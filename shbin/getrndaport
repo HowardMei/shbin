@@ -1,0 +1,20 @@
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  getrndaport
+#%   DESCRIPTION:  Get a random available port number
+#%   Usage: getrndaport
+#----------------------------------------------------------------------------------------------------------------------
+_getrndaport() {
+	local pn="$(( 20+( $(od -An -N2 -i /dev/random) )%(49150+1) ))"
+	##local pn="$(((RANDOM % 4096) + 4096))"
+	while true; do
+		(netstat -nltu | grep ":$pn" | grep -iq "LISTEN") && (pn="$(( 20+( $(od -An -N2 -i /dev/random) )%(49150+1) ))") || break
+	done
+	echo "$pn"
+}
+
+_getrndaport 
+
+unset -f _getrndaport 
+exit 0

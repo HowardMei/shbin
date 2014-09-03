@@ -1,0 +1,30 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  getpos
+#%   DESCRIPTION:  Get the mth row and nth column from the given string
+#%   Usage: epos 2 2 "$(psp salt)" OR psp salt | epos 2 2
+#----------------------------------------------------------------------------------------------------------------------
+_epos() {
+	local nrow="$(echo "$1" | tr -cd '[:digit:]')"
+	nrow="${nrow:-1}"
+	local ncol="$(echo "$2" | tr -cd '[:digit:]')"
+	ncol="${ncol:-1}"
+	shift 2
+	if [ $# -lt 1 ]; then
+		echo "$(cat)" | erow "$nrow" | ecol "$ncol"
+	else
+		echo "$@" | erow "$nrow" | ecol "$ncol"
+	fi
+}
+
+
+if [ $# -lt 1 ]; then
+	_epos "$(cat)"
+elif [ $# -eq 2 ]; then
+	_epos "$1" "$2" "$(cat)"
+else
+	_epos "$@"
+fi
+
+unset -f _getrow
+exit 0

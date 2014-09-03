@@ -1,0 +1,40 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  shsrc
+#   DESCRIPTION:  Get the real path of the script file being executed, sourced or called.
+#----------------------------------------------------------------------------------------------------------------------
+_shsrc() {
+	if [ $# -lt 2 ]; then
+		echo 'Usage: shsrc "./test.sh" "$_" ["$0" "$BASH_SOURCE"]' >&2
+		return 1
+	else
+		local ScriptName="$(basename "$1" 2>/dev/null)"
+		local ScriptDir="$(dirname "$1" 2>/dev/null | grep -v '/usr/bin' | grep -v '/bin')"
+		local GuessDir="$(abspath "$ScriptDir")"
+		if [ -z "$GuessDir" ]; then
+			GuessDir="${__ScriptTmp:="$HOME"}"
+		else
+			shift
+		fi
+	fi
+	local ca="$1"
+	local cb="$2"
+	local cc="$3"
+
+	if [ "${cb:-}" != "$ca" ] && [ -n "${cc:-}" ]; then
+		__ScriptFile="$(abspath ${cc[0]} || abspath ${cc[@]})"
+	elif [ -f "$(abspath ${ca:-} | grep -v '/usr/bin' | grep -v '/bin')" ]; then
+	   __ScriptFile="$(abspath $ca)"
+	elif [ -f "$(abspath ${cb:-} | grep -v '/usr/bin' | grep -v '/bin')" ]; then
+	   __ScriptFile="$(abspath $cb)"
+	elif [ -n "$ScriptName" ] && [ -f "$(find $GuessDir -mindepth 0 -maxdepth 1 -type f -name ${ScriptName} | head -n 1)" ]; then
+	   __ScriptFile="$(find $GuessDir -mindepth 0 -maxdepth 1 -type f -name ${ScriptName} | head -n 1)"
+	fi
+
+	echo "$__ScriptFile" | estrips -rl '.*shbin/shsrc.*' | estrips -bl 
+}
+
+_shsrc "$@" 
+
+unset -f _shsrc 
+exit 0

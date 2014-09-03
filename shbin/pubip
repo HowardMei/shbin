@@ -1,0 +1,64 @@
+
+
+PUB_IPv4=""
+PUB_IP4=""
+PUB_IPv6=""
+PUB_IP6=""
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  check_pubip <= __gather_pubip_info
+#%   DESCRIPTION:  Discover public ip information
+#%	 Usage: pubip [PUB_IP4|PUB_IPv4|PUB_IP6|PUB_IPv6]
+#----------------------------------------------------------------------------------------------------------------------
+_check_pubip() {
+	if iscommand "curl" 2>/dev/null;then
+	    ##echo "Checking public ip over ip.appspot.com"
+		local chk='curl -s'
+	elif iscommand "wget" 2>/dev/null;then
+		local chk='wget -qO-'
+	elif iscommand "busybox" 2>/dev/null && [ -n "$(busybox --list-modules | grep -i wget)" ];then
+		local chk='busybox wget -qO-'
+	fi
+	PUB_IPv4="$($chk https://ip.appspot.com/ 2>/dev/null)"
+	## sh cannot recognize '==' and '=' is error prone, use '!=' instead
+	if ! isipv4 "$PUB_IPv4" 2>/dev/null;then
+	    ##echo "Checking public ip over checkip.dyndns.org"
+		PUB_IPv4="$($chk checkip.dyndns.org 2>/dev/null | grep -o "[[:digit:].]\+" 2>/dev/null)"
+		##PUB_IPv4=$(curl -s checkip.dyndns.org|sed -e 's/.*Current IP Address: //' -e 's/<.*$//' 2>/dev/null)
+	fi
+	if iscommand "dig" 2>/dev/null && ! isipv4 "$PUB_IPv4" 2>/dev/null;then
+		##echo "Checking public ip over myip.opendns.com"
+		PUB_IPv4="$(dig +short myip.opendns.com @resolver1.opendns.com 2>/dev/null)"
+		##PUB_IPv4=$(dig +short whoami.akamai.net @ns1-1.akamaitech.net -t -4 a  2>/dev/null)
+		##PUB_IP4=$(dig +short o-o.myaddr.l.google.com @ns1.google.com -t txt | sed -e 's/\"//g' 2>/dev/null)
+	fi
+	if ! isipv4 "$PUB_IPv4" 2>/dev/null;then
+		PUB_IPv4=""
+	fi
+	PUB_IP4="$PUB_IPv4"
+	PUB_IP6="$PUB_IPv6"
+	PUBIP="$PUB_IPv4"
+	PUBIPv4="$PUB_IPv4"
+}
+
+
+_check_pubip
+
+if [ $# -lt 1 ]; then
+	export PUB_IPv4
+	export PUB_IP4
+	export PUB_IPv6
+	export PUB_IP6
+	if [ -n "$PUB_IPv4" ]; then
+		echo "$PUB_IPv4"
+	fi
+else
+	for _vx in "$@"; do
+		if [ -n "${!_vx}" ]; then
+			echo "${!_vx}"
+		fi
+	done
+fi
+
+unset -f _check_pubip
+unset _vx 
+exit 0

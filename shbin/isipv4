@@ -1,0 +1,46 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  isipv4
+#%   DESCRIPTION:  Validate the given ip address
+#%	 Usage: isipv4 192.168.0.12
+#----------------------------------------------------------------------------------------------------------------------
+unset -f isipv4
+isipv4() {
+	if [ $# -ne 1 ]; then
+		echo "isipv4 needs exactly one ip v4 as input" >&2
+		return 1
+	fi
+	local  ip="$1"
+	case "$ip" in
+		# Invalid if it contains any character other than number or dot
+		# Invalid if it contains more than three dots
+		# Invalid if it contains two adjacent dots
+		# Invalid if it begins with a non-number
+		# Invalid if it ends with a non-number
+		*[!.0-9]* | *.*.*.*.* | *..* | [!0-9]* | *[!0-9] ) 
+			echo "$1 is NOT a valid ip v4 address." >&2
+			return 1;;
+		# Invalid if it contains a number bigger than 255:
+		#  256-259 or 260-299 or 300-999 or four adjacent digits
+		*25[6-9]* | *2[6-9][0-9]* | *[3-9][0-9][0-9]* | *[0-9][0-9][0-9][0-9]* )
+			echo "$1 is NOT a valid ip v4 address." >&2
+			return 1;;
+		# Verify that it contains three dots
+		*.*.*.* )
+			echo "$1 is a valid ip v4 address."
+			return 0;;
+		# Failing that, invalid after all (too few dots)
+		'' | *)
+			echo "$1 is NOT a valid ip v4 address." >&2
+			return 1;;
+	esac
+	## Warning: leading zeroes will be mistreated. 08.08.08.08 will be true
+}
+
+if [ $# -lt 1 ]; then
+	export -f isipv4 2>/dev/null 
+else
+	isipv4 "$@" >/dev/null 
+fi
+
+exit 0

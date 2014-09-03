@@ -1,0 +1,51 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  vernum_recmp
+#%   DESCRIPTION:  Version number reursive comparing, only . symbol allowed
+#%	 Usage: hiver 3.08.1 3.13.1
+#----------------------------------------------------------------------------------------------------------------------
+_vernum_recmp() {
+   	[ "$1" = "$2" ] && return 10
+
+   local v1f=$(echo "$1" | cut -d '.' -f -1)
+   local v1b=$(echo "$1" | cut -d '.' -f 2-)
+
+   local v2f=$(echo "$2" | cut -d '.' -f -1)
+   local v2b=$(echo "$2" | cut -d '.' -f 2-)
+
+   if [ "$v1f" != "$1" ] || [ "$v2f" != "$2" ]; then
+       [ "$v1f" -gt "$v2f" ] && return 11
+       [ "$v1f" -lt "$v2f" ] && return 9
+
+       [ "$v1f" = "$1" ] || [ -z "$v1b" ] && v1b=0
+       [ "$v2f" = "$2" ] || [ -z "$v2b" ] && v2b=0
+       _vernum_recmp $v1b $v2b
+       return $?
+   else
+       [ "$1" -gt "$2" ] && return 11 || return 9
+   fi
+}
+
+
+if [ $# -lt 2 ]; then
+	echo "Usage: hiver 12.0.04 12.1.01" >&2 
+else
+	kv1="$1" 
+	kv2="$2" 
+fi
+
+if [ -n "$(echo "${kv1}${kv2}" | efilter -a)" ]; then
+	printf "${kv1}\n${kv2}" | sort -t'.' -V 2>/dev/null | tail -1
+else
+	_vernum_recmp "$kv1" "$kv2" 
+	case "$?" in
+		10 | 11)
+			echo "$kv1";;
+		9)
+			echo "$kv2";;
+		*)
+			echo "Error: failed to compare $kv1 $kv2" >&2;;
+	esac
+fi
+
+exit 0

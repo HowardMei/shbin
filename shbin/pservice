@@ -1,0 +1,317 @@
+
+## require shbin/shc
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  pservice
+#%   DESCRIPTION:  Universal init/daemon service manager
+#%	 Usage: pservice [enable|start|stop|status|restart|active|available] servicename 
+#----------------------------------------------------------------------------------------------------------------------
+_pservice() {
+	if [ $# -lt 1 ] ; then
+	 echo "Usage: pservice [enable|start|stop|status|restart|active|available] servicename"
+	 return 1
+	fi
+	local paction="$1"
+	local pdaemon="$2"
+	shift 2
+	local popts="$@" 
+	
+	case "$paction" in
+		-e | enable | turnon)
+			if shc "chkconfig --list 1>/dev/null 2>&1"; then
+				## System V & Upstart [service + update-rc.d]
+				shc "chkconfig $pdaemon on"
+				return 0
+			elif shc "systemctl --all 1>/dev/null 2>&1"; then
+				## Systemd [systemctl]
+				shc "systemctl enable $pdaemon.service"
+				return 0
+			elif shc "initctl list 1>/dev/null 2>&1"; then
+				## Upstart [start/.../status + initctl]
+				if [ -z "$popts" ]; then
+					echo "update-rc.d needs runlevel options to work properly"
+					return 1
+				else
+					shc "update-rc.d $pdaemon $popts"
+					return 0
+				fi
+			elif shc "rc-status 1>/dev/null 2>&1"; then
+				## OpenRC [/etc/init.d/* + 
+				shc "rc-update add $pdaemon"
+				return 0
+			else
+				echo "Cannot find a [SysVinit|Upstart|Systemd|OpenRC] to enable $pdaemon service." >&2
+				echo "Please check the $pdaemon configurations manually." >&2
+				return 1
+			fi
+			;;
+		-x | -off | disable | turnoff)
+			if shc "chkconfig --list 1>/dev/null 2>&1"; then
+				## System V & Upstart [service + update-rc.d]
+				shc "chkconfig $pdaemon off"
+				return 0
+			elif shc "systemctl --all 1>/dev/null 2>&1"; then
+				## Systemd [systemctl]
+				shc "systemctl disable $pdaemon.service"
+				return 0
+			elif shc "initctl list 1>/dev/null 2>&1"; then
+				## Upstart [start/.../status + initctl]
+				if [ -z "$popts" ]; then
+					echo "update-rc.d needs runlevel options to work properly"
+					return 1
+				else
+					shc "update-rc.d $pdaemon stop $popts"
+					return 0
+				fi
+			elif shc "rc-status 1>/dev/null 2>&1"; then
+				## OpenRC [/etc/init.d/* + 
+				shc "rc-update del $pdaemon"
+				return 0
+			else
+				echo "Cannot find a [SysVinit|Upstart|Systemd|OpenRC] to disable $pdaemon service." >&2
+				echo "Please check the $pdaemon configurations manually." >&2
+				return 1
+			fi
+			;;
+		-s | start)
+			if shc "service $pdaemon status 2>/dev/null | grep -q 'start/running'"; then
+				echo "Service $pdaemon is already running."
+				return 1
+			elif shc "service $pdaemon status 2>/dev/null | grep -q 'stop/waiting'"; then
+				## System V & Upstart
+				shc "service $pdaemon start"
+				return 0
+			else
+				if shc "systemctl is-active $pdaemon.service 2>/dev/null" = "active"; then
+					echo "Service $pdaemon is already running."
+					return 1
+				elif shc "systemctl is-active $pdaemon.service 2>/dev/null" = "unknown"; then
+					## https://bugzilla.redhat.com/show_bug.cgi?id=1073481
+					## Systemd
+					shc "systemctl start $pdaemon.service"
+					shc "systemctl status $pdaemon.service"
+					return 0
+				elif shc "systemctl is-active $pdaemon.service 2>/dev/null" = "failed"; then
+					shc "systemctl restart $pdaemon.service"
+					shc "systemctl status $pdaemon.service"
+					return 0
+				else
+					if shc "status $pdaemon 2>/dev/null | grep -q 'start/running'"; then
+						## Upstart
+						echo "Service $pdaemon is already running."
+						return 1
+					elif shc "status $pdaemon 2>/dev/null | grep -q 'stop/waiting'"; then
+						shc "start $pdaemon"
+						return 0
+					else
+						if shc "/etc/init.d/$pdaemon status 2>/dev/null | grep -q 'is running'"; then
+							echo "Service $pdaemon is already running."
+							return 1
+						elif shc "/etc/init.d/$pdaemon status 2>/dev/null | grep -q 'not running'"; then
+							## OpenRC/System V symlinks from /etc/rc?.d
+							shc "/etc/init.d/$pdaemon start"
+							return 0
+						else
+							echo "Cannot find a [SysVinit|Upstart|Systemd|OpenRC] to start $pdaemon service." >&2
+							echo "Please check the $pdaemon configurations manually." >&2
+							return 1
+						fi
+					fi
+				fi
+			fi
+			;;
+		-p | stop)
+			if shc "service $pdaemon status 2>/dev/null | grep -q 'stop/waiting'"; then
+				echo "Service $pdaemon is already stopped."
+				return 1
+			elif shc "service $pdaemon status 2>/dev/null | grep -q 'start/running'"; then
+				## System V & Upstart
+				shc "service $pdaemon stop"
+				return 0
+			else
+				if shc "systemctl is-active $pdaemon.service 2>/dev/null" = "failed"; then
+					echo "Service $pdaemon is failed and stopped."
+					return 1
+				elif shc "systemctl is-active $pdaemon.service 2>/dev/null" = "unknown"; then
+					## https://bugzilla.redhat.com/show_bug.cgi?id=1073481
+					## Systemd
+					shc "systemctl stop $pdaemon.service 2>/dev/null"
+					return 0
+				elif shc "systemctl is-active $pdaemon.service 2>/dev/null" = "active"; then
+					shc "systemctl stop $pdaemon.service"
+					shc "systemctl status $pdaemon.service"
+					return 0
+				else
+					if shc "status $pdaemon 2>/dev/null | grep -q 'stop/waiting'"; then
+						## Upstart
+						echo "Service $pdaemon is already stopped."
+						return 1
+					elif shc "status $pdaemon 2>/dev/null | grep -q 'start/running'"; then
+						shc "stop $pdaemon"
+						return 0
+					else
+						if shc "/etc/init.d/$pdaemon status 2>/dev/null | grep -q 'not running'"; then
+							echo "Service $pdaemon is already stopped."
+							return 1
+						elif shc "/etc/init.d/$pdaemon status 2>/dev/null | grep -q 'is running'"; then
+							## OpenRC/System V symlinks from /etc/rc?.d
+							shc "/etc/init.d/$pdaemon stop"
+							return 0
+						else
+							echo "Cannot find a [SysVinit|Upstart|Systemd|OpenRC] to stop $pdaemon service." >&2
+							echo "Please check the $pdaemon configurations manually." >&2
+							return 1
+						fi
+					fi
+				fi
+			fi
+			;;
+		-u | status)
+			if shc "service $pdaemon status 2>/dev/null | grep -q 'start/running'"; then
+				shc "service $pdaemon status"
+				return 0
+			elif shc "service $pdaemon status 2>/dev/null | grep -q 'stop/waiting'"; then
+				## System V & Upstart
+				shc "service $pdaemon status"
+				return 0
+			else
+				if shc "systemctl is-active $pdaemon.service 2>/dev/null" = "active"; then
+					shc "systemctl status $pdaemon.service"
+					return 0
+				elif shc "systemctl is-active $pdaemon.service 2>/dev/null" = "unknown"; then
+					## https://bugzilla.redhat.com/show_bug.cgi?id=1073481
+					## Systemd
+					shc "systemctl status $pdaemon.service"
+					return 0
+				elif shc "systemctl is-active $pdaemon.service 2>/dev/null" = "failed"; then
+					shc "systemctl status $pdaemon.service"
+					return 0
+				else
+					if shc "status $pdaemon 2>/dev/null | grep -q 'start/running'"; then
+						## Upstart
+						shc "status $pdaemon"
+						return 0
+					elif shc "status $pdaemon 2>/dev/null | grep -q 'stop/waiting'"; then
+						shc "status $pdaemon"
+						return 0
+					else
+						if shc "/etc/init.d/$pdaemon status 2>/dev/null | grep -q 'is running'"; then
+							shc "/etc/init.d/$pdaemon status"
+							return 0
+						elif shc "/etc/init.d/$pdaemon status 2>/dev/null | grep -q 'not running'"; then
+							## OpenRC/System V symlinks from /etc/rc?.d
+							shc "/etc/init.d/$pdaemon status"
+							return 0
+						else
+							echo "Cannot find a [SysVinit|Upstart|Systemd|OpenRC] to check $pdaemon status." >&2
+							echo "Please check the $pdaemon configurations manually." >&2
+							return 1
+						fi
+					fi
+				fi
+			fi
+			;;
+		-r | restart)
+			if shc "service $pdaemon status 2>/dev/null | grep -q 'start/running'"; then
+				shc "service $pdaemon restart"
+				return 0
+			elif shc "service $pdaemon status 2>/dev/null | grep -q 'stop/waiting'"; then
+				## System V & Upstart
+				shc "service $pdaemon restart"
+				return 0
+			else
+				if shc "systemctl is-active $pdaemon.service 2>/dev/null" = "active"; then
+					shc "systemctl restart $pdaemon.service"
+					return 0
+				elif shc "systemctl is-active $pdaemon.service 2>/dev/null" = "unknown"; then
+					## https://bugzilla.redhat.com/show_bug.cgi?id=1073481
+					## Systemd
+					shc "systemctl restart $pdaemon.service"
+					shc "systemctl status $pdaemon.service"
+					return 0
+				elif shc "systemctl is-active $pdaemon.service 2>/dev/null" = "failed"; then
+					shc "systemctl restart $pdaemon.service"
+					shc "systemctl status $pdaemon.service"
+					return 0
+				else
+					if shc "status $pdaemon 2>/dev/null | grep -q 'start/running'"; then
+						## Upstart
+						shc "restart $pdaemon"
+						return 0
+					elif shc "status $pdaemon 2>/dev/null | grep -q 'stop/waiting'"; then
+						shc "restart $pdaemon"
+						return 0
+					else
+						if shc "/etc/init.d/$pdaemon status 2>/dev/null | grep -q 'is running'"; then
+							shc "/etc/init.d/$pdaemon restart"
+							return 0
+						elif shc "/etc/init.d/$pdaemon status 2>/dev/null | grep -q 'not running'"; then
+							## OpenRC/System V symlinks from /etc/rc?.d
+							shc "/etc/init.d/$pdaemon restart"
+							return 0
+						else
+							echo "Cannot find a [SysVinit|Upstart|Systemd|OpenRC] to restart $pdaemon service." >&2
+							echo "Please check the $pdaemon configurations manually." >&2
+							return 1
+						fi
+					fi
+				fi
+			fi
+			;;
+		-l | active | running)
+			if shc "chkconfig --list | grep -q ':on' 2>/dev/null"; then
+				## System V & Upstart [service + update-rc.d]
+				shc "chkconfig --list | grep -q ':on'"
+				return 0
+			elif shc "initctl list | grep -q 'start/running' 2>/dev/null"; then
+				## Upstart [start/.../status + initctl]
+				shc "initctl list"
+				return 0
+			elif shc "systemctl list-units 2>/dev/null"; then
+				## Systemd [systemctl]
+				shc "systemctl list-units"
+				return 0
+			elif shc "rc-status 2>/dev/null"; then
+				## OpenRC [/etc/init.d/* + 
+				shc "rc-status"
+				return 0
+			else
+				echo "Cannot find a [SysVinit|Upstart|Systemd|OpenRC] to list all running services." >&2
+				echo "Please check the $pdaemon configurations manually." >&2
+				return 1
+			fi
+			;;
+		-a | available | enabled)
+			if shc "chkconfig --list 2>/dev/null"; then
+				## System V & Upstart [service + update-rc.d]
+				shc "chkconfig --list"
+				return 0
+			elif shc "systemctl --all 2>/dev/null"; then
+				## Systemd [systemctl]
+				shc "systemctl --all"
+				return 0
+			elif shc "initctl list 2>/dev/null"; then
+				## Upstart [start/.../status + initctl]
+				shc "initctl list"
+				return 0
+			elif shc "rc-update -v show 2>/dev/null"; then
+				## OpenRC [/etc/init.d/* + 
+				shc "rc-update -v show"
+				return 0
+			else
+				echo "Cannot find a [SysVinit|Upstart|Systemd|OpenRC] to list all available service." >&2
+				echo "Please check the $pdaemon configurations manually." >&2
+				return 1
+			fi
+			;;
+		-- | *)
+			echo "The given pservice action [$1] is not supported by the OS or Pservice" >&2
+			return 1
+			;;
+	esac
+}
+
+
+_pservice "$@" 
+
+unset -f _pservice 
+exit 0

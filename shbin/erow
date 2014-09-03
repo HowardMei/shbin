@@ -1,0 +1,36 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  erow
+#%   DESCRIPTION:  Get the nth row from the given string
+#%   Usage: erow 2 "$(psp salt)" OR psp salt | erow 2
+#----------------------------------------------------------------------------------------------------------------------
+_erow() {
+	local nrow="$(echo "$1" | tr -cd '[:digit:]')"
+	nrow="${nrow:-1}"
+	shift
+	if [ $# -lt 1 ]; then
+		local ostr="$(cat)"
+	else
+		local ostr="$@"
+	fi
+	local nrtot="$(echo "$ostr" | wc -l)"
+	if [ "$nrow" -le "$nrtot" ]; then
+		## Print only the nth line: sed "${nth}q;d" 
+		echo "$ostr" | head -n "$nrow" | tail -1
+		return 0
+	else
+		return 1
+	fi
+}
+
+
+if [ $# -lt 1 ]; then
+	_erow "$(cat)"
+elif [ $# -eq 1 ]; then
+	_erow "$1" "$(cat)"
+else
+	_erow "$@"
+fi
+
+unset -f _erow
+exit 0

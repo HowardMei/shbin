@@ -1,0 +1,36 @@
+
+## require shbin/abspath, shbin/estrips
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  uniqfy
+#   DESCRIPTION:  Remove redundant lines of the given files even if the duplicates are not adjacent (uniq's drawback)
+#----------------------------------------------------------------------------------------------------------------------
+__ScriptTmp="$(mktemp -d)"
+_uniqfy() {
+	if [ $# -lt 1 ]; then
+		local fls="$(cat)"
+	else
+		local fls="$@"
+	fi
+	for x in $fls; do
+		local fp="$(abspath "$x")"
+		if [ -n "$fp" ] && [ -r "$fp" ];then
+           bktohome "$fp"
+           local fn="$(basename "$fp")"
+		   cat "$fp" | estrips -u > "$__ScriptTmp/$fn.tmp"
+		   if [ -r "$__ScriptTmp/$fn.tmp" ]; then
+				echo "Redundant lines have been removed from $fp"
+				\mv -f "$__ScriptTmp/$fn.tmp" "$fp"
+		   fi
+        fi
+    done
+}
+
+
+if [ $# -lt 1 ]; then
+	_uniqfy "$(cat)"
+else
+	_uniqfy "$@"
+fi	
+
+unset -f _uniqfy
+exit 0

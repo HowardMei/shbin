@@ -1,0 +1,126 @@
+
+##=============================================Initial  Declaration====================================================
+CPU_VENDOR_ID=""
+CPU_CORES=""
+CPU_FREQ=""
+CPU_VENDOR_ID_L=""
+CPU_ARCH=""
+CPU_ARCH_L=""
+MEM_TOT=""
+MEM_FREE=""
+MEM_TOTMB=""
+MEM_FREEMB=""
+MEM_USAGE=""
+MEM_AVAIL=""
+MEM_USAGEPC=""
+MEM_AVAILPC=""
+DISK_TOT=""
+DISK_FREE=""
+DISK_TOTGB=""
+DISK_FREEGB=""
+DISK_USAGE=""
+DISK_AVAIL=""
+DISK_USAGEPC=""
+DISK_AVAILPC=""
+DISK_TYPE=""
+##=====================================================================================================================
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  check_hardware <= __gather_hardware_info
+#   DESCRIPTION:  Discover hardware information
+#----------------------------------------------------------------------------------------------------------------------
+_check_hardware() {
+    if [ -f /proc/cpuinfo ]; then
+		CPU_VENDOR_ID=$(awk '/vendor_id|Processor/ {sub(/-.*$/,"",$3); print $3; exit}' /proc/cpuinfo )
+		CPU_CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null)
+		CPU_FREQ=$(awk '/cpu MHz/ {print int($4)}' /proc/cpuinfo | head -n 1)
+    elif [ -f /usr/bin/kstat ]; then
+	# SmartOS.
+	# Solaris!?
+	# This has only been tested for a GenuineIntel CPU
+		CPU_VENDOR_ID=$(/usr/bin/kstat -p cpu_info:0:cpu_info0:vendor_id | awk '{print $2}')
+		CPU_CORES=$(/usr/bin/kstat -m cpu_info | grep core_id | awk '{ print $2}' | uniq | wc -l)
+    else
+		CPU_VENDOR_ID=$( sysctl -n hw.model )
+		CPU_CORES=$( sysctl -n hw.ncpu )
+    fi
+    CPU_VENDOR_ID_L=$( echo $CPU_VENDOR_ID | tr '[:upper:]' '[:lower:]' )
+    CPU_ARCH=$(uname -m 2>/dev/null || uname -p 2>/dev/null || echo "unknown")
+    CPU_ARCH_L=$( echo $CPU_ARCH | tr '[:upper:]' '[:lower:]' )
+    if [ -f /proc/meminfo ]; then
+		MEM_TOT=$(awk '/MemTotal/ {print int($2/1024+0.5)}' /proc/meminfo)
+		MEM_FREE=$(awk '/MemFree/ {print int($2/1024+0.5)}' /proc/meminfo)
+		MEM_AVAIL=$((100*MEM_FREE/MEM_TOT))
+		MEM_USAGE=$((100-MEM_AVAIL))
+		SWAP_TOT=$(awk '/SwapTotal/ {print int($2/1024+0.5)}' /proc/meminfo)
+		SWAP_FREE=$(awk '/SwapFree/ {print int($2/1024+0.5)}' /proc/meminfo)
+    fi
+    if [ -n "$(command -v df)" ];then
+		DISK_TOT=$(df -h | sed -n 2p | awk '{print $2}' | tr -d 'G')
+		DISK_FREE=$(df -h | sed -n 2p | awk '{print $4}' | tr -d 'G')
+		DISK_USAGE=$(df -h | sed -n 2p | awk '{print $5}' | tr -d '%')
+		DISK_AVAIL=$((100-DISK_USAGE))
+    fi
+    local dt=$(cat /sys/block/sda/queue/rotational 2>/dev/null)
+    local vdt=$(cat /sys/block/vda/queue/rotational 2>/dev/null)
+    vdt=${vdt:-$(cat /sys/block/xvda/queue/rotational 2>/dev/null)}
+    dt=${dt:-1024}
+	vdt=${vdt:-1024}
+    if [ "$dt" -eq 0 ] && [ "$vdt" -eq 1024 ];then
+		DISK_TYPE="SSD"
+    elif [ "$dt" -eq 1 ] && [ "$vdt" -eq 1024 ];then
+		DISK_TYPE="HDD"
+    elif [ "$dt" -eq 1024 ] && [ "$vdt" -ne 1024 ];then
+		DISK_TYPE="VXD"
+	else
+		DISK_TYPE="Unknown"
+    fi
+	MEM_TOTMB="$MEM_TOT"MB
+	MEM_FREEMB="$MEM_FREE"MB
+	MEM_USAGEPC="$MEM_USAGE"%
+	MEM_AVAILPC="$MEM_AVAIL"%
+	DISK_TOTGB="$DISK_TOT"GB
+	DISK_FREEGB="$DISK_FREE"GB
+	DISK_USAGEPC="$DISK_USAGE"%
+	DISK_AVAILPC="$DISK_AVAIL"%
+}
+
+
+_check_hardware
+
+if [ $# -lt 1 ]; then
+	export CPU_VENDOR_ID
+	export CPU_CORES
+	export CPU_FREQ
+	export CPU_VENDOR_ID_L
+	export CPU_ARCH
+	export CPU_ARCH_L
+	export MEM_TOT
+	export MEM_FREE
+	export MEM_USAGE
+	export MEM_AVAIL
+	export MEM_TOTMB
+	export MEM_FREEMB
+	export MEM_USAGEPC
+	export MEM_AVAILPC
+	export DISK_TOT
+	export DISK_FREE
+	export DISK_USAGE
+	export DISK_AVAIL
+	export DISK_TOTGB=
+	export DISK_FREEGB
+	export DISK_USAGEPC
+	export DISK_AVAILPC
+	export DISK_TYPE
+	if [ -n "$CPU_ARCH" ]; then
+		echo "$CPU_ARCH"
+	fi
+else
+	for _vx in "$@"; do
+		if [ -n "${!_vx}" ]; then
+			echo "${!_vx}"
+		fi
+	done
+fi
+
+exit 0

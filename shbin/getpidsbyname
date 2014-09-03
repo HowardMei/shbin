@@ -1,0 +1,32 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  getpidsbyname
+#%   DESCRIPTION:  Get the exact pid of a given process name
+#%	 Usage: getpidsbyname salt-master
+#----------------------------------------------------------------------------------------------------------------------
+_getpidsbyname() {
+	if [ $# -ne 1 ]; then
+		echo "Usage: getpidsbyname process_name" >&2
+		return 1
+	fi
+	local plist=""
+	plist="$(pidof "$1" 2>/dev/null)"
+
+	if [ -z "$plist" ]; then
+		plist="$(pgrep -x "$1" 2>/dev/null)"
+	fi
+	if [ -z "$plist" ]; then
+		plist="$(ps axwww -o pid,comm | grep -i "$1" 2>/dev/null | grep -v grep | grep -v ps | awk '{print $1}')"
+	fi
+	if [ -z "$plist" ]; then
+		echo "Cannot find any running process with name $1" >&2 
+		return 1
+	else
+		echo "$plist"
+	fi
+}
+
+_getpidsbyname "$@" 
+
+unset -f _getpidsbyname
+exit 0

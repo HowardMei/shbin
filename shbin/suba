@@ -1,0 +1,18 @@
+
+
+##----------------------------------------------------  Super BASH Shell ------------------------------------------------
+suba='bash -c'
+if [ "$(shuser)" != 'root' ]; then
+	if iscommand "sudo"; then
+		suba='sudo bash -c'
+	elif iscommand "su"; then
+		suba='su -c'
+	else
+		echo >&2 'Error: this script needs the priviledge to run commands as root.'
+		echo >&2 'We are unable to find either "sudo" or "su" available to make this happen.'
+		exit 1
+	fi
+fi
+
+$suba "$@"
+exit 0

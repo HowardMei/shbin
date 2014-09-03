@@ -1,0 +1,28 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  ispinstalled
+#%   DESCRIPTION:  Check if a command or package is installed 
+#%	 Usage: ispinstalled curl
+#----------------------------------------------------------------------------------------------------------------------
+unset -f ispinstalled
+ispinstalled() {
+	local cmdlist="$(pcmdupkg -lc "$1" 2>/dev/null)"
+	local appname="$(pcmdupkg -sa "$1" 2>/dev/null)"
+	if [ -z "$cmdlist" ] && [ -z "$appname" ]; then
+		echo "$@ is NOT installed yet." >&2
+		return 1
+	else
+		echo "$@ is already installed."
+		return 0
+	fi
+}
+
+
+if [ $# -lt 1 ]; then
+	echo 'Usage: if ispinstalled lzma 2>/dev/null; or source "$(which ispinstalled)" && if [ -n "$(ispinstalled lzma)" ];' >&2
+	export -f ispinstalled 2>/dev/null
+else
+	ispinstalled "$@" >/dev/null 
+fi
+
+exit 0

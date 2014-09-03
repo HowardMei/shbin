@@ -1,0 +1,28 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  ecol 
+#%   DESCRIPTION:  Get the nth column from the given string
+#%	 Usage: ecol 2 "$(psp salt)" OR psp salt | ecol 2
+#----------------------------------------------------------------------------------------------------------------------
+_ecol() {
+	local ncol="$(echo $1 | tr -cd '[:digit:]')"
+	ncol="${ncol:-1}"
+	shift
+	if [ $# -lt 1 ]; then
+		echo "$(cat)" | awk '{ print $'"$ncol"'}' | estrips -b | estrips -e
+	else
+		echo "$@" | awk '{ print $'"$ncol"'}' | estrips -b | estrips -e
+	fi
+}
+
+
+if [ $# -lt 1 ]; then
+	_ecol "$(cat)"
+elif [ $# -eq 1 ]; then
+	_ecol "$1" "$(cat)"
+else
+	_ecol "$@"
+fi
+
+unset -f _ecol
+exit 0

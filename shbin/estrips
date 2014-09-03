@@ -1,0 +1,12 @@
+
+#%   DESCRIPTION:  Strip special chars from the given string.
+#%	 Usage: echo "string" | estrips [-a|-an|-b|-ct|-cm|-cl|-d|-e|-em|-f|-h|-lo|-m|-ml|-n|-p|-q|-r|-rl|-sp|-u|-ub|-up] 
+#%			estrips [-a|-an|-b|-ct|-cm|-cl|-d|-e|-em|-f|-h|-lo|-m|-ml|-n|-p|-q|-r|-rl|-sp|-u|-ub|-up] "string"
+
+if [ $# -lt 1 ]; then
+	estrip "$(cat)"
+else
+	estrip "$@"
+fi
+
+exit 0
