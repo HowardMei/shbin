@@ -5,21 +5,46 @@
 #%	 Usage: ecol 2 "$(psp salt)" OR psp salt | ecol 2
 #----------------------------------------------------------------------------------------------------------------------
 _ecol() {
-	local ncol="$(echo $1 | tr -cd '[:digit:]')"
-	ncol="${ncol:-1}"
+    local dlm=" "
+	if [ "-d" == "$1" ] || [ "--delimiter" == "$1" ] || [ "--separator" == "$1" ]; then
+		shift
+		dlm="$1"
+		shift
+	fi
+	if echo "$1" | grep -q : 2>/dev/null; then
+		local nca="$(echo "$1" | cut -d: -f1 | tr -cd '[:digit:]')"
+		local ncb="$(echo "$1" | cut -d: -f2 | tr -cd '[:digit:]')"
+	else
+		local nca="$(echo "$1" | tr -cd '[:digit:]')"
+		local ncb="$nca"
+	fi
 	shift
 	if [ $# -lt 1 ]; then
-		echo "$(cat)" | awk '{ print $'"$ncol"'}' | estrips -b | estrips -e
+		local ostr="$(cat)"
 	else
-		echo "$@" | awk '{ print $'"$ncol"'}' | estrips -b | estrips -e
+		local ostr="$@"
+	fi
+	local nctot="$(echo "$ostr" | ncols -d "$dlm")" 
+	nca="${nca:=1}" 
+	ncb="${ncb:="$nctot"}" 
+	if [ "$nca" -ge 0 ] && [ "$nca" -le "$ncb" ] && [ "$ncb" -le "$nctot" ]; then
+		## Inside awk: printf FS$i will produce errors due to special chars like %, use printf("%s", FS$i) to avoid
+		printf "%s" "$ostr" | awk -F"$dlm" '{for (i='"$nca"'; i<='"$ncb"'; i++) printf("%s", FS$i); print NL}' 2>/dev/null 
+		return 0
+	else
+		return 1
 	fi
 }
 
 
 if [ $# -lt 1 ]; then
-	_ecol "$(cat)"
-elif [ $# -eq 1 ]; then
-	_ecol "$1" "$(cat)"
+	_ecol 1 "$(cat)"
+elif [ $# -eq 3 ]; then
+	if [ "-d" == "$1" ] || [ "--delimiter" == "$1" ] || [ "--separator" == "$1" ]; then
+		_ecol "$1" "$2" "$3" "$(cat)"
+	else
+		_ecol "$@" 
+	fi
 else
 	_ecol "$@"
 fi

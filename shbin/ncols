@@ -1,0 +1,35 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  ncols
+#%   DESCRIPTION:  Get the number of columns of the given string
+#%	 Usage: ncols [-d " "|,] "string paragraph" or psp salt | ncols [-d " "|,]
+#----------------------------------------------------------------------------------------------------------------------
+_ncols() {  
+   local dlm=" "
+   if [ $# -lt 1 ]; then
+		return 1
+   elif [ $# -ge 2 ]; then
+		if [ "-d" == "$1" ] || [ "--delimiter" == "$1" ] || [ "--separator" == "$1" ]; then
+			shift
+			dlm="$1"
+			shift
+		fi
+   fi
+   printf "%s" "$@" | awk -F"$dlm" 'END {print NF;exit}' 
+}
+
+
+if [ $# -lt 1 ]; then
+	_ncols "$(cat)"
+elif [ $# -eq 2 ]; then
+	if [ "-d" == "$1" ] || [ "--delimiter" == "$1" ] || [ "--separator" == "$1" ]; then
+		_ncols "$1" "$2" "$(cat)"
+	else
+		_ncols "$@" 
+	fi
+else
+	_ncols "$@" 
+fi
+ 
+unset -f _ncols 
+exit 0

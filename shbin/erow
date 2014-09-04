@@ -5,18 +5,26 @@
 #%   Usage: erow 2 "$(psp salt)" OR psp salt | erow 2
 #----------------------------------------------------------------------------------------------------------------------
 _erow() {
-	local nrow="$(echo "$1" | tr -cd '[:digit:]')"
-	nrow="${nrow:-1}"
+	if echo "$1" | grep -q : 2>/dev/null; then
+		local nra="$(echo "$1" | cut -d: -f1 | tr -cd '[:digit:]')"
+		local nrb="$(echo "$1" | cut -d: -f2 | tr -cd '[:digit:]')"
+	else
+		local nra="$(echo "$1" | tr -cd '[:digit:]')"
+		local nrb="$nra"
+	fi
+	nra="${nra:=1}"
+	nrb="${nrb:=1}"
 	shift
 	if [ $# -lt 1 ]; then
 		local ostr="$(cat)"
 	else
 		local ostr="$@"
 	fi
-	local nrtot="$(echo "$ostr" | wc -l)"
-	if [ "$nrow" -le "$nrtot" ]; then
+	local nrtot="$(echo "$ostr" | nrows)"
+	if [ "$nra" -ge 0 ] && [ "$nra" -le "$nrb" ] && [ "$nrb" -le "$nrtot" ]; then
 		## Print only the nth line: sed "${nth}q;d" 
-		echo "$ostr" | head -n "$nrow" | tail -1
+		## Print from the mth line to nth line: sed -n "${mth},${nth}p"
+		echo "$ostr" | awk "NR >= $nra && NR <= $nrb" 
 		return 0
 	else
 		return 1
@@ -25,7 +33,7 @@ _erow() {
 
 
 if [ $# -lt 1 ]; then
-	_erow "$(cat)"
+	_erow 1 "$(cat)"
 elif [ $# -eq 1 ]; then
 	_erow "$1" "$(cat)"
 else
