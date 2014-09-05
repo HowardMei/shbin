@@ -11,7 +11,7 @@ _pservice() {
 	 return 1
 	fi
 	local paction="$1"
-	local pdaemon="$2"
+	local pdaemon="$(pcmdupkg --showpack "$2")"
 	shift 2
 	local popts="$@" 
 	

@@ -31,21 +31,18 @@ _pupdate() {
 			fi
 			;;
 		-- | *)
-			local pkgname="$(pcmdupkg --showpack "$1" 2>/dev/null)"
-			if [ -z "$pkgname" ]; then
-				echo "Cannot find the parent package of $1" >&2
+			local pkgname="$1"
+			if ! ispinstalled "$pkgname" 2>/dev/null;then
+				echo "$pkgname has not yet been installed."
+				pinstall "$pkgname"
+				shift
+				_pupdate "$@"
 				return 1
 			fi
+			pkgname="$(pcmdupkg --showpack "$1" 2>/dev/null)"
 			;;
 	esac
 	
-	if ! ispinstalled "$pkgname" 2>/dev/null;then
-		echo "$pkgname has not yet been installed."
-		pinstall "$pkgname"
-		shift
-		_pupdate "$@"
-		return 1
-	fi
 	if iscommand apt-get 2>/dev/null;then
 		echo "Updating $pkgname via apt-get"
 		shc "apt-get update -y -q" && pinstall "$pkgname" || echo "$pkgname apt-get update failed!"
@@ -139,7 +136,7 @@ _pupdate() {
 		if [ $# -lt 1 ] ; then
 			return 0
 		else
-			_pinstall "$@"
+			_pupdate "$@"
 			return 1
 		fi
 	fi
