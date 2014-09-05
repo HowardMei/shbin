@@ -32,23 +32,20 @@ _pinstall() {
 			fi
 			;;
 		-- | *)
-			local pkgname="$(pcmdupkg --showpack "$1" 2>/dev/null)"
-			if [ -z "$pkgname" ]; then
-				pkgname="$1"
+			local pkgname="$1" 
+			if ispinstalled "$pkgname" 2>/dev/null; then
+				echo "$pkgname has already been installed." >&2
+				shift
+				if [ $# -lt 1 ] ; then
+					return 0
+				else
+					_pinstall "$@"
+					return 1
+				fi
 			fi
 			;;
 	esac
 	
-	if ispinstalled "$pkgname" 2>/dev/null;then
-		echo "$pkgname has already been installed." >&2
-		shift
-		if [ $# -lt 1 ] ; then
-			return 0
-		else
-			_pinstall "$@"
-			return 1
-		fi
-	fi
 	if iscommand apt-get 2>/dev/null;then
 		echo "Installing $pkgname via apt-get" >&2
 		shc "apt-get install --fix-missing --force-yes -y -q -o DPkg::Options::=--force-confold $pkgname" || echo "$pkgname apt-get install failed!" >&2

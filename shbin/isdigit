@@ -25,5 +25,3 @@ if [ $# -lt 1 ]; then
 else
 	isdigit "$@" >/dev/null 
 fi
-
-exit 0

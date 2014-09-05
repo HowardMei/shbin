@@ -12,15 +12,15 @@ _erow() {
 		local nra="$(echo "$1" | tr -cd '[:digit:]')"
 		local nrb="$nra"
 	fi
-	nra="${nra:=1}"
-	nrb="${nrb:=1}"
 	shift
 	if [ $# -lt 1 ]; then
 		local ostr="$(cat)"
 	else
 		local ostr="$@"
 	fi
-	local nrtot="$(echo "$ostr" | nrows)"
+	local nrtot="$(echo "$ostr" | nrows)" 
+	nra="${nra:=1}"
+	nrb="${nrb:="$nrtot"}"
 	if [ "$nra" -ge 0 ] && [ "$nra" -le "$nrb" ] && [ "$nrb" -le "$nrtot" ]; then
 		## Print only the nth line: sed "${nth}q;d" 
 		## Print from the mth line to nth line: sed -n "${mth},${nth}p"

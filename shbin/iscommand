@@ -23,5 +23,3 @@ if [ $# -lt 1 ]; then
 else
 	iscommand "$@" >/dev/null 
 fi
-
-exit 0

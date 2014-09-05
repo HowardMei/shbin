@@ -1,5 +1,5 @@
 
-## require shbin/whicis, shbin/iscommand, shbin/efilter, shbin/estrip
+## require shbin/whichis, shbin/iscommand, shbin/efilter, shbin/estrip
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  _pcmd2pkg
 #%   DESCRIPTION:  List the package who owns the bin file
@@ -7,13 +7,16 @@
 #----------------------------------------------------------------------------------------------------------------------
 _pcmd2pkg() {
 	if [ $# -lt 1 ] ; then
-		echo "Too few options, at leat 1 command name is required." >&2
+		echo "Too few options, at leat one command name is required." >&2
 		return 1
 	else
 		local binloc="$(whichis "$1")"
 		if [ -z "$binloc" ]; then
-			echo "$1 is not a valid command or binary." >&2
-			return 1
+			binloc="$(sob "$pkgopt" 2>/dev/null | efilters -rl ".*/bin/.*" | erow 1)" 
+			if [ -z "$binloc" ]; then
+				echo "$1 is not a valid command or binary." >&2
+				return 1
+			fi
 		fi
 	fi
 	

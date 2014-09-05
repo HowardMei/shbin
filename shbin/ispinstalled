@@ -6,8 +6,20 @@
 #----------------------------------------------------------------------------------------------------------------------
 unset -f ispinstalled
 ispinstalled() {
-	local cmdlist="$(pcmdupkg -lc "$1" 2>/dev/null)"
-	local appname="$(pcmdupkg -sa "$1" 2>/dev/null)"
+	local opt="$1" 
+	local binloc="$(whichis "$opt")"
+	if [ -n "$binloc" ] && [ -x "$binloc" ]; then
+		echo "$1 is already installed."
+		return 0 
+	else
+		binloc="$(sob "$opt" 2>/dev/null | efilters -rl ".*/bin/.*" | erow 1)" 
+		if [ -n "$binloc" ] && [ -x "$binloc" ]; then
+			echo "$1 is already installed."
+			return 0 
+		fi
+	fi
+	local cmdlist="$(pcmdupkg -lc "$opt" 2>/dev/null)"
+	local appname="$(pcmdupkg -sa "$opt" 2>/dev/null)"
 	if [ -z "$cmdlist" ] && [ -z "$appname" ]; then
 		echo "$@ is NOT installed yet." >&2
 		return 1
@@ -24,5 +36,3 @@ if [ $# -lt 1 ]; then
 else
 	ispinstalled "$@" >/dev/null 
 fi
-
-exit 0

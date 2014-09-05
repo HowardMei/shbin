@@ -4,7 +4,7 @@
 #%   DESCRIPTION:  Validate the given ip address
 #%	 Usage: isipv4 192.168.0.12
 #----------------------------------------------------------------------------------------------------------------------
-unset -f isipv4
+unset -f isipv4 
 isipv4() {
 	if [ $# -ne 1 ]; then
 		echo "isipv4 needs exactly one ip v4 as input" >&2
@@ -42,5 +42,3 @@ if [ $# -lt 1 ]; then
 else
 	isipv4 "$@" >/dev/null 
 fi
-
-exit 0

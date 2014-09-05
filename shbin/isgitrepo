@@ -4,6 +4,7 @@
 #%   DESCRIPTION:  Check if the given directory is a git managed repo
 #%	 Usage: isgitrepo [dirpath]
 #----------------------------------------------------------------------------------------------------------------------
+unset -f isgitrepo 
 isgitrepo() {
    if [ $# -lt 1 ] ; then
       local gitdir="$(abspath .)"
@@ -34,5 +35,3 @@ if [ $# -lt 1 ]; then
 else
 	isgitrepo "$@" >/dev/null 
 fi
-
-exit 0

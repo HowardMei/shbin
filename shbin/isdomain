@@ -25,7 +25,5 @@ isdomain() {
 if [ $# -lt 1 ]; then
 	export -f isdomain 2>/dev/null 
 else
-	isdomain "$@" 
+	isdomain "$@" >/dev/null 
 fi
-
-exit 0
