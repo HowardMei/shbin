@@ -55,4 +55,3 @@ else
 fi
 
 unset shbinpath histpath filename hlp 
-exit 0

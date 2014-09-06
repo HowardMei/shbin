@@ -16,5 +16,3 @@ else
 		sush "$@" 
 	fi
 fi
-
-exit 0

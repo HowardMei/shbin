@@ -1,0 +1,71 @@
+
+## require shbin/shc
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  ufwacceptport
+#%   DESCRIPTION:  Make ufw allow a certain port
+#%	 Usage: ufwacceptport [-l | log | --log] 2012/tcp
+#----------------------------------------------------------------------------------------------------------------------
+_ufwacceptport() {
+	if [ $# -lt 1 ] ; then
+		echo "Usage: ufwacceptport [--log] 2012/tcp"
+		return 1
+	fi
+
+	if iscommand ufw 2>/dev/null; then
+		local logit=""
+		local pn=""
+		local tp="tcp"
+	else
+		echo "ufw is not available on this system, please pinstall ufw" >&2
+		return 1
+	fi
+
+	case "$1" in
+		-l | --log | log)
+			logit="yes"
+			shift
+			if [ $# -lt 1 ] ; then
+				echo "Usage: ufwacceptport [-l | log | --log] 2012/tcp"
+				return 1
+			fi
+			;;
+		-- | *)
+			;;
+	esac
+    pn="$(echo "$1" | tr -cd '[[:digit:]]')"
+    if [ -z "$pn" ]; then
+		echo "Usage: ufwacceptport [-l | log | --log] 2012/tcp"
+		return 1
+    fi
+	tp="$(echo "$1" | sed -e "s^$pn\/^^g")"
+    case "$tp" in
+		udp | UDP)
+			tp="udp"
+			;;
+		-- | *)
+			tp="tcp"
+			;;
+	esac
+
+	if [ ! -f "/etc/default/ufw" ]; then
+		echo "/etc/default/ufw cannot be found, please make sure ufw is installed properly." >&2
+		return 1
+	fi
+
+	(shc 'ufw status' | grep -iq "inactive") && shc 'yes | ufw enable;ufw logging on;ufw default deny' || echo ""
+
+	if [ "yes" = "$logit" ]; then
+		shc "ufw allow log $pn/$tp"
+	else
+		shc "ufw allow $pn/$tp"
+	fi
+	echo "Plan to reload ufw within 5s to apply the new ufw rules." 2>/dev/null
+	echo "Please Ctrl+C to interupt it if you don't want it to." 2>/dev/null
+	shc 'sleep 5; ufw reload; ufw status numbered'
+}
+
+
+_ufwacceptport "$@"
+
+unset -f _ufwacceptport
+exit 0

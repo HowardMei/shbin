@@ -15,4 +15,3 @@ if [ "$(shuser)" != 'root' ]; then
 fi
 
 $suba "$@"
-exit 0

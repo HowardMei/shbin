@@ -37,4 +37,3 @@ _shsrc() {
 _shsrc "$@" 
 
 unset -f _shsrc 
-exit 0

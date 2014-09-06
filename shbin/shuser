@@ -15,4 +15,3 @@ SHUSER="$(id -un 2>/dev/null || whoami 2>/dev/null)"
 export SHUSER
 echo "$SHUSER"
 
-exit 0

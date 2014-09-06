@@ -14,4 +14,3 @@ if [ "$(shuser)" != 'root' ]; then
 fi
 
 $sush "$@"
-exit 0
