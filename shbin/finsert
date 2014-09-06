@@ -1,0 +1,72 @@
+
+## require shbin/abspath, shbin/escape, shbin/fsplit, shbin/fappend
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  finsert
+#%   DESCRIPTION:  Insert the content before/after the pattern matched strings of the given file
+#%	 Usage:finsert [ -n|--nth 3 ] [-a|-b|--after|--before] "$WP_CONFIG_FILE" ".*Matching_Pattern.*" "$ANY_TEXT_TO_INSERT"
+#----------------------------------------------------------------------------------------------------------------------
+__ScriptTmp="$(mktemp -d)"
+_finsert() {
+	if [ $# -lt 3 ]; then
+        echo 'Usage:finsert [ -n|--nth 3 ] [-a|-b|--after|--before] "$WP_CONFIG_FILE" ".*Matching_Pattern.*" "$ANY_TEXT_TO_INSERT"' >&2
+        return 1
+    fi;
+    local fpos='-a'
+    local num=1
+    case "$1" in
+        -n | --nth | --num | --number)
+            shift
+            local num="$(echo "$1" | tr -cd '[:digit:]')"
+            if [ -z "$num" ]; then
+                echo "A non-digit value is given to -n option."
+                return 1
+            fi
+            shift
+            if [ "-a" == "$1" ] || [ "--after" == "$1" ]; then
+                fpos='-a'
+                shift
+            fi
+            if [ "-b" == "$1" ] || [ "--before" == "$1" ]; then
+                fpos='-b'
+                shift
+            fi
+        ;;
+		-a | --after)
+				fpos='-a'
+				shift
+				;;
+		-b | --before)
+				fpos='-b'
+				shift
+				;;
+		-- | *)
+				;;
+	esac
+    local fn="$(abspath "$1")"
+    if [ ! -r "$fn" ]; then
+        echo "$fn is not a valid file or cannot be read!" 1>&2
+        return 1
+    else
+        shift
+    fi
+	local pat="$(escape $1)"
+	shift
+	local txt="$*"
+	fsplit -n "$num" "$fpos" "$fn" "$pat"
+	if [ $? -eq 0 ]; then
+		echo "$txt" | fappend "${fn}.part1"
+		cat "${fn}.part1" "${fn}.part2" > "$fn"
+		\mv -f "${fn}.part1" "$__ScriptTmp/" 2>/dev/null
+		\mv -f "${fn}.part2" "$__ScriptTmp/" 2>/dev/null
+	fi
+}
+
+
+if [ $# -lt 1 ]; then
+	echo 'Usage:finsert [ -n|--nth 3 ] [-a|-b|--after|--before] "$WP_CONFIG_FILE" ".*Matching_Pattern.*" "$ANY_TEXT_TO_INSERT"' >&2
+else
+	_finsert "$@"
+fi
+
+unset -f _finsert
+exit 0

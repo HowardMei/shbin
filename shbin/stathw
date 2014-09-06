@@ -117,10 +117,19 @@ if [ $# -lt 1 ]; then
 	fi
 else
 	for _vx in "$@"; do
-		if [ -n "${!_vx}" ]; then
-			echo "${!_vx}"
+##		if [ -n "${!_vx}" ]; then
+##			echo "${!_vx}"
+##		fi
+		## ${!_vx} may report bad substitution in sh
+		if [ -n "$_vx" ]; then
+			_vvx="$(eval "echo \$$_vx")"
+			if [ -n "$_vvx" ]; then
+				echo "$_vvx"
+			fi
 		fi
 	done
 fi
 
+unset _vvx
+unset -f _check_hardware 
 exit 0

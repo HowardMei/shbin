@@ -18,7 +18,7 @@ DISTRO_MINOR_VERSION=""
 #          NAME:  check_os <= __gather_os_info
 #   DESCRIPTION:  Discover operating system information
 #----------------------------------------------------------------------------------------------------------------------
-_check_kernel() {
+__gather_kernel_info() {
     OS_NAME=$(uname -s 2>/dev/null)
     OS_NAME_L=$( echo $OS_NAME | tr '[:upper:]' '[:lower:]' )
     OS_ARCH=$(uname -m)
@@ -28,8 +28,8 @@ _check_kernel() {
     OS_VERNUM=$(uname -r | cut -d\- -f1 | tr -d '.' | tr -d '[A-Z][a-z]')
 }
 
-__gather_kernel_info() {
-	_check_kernel
+_check_kernel() {
+	__gather_kernel_info
 }
 
 
@@ -450,10 +450,22 @@ if [ $# -lt 1 ]; then
 	fi
 else
 	for _vx in "$@"; do
-		if [ -n "${!_vx}" ]; then
-			echo "${!_vx}"
+##		if [ -n "${!_vx}" ]; then
+##			echo "${!_vx}"
+##		fi
+		## ${!_vx} may report bad substitution in sh
+		if [ -n "$_vx" ]; then
+			_vvx="$(eval "echo \$$_vx")"
+			if [ -n "$_vvx" ]; then
+				echo "$_vvx"
+			fi
 		fi
 	done
 fi
 
+unset _vvx 
+unset -f __gather_kernel_info _check_kernel __parse_version_string __sort_release_files 
+unset -f __gather_linux_system_info __gather_sunos_system_info __gather_bsd_system_info 
+unset -f __ubuntu_derivatives_translation __debian_derivatives_translation __gather_operatingsystem_info 
+unset -f _check_operatingsystem 
 exit 0
