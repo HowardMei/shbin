@@ -30,10 +30,13 @@ _pcmd2pkg() {
 	if iscommand "dlocate" 2>/dev/null;then
 		dlocate -S --package-only "$binloc" 2>/dev/null
 		return 0 
+	else
+		pinstall dlocate 2>/dev/null
+		dlocate -S --package-only "$binloc" 2>/dev/null
+		return 0 
 	fi
 	
 	if iscommand "dpkg" 2>/dev/null;then
-		pinstall dlocate 2>/dev/null
 		dpkg -S "$binloc" 2>/dev/null | estrips -r ":.*"
 		return 0 
 	fi

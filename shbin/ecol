@@ -29,7 +29,7 @@ _ecol() {
 	ncb="${ncb:="$nctot"}" 
 	if [ "$nca" -ge 0 ] && [ "$nca" -le "$ncb" ] && [ "$ncb" -le "$nctot" ]; then
 		## Inside awk: printf FS$i will produce errors due to special chars like %, use printf("%s", FS$i) to avoid
-		printf "%s" "$ostr" | awk -F"$dlm" '{for (i='"$nca"'; i<='"$ncb"'; i++) printf("%s", FS$i); print NL}' 2>/dev/null 
+		printf "%s" "$ostr" | awk -F"$dlm" '{for (i='"$nca"'; i<='"$ncb"'; i++) printf("%s", FS$i); print NL}' 2>/dev/null | estrips -r "^${dlm}" 
 		return 0
 	else
 		return 1
