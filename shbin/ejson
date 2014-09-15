@@ -1,0 +1,43 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  ejson
+#%   DESCRIPTION:  Parse and extract key value pairs from json string/file.
+#%	 Usage: echo "json_string" | ejson key  OR  ejson [key] jsonfile
+#----------------------------------------------------------------------------------------------------------------------
+_ejson() {
+if [ -n "$(uname -s 2>/dev/null | grep -i linux)" ]; then
+	jqcmd="jqx$(uname -m 2>/dev/null | efilters -d | sed 's/8664/64/' | sed 's/386/32/')"
+	if iscommand "$jqcmd" 2>/dev/null; then
+		echo "$(cat)" | $jqcmd .$@ | grep -v null
+		return 0
+	else
+		echo "Cannot find the jqx64/32 command!" >&2
+		return 1
+	fi
+else
+	echo "Currently only support linux operation system." >&2
+	return 1
+fi
+}
+
+
+if [ $# -lt 1 ]; then
+	echo "$(cat)" | _ejson
+elif [ $# -eq 1 ]; then
+	if [ -f "$1" ]; then
+		cat "$1" | _ejson
+	else
+		echo "$(cat)" | _ejson "$1"
+	fi
+elif [ $# -eq 2 ]; then
+	if [ -f "$2" ]; then
+		cat "$2" | _ejson "$1"
+	else
+		echo "$2 is NOT a valid json file." >&2
+		exit 1
+	fi
+else
+	echo 'echo "json_string" | ejson key  OR  ejson [key] jsonfile' >&2
+fi
+
+exit 0
