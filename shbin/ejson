@@ -2,42 +2,44 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  ejson
 #%   DESCRIPTION:  Parse and extract key value pairs from json string/file.
-#%	 Usage: echo "json_string" | ejson key  OR  ejson [key] jsonfile
+#%	 Usage: echo "json_string" | ejson [-k|-v|--keys|--values]  OR  ejson [-k|-v|--keys|--values] jsonfile
 #----------------------------------------------------------------------------------------------------------------------
-_ejson() {
-if [ -n "$(uname -s 2>/dev/null | grep -i linux)" ]; then
-	jqcmd="jqx$(uname -m 2>/dev/null | efilters -d | sed 's/8664/64/' | sed 's/386/32/')"
-	if iscommand "$jqcmd" 2>/dev/null; then
-		echo "$(cat)" | $jqcmd .$@ | grep -v null
-		return 0
-	else
-		echo "Cannot find the jqx64/32 command!" >&2
-		return 1
-	fi
-else
-	echo "Currently only support linux operation system." >&2
-	return 1
-fi
-}
-
 
 if [ $# -lt 1 ]; then
-	echo "$(cat)" | _ejson
+	echo "$(cat)" | jqx
 elif [ $# -eq 1 ]; then
 	if [ -f "$1" ]; then
-		cat "$1" | _ejson
+		cat "$1" | jqx
+	elif [ "$1" == "-k" ] || [ "$1" == "--keys" ];then
+		echo "$(cat)" | jqx -c '[paths|.[0:5]]|unique[]' | estrips -q | estrips -m '[' | estrips -m ']' | sed 's/,/./g'
+	elif [ "$1" == "-v" ] || [ "$1" == "--values" ];then
+		echo "$(cat)" | jqx
 	else
-		echo "$(cat)" | _ejson "$1"
+		echo "$(cat)" | jqx -r ."$1"
 	fi
 elif [ $# -eq 2 ]; then
 	if [ -f "$2" ]; then
-		cat "$2" | _ejson "$1"
+		cat "$2" | ejson "$1"
+	elif [ "$1" == "-k" ] || [ "$1" == "--keys" ];then
+		shift
+		echo "$(cat)" | jqx -c '[paths|.[0:5]]|unique[]' | estrips -q | estrips -m '[' | estrips -m ']' | sed 's/,/./g' | efilter -rl "$1"
+	elif [ "$1" == "-v" ] || [ "$1" == "--values" ];then
+		shift
+		echo "$(cat)" | jqx -r ."$1"
 	else
-		echo "$2 is NOT a valid json file." >&2
-		exit 1
+		jqx "$@"
 	fi
 else
-	echo 'echo "json_string" | ejson key  OR  ejson [key] jsonfile' >&2
+	opts="$@"
+	fopt="$(ecol "$#" "$opts")"
+	shift
+	newopts="$(ecol :"$#" "$opts")"
+	if [ -f "$fopt" ]; then
+		cat "$fopt" | ejson $newopts 
+	else
+		echo "$(cat)" | ejson $opts 
+	fi
 fi
 
+unset fopt opts newopts
 exit 0
