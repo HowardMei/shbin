@@ -19,7 +19,7 @@ elif [ $# -eq 1 ]; then
 			echo "$(cat)" | jqx
 			;;
 			-- | *)
-			echo "$(cat)" | jqx -r ."$1"
+			echo "$(cat)" | jqx ."$1"
 			;;
 		esac
 	fi
@@ -34,7 +34,7 @@ elif [ $# -eq 2 ]; then
 			;;
 			-v | --value | --values)
 				shift
-				echo "$(cat)" | jqx -r ."$1"
+				echo "$(cat)" | jqx ."$1"
 			;;
 			-- | *)
 				jqx "$@"
