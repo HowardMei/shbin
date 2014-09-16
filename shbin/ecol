@@ -6,11 +6,15 @@
 #----------------------------------------------------------------------------------------------------------------------
 _ecol() {
     local dlm=" "
-	if [ "-d" == "$1" ] || [ "--delimiter" == "$1" ] || [ "--separator" == "$1" ]; then
-		shift
-		dlm="$1"
-		shift
-	fi
+    case "$1" in
+		-d | --delimiter | --separator)
+			shift
+			dlm="$1"
+			shift
+		;;
+		-- | *)
+		;;
+	esac
 	if echo "$1" | grep -q : 2>/dev/null; then
 		local nca="$(echo "$1" | cut -d: -f1 | tr -cd '[:digit:]')"
 		local ncb="$(echo "$1" | cut -d: -f2 | tr -cd '[:digit:]')"
@@ -40,11 +44,14 @@ _ecol() {
 if [ $# -lt 1 ]; then
 	_ecol 1 "$(cat)"
 elif [ $# -eq 3 ]; then
-	if [ "-d" == "$1" ] || [ "--delimiter" == "$1" ] || [ "--separator" == "$1" ]; then
+    case "$1" in
+		-d | --delimiter | --separator)
 		_ecol "$1" "$2" "$3" "$(cat)"
-	else
+		;;
+	-- | *)
 		_ecol "$@" 
-	fi
+		;;
+	esac
 else
 	_ecol "$@"
 fi

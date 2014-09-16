@@ -12,7 +12,7 @@ _fsubst() {
     fi
     local line=0
     case "$1" in
-		-l | --line | --change)
+		-l | --line | --change | --replace)
 			local line=1024
 			shift
 			;;

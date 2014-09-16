@@ -21,10 +21,14 @@ _fsubstn() {
 				return 1
 			fi
 			shift
-			if [ "-l" == "$1" ] || [ "--line" == "$1" ] || [ "--change" == "$1" ]; then
-				line=1024
-				shift
-			fi
+			case "$1" in
+				-l | --line | --change | --replace)
+					line=1024
+					shift
+				;;
+				-- | *)
+				;;
+			esac
 			;;
 		-l | --line | --change)
 			local line=1024

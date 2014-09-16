@@ -10,24 +10,36 @@ if [ $# -lt 1 ]; then
 elif [ $# -eq 1 ]; then
 	if [ -f "$1" ]; then
 		cat "$1" | jqx
-	elif [ "$1" == "-k" ] || [ "$1" == "--keys" ];then
-		echo "$(cat)" | jqx -c '[paths|.[0:5]]|unique[]' | estrips -q | estrips -m '[' | estrips -m ']' | sed 's/,/./g'
-	elif [ "$1" == "-v" ] || [ "$1" == "--values" ];then
-		echo "$(cat)" | jqx
 	else
-		echo "$(cat)" | jqx -r ."$1"
+		case "$1" in
+			-k | --key | --keys)
+			echo "$(cat)" | jqx -c '[paths|.[0:5]]|unique[]' | estrips -q | estrips -m '[' | estrips -m ']' | sed 's/,/./g'
+			;;
+			-v | --value | --values)
+			echo "$(cat)" | jqx
+			;;
+			-- | *)
+			echo "$(cat)" | jqx -r ."$1"
+			;;
+		esac
 	fi
 elif [ $# -eq 2 ]; then
 	if [ -f "$2" ]; then
 		cat "$2" | ejson "$1"
-	elif [ "$1" == "-k" ] || [ "$1" == "--keys" ];then
-		shift
-		echo "$(cat)" | jqx -c '[paths|.[0:5]]|unique[]' | estrips -q | estrips -m '[' | estrips -m ']' | sed 's/,/./g' | efilter -rl "$1"
-	elif [ "$1" == "-v" ] || [ "$1" == "--values" ];then
-		shift
-		echo "$(cat)" | jqx -r ."$1"
 	else
-		jqx "$@"
+		case "$1" in
+			-k | --key | --keys)
+				shift
+				echo "$(cat)" | jqx -c '[paths|.[0:5]]|unique[]' | estrips -q | estrips -m '[' | estrips -m ']' | sed 's/,/./g' | efilter -rl "$1"
+			;;
+			-v | --value | --values)
+				shift
+				echo "$(cat)" | jqx -r ."$1"
+			;;
+			-- | *)
+				jqx "$@"
+			;;
+		esac
 	fi
 else
 	opts="$@"

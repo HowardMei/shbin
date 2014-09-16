@@ -9,11 +9,15 @@ _ncols() {
    if [ $# -lt 1 ]; then
 		return 1
    elif [ $# -ge 2 ]; then
-		if [ "-d" == "$1" ] || [ "--delimiter" == "$1" ] || [ "--separator" == "$1" ]; then
-			shift
-			dlm="$1"
-			shift
-		fi
+		case "$1" in
+			-d | --delimiter | --separator)
+				shift
+				dlm="$1"
+				shift
+			;;
+			-- | *)
+			;;
+		esac
    fi
    printf "%s" "$@" | awk -F"$dlm" 'END {print NF;exit}' 
 }
@@ -22,11 +26,14 @@ _ncols() {
 if [ $# -lt 1 ]; then
 	_ncols "$(cat)"
 elif [ $# -eq 2 ]; then
-	if [ "-d" == "$1" ] || [ "--delimiter" == "$1" ] || [ "--separator" == "$1" ]; then
+	case "$1" in
+		-d | --delimiter | --separator)
 		_ncols "$1" "$2" "$(cat)"
-	else
+		;;
+	-- | *)
 		_ncols "$@" 
-	fi
+		;;
+	esac
 else
 	_ncols "$@" 
 fi
