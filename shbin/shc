@@ -1,6 +1,7 @@
 
-#%   DESCRIPTION:  Super sh shell command runner [ in sh/bash script file & console ]
+#%   DESCRIPTION:  Super sh shell [ sudo sh/bash -c for sh/bash script file & console ]
 #%	 Usage: 	shc 'echo "Current shell is $SHELL"' OR shc "echo 'Current shell is $SHELL'"
+
 
 if [ -n "$_" ] && [ -x "$_" ]; then
 	if [ -n "$(echo "$_" | grep -i "/bash" 2>/dev/null)" ]; then

@@ -1,6 +1,7 @@
 
 #%   DESCRIPTION:  Return the current shell user name
 #%	 Usage: 	shuser
+
 #----------------------------------------------------------------------------------------------------------------------
 #SHUSER="root"
 # whoami alternative for SunOS
