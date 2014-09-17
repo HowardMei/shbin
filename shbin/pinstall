@@ -48,7 +48,7 @@ _pinstall() {
 	
 	if iscommand apt-get 2>/dev/null;then
 		echo "Installing $pkgname via apt-get" >&2
-		shc "apt-get install --fix-missing --force-yes -y -q -o DPkg::Options::=--force-confold $pkgname" || echo "$pkgname apt-get install failed!" >&2
+		shc "apt-get install --fix-missing --no-install-recommends --force-yes -y -q -o DPkg::Options::=--force-confold $pkgname" || echo "$pkgname apt-get install failed!" >&2
 		shift
 		if [ $# -lt 1 ] ; then
 			return 0
