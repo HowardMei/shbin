@@ -1,4 +1,6 @@
 
+#%   DESCRIPTION:  Super sh shell command runner [ in sh called scriptfile/sh console ]
+#%	 Usage: 	sush 'echo "Current shell is $SHELL"' OR sush "echo 'Current shell is $SHELL'"
 ##----------------------------------------------------  Super SH Shell ------------------------------------------------
 sush='sh -c'
 if [ "$(shuser)" != 'root' ]; then

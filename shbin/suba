@@ -1,5 +1,6 @@
 
-
+#%   DESCRIPTION:  Super bash shell command runner [ in bash called scriptfile/bash console ]
+#%	 Usage: 	suba 'echo "Current shell is $SHELL"' OR suba "echo 'Current shell is $SHELL'"
 ##----------------------------------------------------  Super BASH Shell ------------------------------------------------
 suba='bash -c'
 if [ "$(shuser)" != 'root' ]; then
