@@ -22,7 +22,7 @@ _check_pubip() {
 	## sh cannot recognize '==' and '=' is error prone, use '!=' instead
 	if ! isipv4 "$PUB_IPv4" 2>/dev/null;then
 	    ##echo "Checking public ip over checkip.dyndns.org"
-		PUB_IPv4="$($chk checkip.dyndns.org 2>/dev/null | grep -o "[[:digit:].]\+" 2>/dev/null)"
+		PUB_IPv4="$($chk http://checkip.dyndns.org 2>/dev/null | grep -o "[[:digit:].]\+" 2>/dev/null)"
 		##PUB_IPv4=$(curl -s checkip.dyndns.org|sed -e 's/.*Current IP Address: //' -e 's/<.*$//' 2>/dev/null)
 	fi
 	if iscommand "dig" 2>/dev/null && ! isipv4 "$PUB_IPv4" 2>/dev/null;then
