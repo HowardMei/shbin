@@ -1,0 +1,24 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  nrows
+#%   DESCRIPTION:  Get the number of rows of the given string
+#%	 Usage: nrows "string paragraph" or psp salt | nrows
+#----------------------------------------------------------------------------------------------------------------------
+
+if [ $# -lt 1 ]; then
+	if iscommand wc 2>/dev/null; then
+		printf "%s" "$(cat)" | wc -l 
+		## or echo -n, but printf is better in compatibility
+	else
+		## sed -n '$=' may has buffer size limit
+		printf "%s" "$(cat)" | awk 'END {print NR;exit}' 
+	fi
+else
+	if iscommand wc 2>/dev/null; then
+		printf "%s" "$*" | wc -l 
+	else
+		printf "%s" "$*" | awk 'END {print NR;exit}' 
+	fi
+fi
+
+exit 0

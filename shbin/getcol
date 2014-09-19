@@ -1,0 +1,38 @@
+
+## require shbin/abspath, shbin/ecol
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  getcol
+#%   DESCRIPTION:  Get the given column from the file
+#%   Usage: getcol colnum filepath
+#----------------------------------------------------------------------------------------------------------------------
+_getcol() {
+    if [ $# -ne 2 ];then
+	   echo "Usage: getcol colnum filename" >&2
+	   return 1
+	else
+       local ncol="$(echo $1 | tr -cd '[:digit:]')"
+       local fn="$(abspath "$2")"
+    fi
+
+    if [ -z "$ncol" ];then
+       echo "$ncol is not a valid column number!" >&2
+	   return 1
+    fi
+    if [ ! -r "$fn" ];then
+	   echo "$fn is not a valid file or cannot be read!" >&2
+	   return 2
+	fi
+	cat "$fn" | ecol "$ncol"
+}
+
+
+if [ $# -lt 1 ]; then
+	echo "Usage: getcol rownum filename" >&2
+elif [ $# -eq 1 ]; then
+	_getcol "$1" "$(cat)"
+else
+	_getcol "$@"
+fi	
+
+unset -f _getcol
+exit 0

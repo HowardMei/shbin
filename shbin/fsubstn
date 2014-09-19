@@ -1,0 +1,83 @@
+
+##require shbin/abspath, shbin/escape, shbin/erow
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  fsubstn
+#%   DESCRIPTION:  Substitute the nth matched string with new string in the given file
+#%	 Usage: fsubstn [-n | --nth 3] [-l] '/etc/default/grub' 'GRUB_CMDLINE_LINUX=' 'GRUB_CMDLINE_LINUX=\"cgroup_enable=memory swapaccount=1\"'
+#----------------------------------------------------------------------------------------------------------------------
+_fsubstn() {
+    if [ $# -lt 3 ];then
+	   echo 'Usage:  fsubstn [ -n|--nth 3 ] [-l] "$WP_CONFIG_FILE" ".*SALT_BLOCK.*" "$Alternative_Text"'
+       return 1
+    fi
+    local line=0
+    local nth=1
+    case "$1" in
+		-n | --nth | --num | number)
+			shift
+			local nth="$(echo "$1" | tr -cd '[:digit:]')"
+			if [ -z "$nth" ]; then
+				echo "A non-digit value is given to --nth option."
+				return 1
+			fi
+			shift
+			case "$1" in
+				-l | --line | --change | --replace)
+					line=1024
+					shift
+				;;
+				-- | *)
+				;;
+			esac
+			;;
+		-l | --line | --change)
+			local line=1024
+			shift
+			;;
+		-- | *)
+			;;
+	esac
+	local fn="$(abspath "$1")"
+    if [ ! -r "$fn" ];then
+	   echo "$fn is not a valid file or cannot be read!" >&2
+	   return 1
+	else
+	   shift
+	fi
+	local pat="$(escape "$1")"
+	shift
+	local txt="$(escape "$@")"
+	local suf="bk$(date +%s)"
+	local nst=""
+	nst="$(sed -n -e "/$pat/=" "$fn" 2>/dev/null)"
+	if [ -z "$nst" ]; then
+		echo "Cannot find the lines containing the $pat in $fn" >&2
+		return 1
+	else
+		echo "In $fn following lines contain one or more [$pat]:"
+		echo $nst
+	fi
+	local ntl=""
+	ntl="$(erow "$nth" "$nst")"
+    if [ -z "$ntl" ]; then
+		echo "Cannot get the number of the #$nth matching line containing $pat in $fn" >&2
+		return 1
+	fi
+
+	if [ "$line" -lt 512 ]; then
+		echo "<Row $ntl>#$nth matched line:replace the 1st [$pat] with [$txt]"
+		sed -i."$suf" "$ntl,${ntl}s/${pat}/${txt}/1" "$fn"
+	else
+		echo "<Row $ntl>#$nth matched line:replace the whole line with [$txt]"
+		sed -i."$suf" "$ntl,${ntl}s/^.*${pat}.*$/${txt}/g" "$fn"
+	fi
+}
+
+
+if [ $# -lt 1 ]; then
+	echo "Usage: fsubstn [-n | --nth 3] [-l] '/etc/default/grub' 'GRUB_CMDLINE_LINUX=' 'GRUB_CMDLINE_LINUX=\"cgroup_enable=memory swapaccount=1\"'" >&2
+else
+	_fsubstn "$@"
+fi
+
+exit 0

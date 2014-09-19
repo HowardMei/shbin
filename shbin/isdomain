@@ -1,0 +1,29 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  isdomain
+#%   DESCRIPTION:  Validate the given url domain address
+#%   Usage: isdomain "www.google.co.uk"
+#----------------------------------------------------------------------------------------------------------------------
+unset -f isdomain
+isdomain() {
+	if [ $# -ne 1 ]; then
+		echo "isdomain needs exactly one domain name as input" >&2
+		return 1
+	fi
+    local dompat="$(printf "%s" "$1" | grep -E "^(([[:alpha:]](-?[[:alnum:]])*)\.)*[[:alpha:]](-?[[:alnum:]])+\.[[:alpha:]]{2,}$" 2>/dev/null)"
+
+	if [ "$1" == "$dompat" ]; then
+		echo "$1 is a valid internet domain format."
+		return 0
+	else
+		# Failing that, invalid after all (too few dots)
+		echo "$1 is NOT a valid internet domain format." >&2
+		return 1
+	fi
+}
+
+if [ $# -lt 1 ]; then
+	export -f isdomain 2>/dev/null 
+else
+	isdomain "$@" >/dev/null 
+fi

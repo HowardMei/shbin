@@ -1,0 +1,46 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  escape
+#%   DESCRIPTION:  Escape special chars of the given string.
+#%	 Usage: escape "the string" or "$(escape "the string")"
+#----------------------------------------------------------------------------------------------------------------------
+_escape() {
+	if [ $# -lt 1 ]; then
+	   local oristr="$(cat)"
+	   local ol="${#oristr}"
+	else
+	   local oristr="$@"
+	   local ol="${#oristr}"
+	fi
+   ## Warning: Double quotes must be the fist layer, or else $oristr with spaces will be truncated!!!
+   ## Wrong: local newstr=$(echo "$oristr" | sed -e 's/\\/\\\\/g' | sed -e 's/\([[\/.*#&|@=<>\!:?\(\)]\|\]\)/\\&/g')
+   ##local newstr="$(echo $oristr | sed -e 's/\\/\\\\/g' | sed -e 's/\([[\/$*.^#&|@=<>\!:?\(\)]\|\]\)/\\&/g')"
+   ## Escaping everything is a bad idea, use a simpler line if we encounter errors
+   ## http://stackoverflow.com/questions/407523/escape-a-string-for-a-sed-replace-pattern
+   local newstr="$(echo $oristr | sed -e 's/\\/\\\\/g' 2>/dev/null | sed -e 's/[]\/$*.^|[]/\\&/g' 2>/dev/null)"
+   local nl="${#newstr}"
+   if [ "$nl" -lt "$ol" ]; then
+	   newstr="$(echo $oristr | sed -e 's/[]\/$*.^|[]/\\&/g' 2>/dev/null)"
+	   nl="${#newstr}"
+	   if [ "$nl" -lt "$ol" ]; then
+		    newstr="$(echo $oristr | sed -e 's^[\/&]^\\&^g' 2>/dev/null)"
+			nl="${#newstr}"
+			if [ "$nl" -lt "$ol" ]; then
+				echo "$oristr"
+			else
+				echo "$newstr"
+			fi
+	   else
+		  echo "$newstr"
+	   fi
+   else
+		echo "$newstr"
+   fi
+}
+
+
+_escape "$@" 
+
+
+unset -f _escape 
+exit 0

@@ -1,0 +1,18 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  whichis
+#%   DESCRIPTION:  Return the real binary path of the given command
+#%	 Usage: whichis docker
+#----------------------------------------------------------------------------------------------------------------------
+_whichis() {
+   local whis="$(abspath -f $(which "$1"))"
+   if [ -z "$whis" ]; then
+	  return 1
+   else
+	  echo "$whis"
+	  return 0
+   fi
+}
+
+_whichis "$@" 
+

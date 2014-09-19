@@ -1,0 +1,39 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  so
+#   DESCRIPTION:  Quick filename search using locate
+#----------------------------------------------------------------------------------------------------------------------
+_so() {
+  if [ $# -lt 1 ] ; then
+     echo "Usage: so my.cnf dockerfile"
+     return 0
+  fi
+  if [ $# -gt 1 ] ; then
+     local display_divider=1
+  else
+     local display_divider=0
+  fi
+  if ! iscommand "locate" 2>/dev/null; then
+	 pinstall locate
+	 shc 'updatedb'
+  fi
+  local current_argument=0
+  local total_arguments=$#
+  while [ ${current_argument} -lt ${total_arguments} ] ; do
+    local current_file=$1
+    if [ "${display_divider}" -eq "1" ] ; then
+      echo "----------------------------------------"
+      echo "Matches for ${current_file}"
+      echo "----------------------------------------"
+    fi
+    local filename_re="^\(.*/\)*$( echo ${current_file} | sed s%\\.%\\\\.%g )$"
+    locate -ir "${filename_re}"
+    shift
+    (( current_argument = current_argument + 1 ))
+  done
+}
+
+_so "$@" 
+
+unset -f _so 
+exit 0

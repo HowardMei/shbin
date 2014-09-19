@@ -1,0 +1,28 @@
+
+#%   DESCRIPTION:  Run command as another user
+#%	 Usage: 	runas howardmei 'echo "Run as $USER in $SHELL at $HOME";pwd;mkdir -p /root/temp' 
+
+unset SHE USER 
+SHE="$_"
+USER="$1"
+shift
+if [ -d "$(userhome "$USER")" ]; then
+	if [ -n "$SHE" ] && [ -x "$SHE" ]; then
+		if [ -n "$(echo "$_" | grep -i "/bash" 2>/dev/null)" ]; then
+			sudo -H -u "$USER" bash -c "$@"
+		else
+			sudo -H -u "$USER" sh -c "$@"  
+		fi
+	else
+		if [ -n "$(echo "$SHELL" | grep -i "/bash" 2>/dev/null)" ]; then
+			sudo -H -u "$USER" bash -c "$@"  
+		else
+			sudo -H -u "$USER" sh -c "$@" 
+		fi
+	fi
+else
+	echo "user $1 is not found!" >&2
+	exit 1
+fi
+unset SHE USER  
+exit 0

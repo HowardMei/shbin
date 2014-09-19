@@ -1,0 +1,31 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  getpname
+#%   DESCRIPTION:  Get the process name of the given pid
+#%   Usage: getpnamebyid process_id | process_path
+#----------------------------------------------------------------------------------------------------------------------
+_getpname() {
+	if [ $# -ne 1 ]; then
+		echo "Usage: getpnamebyid process_id | process_path" >&2
+		return 1 
+	elif isdigit "$1" 2>/dev/null; then
+		local pid=$(echo "$1" | tr -cd '[[:digit:]]') 
+	else
+		echo "Invalid format of process id. getpnamebyid only accept digits." >&2
+		return 1 
+	fi
+	
+	pname="$(ps -p $pid -o comm= 2>/dev/null)"
+	if [ -z "$pname" ]; then
+		echo "Cannot find any running process with id $1" >&2 
+		return 1 
+	else
+		echo "$pname" 
+	fi
+}
+
+
+_getpname "$@"
+
+unset -f _getpname
+exit 0

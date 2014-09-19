@@ -1,0 +1,32 @@
+
+## require shbin/shuser
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  gitsetuser
+#%   DESCRIPTION:  Git config global user and email
+#%	 Usage: gitsetuser "Howard Mei" "howardmei@mubiic.com"
+#----------------------------------------------------------------------------------------------------------------------
+_gitsetuser() {
+   if [ $# -lt 1 ] ; then
+      local gituser="$(shuser)"
+      local gitemail="$(shuser)@$(hostname)"
+   fi
+   if [ $# -eq 1 ] ; then
+      local gituser="$(shuser)"
+      local gitemail="$1"
+   fi
+   if [ $# -eq 2 ] ; then
+      local gituser="$1"
+      local gitemail="$2"
+   fi
+   if [ $# -gt 2 ] ; then
+      echo "Usage: gitsetuser username user@company.com , no spaces are allowed!"
+      return 0
+   fi
+   git config --global user.name "$gituser"
+   git config --global user.email "$gitemail"
+}
+
+_gitsetuser "$@" 
+
+unset -f _gitsetuser 
+exit 0

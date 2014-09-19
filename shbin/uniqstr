@@ -1,0 +1,23 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  uniqstr
+#   DESCRIPTION:  Unify the given strings
+#----------------------------------------------------------------------------------------------------------------------
+_uniqstr() {
+	if [ $# -lt 1 ]; then
+		echo "$(cat)" | awk '!x[$0]++';echo
+	else
+		echo "$@" | awk '!x[$0]++';echo
+	fi
+}
+
+
+if [ $# -lt 1 ]; then
+	echo "$(cat)" | _uniqstr
+else
+	echo "$*" | _uniqstr
+fi
+
+
+unset -f _uniqstr
+exit 0

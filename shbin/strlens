@@ -1,0 +1,8 @@
+
+if [ $# -lt 1 ]; then
+	echo "$(cat)" | strlen 
+else
+	echo "$*" | strlen 
+fi
+
+exit 0

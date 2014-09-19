@@ -1,0 +1,31 @@
+
+## require shbin/getpnamebyid
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  waiton
+#   DESCRIPTION:  Wait until the given pid finish
+#----------------------------------------------------------------------------------------------------------------------
+_waiton() {
+   if [ -z "$*" ]; then
+      echo "Need at least 1 PID number. Usage: waiton pid1 pid2 pid3 ... \n" >&2
+      return 1
+   fi
+   local pid=''
+   for pid in $@; do
+	  if [ -z "$pid" ];then
+		 continue
+	  fi
+	  local pname="$(getpnamebyid $pid)"
+	  if [ -n "$pname" ];then
+		 while ps -p "$pid" > /dev/null; do sleep 0.1; done;
+	  else
+	     ## &2 is stderr
+		 echo "No process with PID $pid found, which may be already finished" >&2
+		 return 1
+	  fi	
+   done	
+}
+
+_waiton "$@" 
+
+unset -f _waiton 
+exit 0

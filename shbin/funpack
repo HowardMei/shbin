@@ -1,0 +1,70 @@
+
+## require shbin/abspath
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  funpack & fpack
+#%   DESCRIPTION:  Quick uncompressing of archived packs
+#%	 Usage: funpack pack1.zip pack2.tar.gz pack3.tar ... packn.7z
+#----------------------------------------------------------------------------------------------------------------------
+_funpack() {
+  if [ $# -lt 1 ] ; then
+     echo "Usage: funpack testpack.zip anotherpack.tar.gz"
+     return 0
+  fi
+  if [ $# -gt 1 ] ; then
+     local display_divider=1
+  else
+     local display_divider=0
+  fi
+  local curopt=0
+  local numtotarg=$#
+  while [ ${curopt} -lt ${numtotarg} ]; do
+    local current_pack="$(abspath "$1")"
+    if [ -n "$current_pack" ] && [ -f "$current_pack" ]; then
+	    shift
+    else
+	    echo "$1 is not a valid file path, skipping ..."
+	    continue
+    fi
+
+    if [ "${display_divider}" -gt 0 ]; then
+      echo "----------------------------------------"
+      echo "Unpacking ${current_pack} to current dir:"
+      echo "----------------------------------------"
+    fi
+    case $current_pack in
+	   *.tar.bz2)	tar xvjf "$current_pack"    ;;
+	   *.tar.gz)	tar xvzf "$current_pack"   ;;
+	   *.tar.xz)	tar xvzf "$current_pack"    ;;
+	   *.lzma)		unlzma "$current_pack"      ;;
+	   *.bz2)       bunzip2 "$current_pack"     ;;
+	   *.rar)
+			#pinstall unrar 2>/dev/null
+			unrar x "$current_pack"     ;;
+	   *.gz)        gunzip -c "$current_pack" > "$(basename "$current_pack")";;
+	   *.tar)       tar xvf "$current_pack"     ;;
+	   *.tbz2)      tar xvjf "$current_pack"    ;;
+	   *.tgz)       tar xvzf "$current_pack"    ;;
+	   *.zip)       unzip "$current_pack"       ;;
+	   *.Z)         uncompress "$current_pack"  ;;
+	   *.7z)    	7z x "$current_pack"        ;;
+	   *.xz)        unxz "$current_pack"        ;;
+	   *.deb)	    ar p "$current_pack" data.tar.gz | tar xvzf -;;
+	   *.rpm)		rpm2cpio "$current_pack" | cpio -vid ;;
+	   *.exe)
+			##pinstall cabextract 2>/dev/null
+			cabextract "$current_pack"  ;;
+	   *) echo "Format unsupported. Unable to extract $current_pack...";;
+    esac
+    (( curopt = curopt + 1 ))
+  done
+}
+
+
+if [ $# -lt 1 ]; then
+	echo "Usage: funpack pack1.zip pack2.tar.gz pack3.tar ... packn.7z" >&2
+else
+	_funpack "$@"
+fi
+
+unset -f _funpack
+exit 0

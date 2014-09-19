@@ -1,0 +1,25 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  iscommand
+#%   DESCRIPTION:  Check if a command exists
+#%	 Usage: if iscommand curl 2>/dev/null; or source "$(which iscommand)" && if [ -n "$(iscommand curl)" ]; then 
+#----------------------------------------------------------------------------------------------------------------------
+unset -f iscommand
+iscommand() {
+	command -v "$@" >/dev/null 2>&1
+	if [ "$?" -eq 0 ]; then
+		echo "$@ is a command."
+		return 0
+	else
+		echo "$@ is NOT a command." >&2
+		return 1
+	fi
+}
+
+
+if [ $# -lt 1 ]; then
+	echo 'Usage: if iscommand curl 2>/dev/null; or source "$(which iscommand)" && if [ -n "$(iscommand curl)" ];'
+	export -f iscommand 2>/dev/null
+else
+	iscommand "$@" >/dev/null 
+fi

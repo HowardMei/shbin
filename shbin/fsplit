@@ -1,0 +1,93 @@
+
+## require shbin/abspath, shbin/escape
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  fsplit
+#%  DESCRIPTION:  Split the given file according to the given pattern
+#%	Usage: fsplit [ -n|--nth 3 ] [-a|-b|--after|--before] "$WP_CONFIG_FILE" ".*Matching_Pattern.*"
+#----------------------------------------------------------------------------------------------------------------------
+_fsplit() {
+	if [ $# -lt 1 ]; then
+        echo 'Usage:fsplit [ -n|--nth 3 ] [-a|-b|--after|--before] "$WP_CONFIG_FILE" ".*Matching_Pattern.*"' >&2
+        return 1
+    fi;
+    local fpos=0
+    local num=1
+    case "$1" in
+        -n | --nth | --num | --number)
+            shift
+            local num="$(echo $1 | tr -cd '[:digit:]')"
+            if [ -z "$num" ]; then
+                echo "A non-digit value is given to -n option."
+                return 1
+            fi
+            shift
+            if [ "-a" == "$1" ] || [ "--after" == "$1" ]; then
+                fpos=1024
+                shift
+            fi
+            if [ "-b" == "$1" ] || [ "--before" == "$1" ]; then
+                fpos=0
+                shift
+            fi
+        ;;
+		-a | --after)
+				fpos=1024
+				shift
+				;;
+		-b | --before)
+				fpos=0
+				shift
+				;;
+		-- | *)
+				;;
+	esac
+    local fn="$(abspath "$1")"
+    if [ ! -r "$fn" ]; then
+        echo "$fn is not a valid file or cannot be read!" 1>&2
+        return 1
+    else
+        shift
+		local suf="bk$(date +%s)"
+		\cp -f "$fn" "$fn.$suf"
+		local fb="$(basename $fn)"
+    fi
+	if [ $# -lt 1 ]; then
+		local pat="$(cat)"
+	else
+		local pat="$*"
+	fi
+	pat="$(escape "$pat")"
+    local nst="$(sed -n -e "/$pat/=" "$fn")"
+    local n1t="$(getrow 1 "$nst")"
+    local nmt="$(getrow $num "$nst")"
+    if [ -z "$nmt" ] || [ "$nmt" -lt 1 ]; then
+		echo "Cannot find the #$num $pat in $fn" >&2
+		return 1
+	fi
+	local floc="after"
+	if [ "$fpos" -lt 512 ]; then
+		nmt="$((nmt-1))"
+		floc="before"
+	fi
+	local nrtot="$(wc -l < $fn)"
+	local nlf="$((nrtot-nmt))"
+	if [ "$nmt" -lt "$nrtot" ];then
+	   echo "Splitting $fn into $fb.part1 and $fb.part2 $floc #$num [$pat] matching line #$nmt"
+			head -n "$nmt" "$fn" > "$fb.part1"
+			tail -n "$nlf" "$fn" > "$fb.part2"
+			return 0
+    else
+       echo "File split operation failed!" >&2
+       return 1
+    fi
+}
+
+
+if [ $# -lt 1 ]; then
+	echo 'Usage:fsplit [ -n|--nth 3 ] [-a|-b|--after|--before] "$WP_CONFIG_FILE" ".*Matching_Pattern.*"' >&2
+else
+	_fsplit "$@"
+fi
+
+unset -f _fsplit
+exit 0

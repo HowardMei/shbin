@@ -1,0 +1,50 @@
+
+
+PRV_IPv4=""
+PRV_IP4=""
+PRV_IPv6=""
+PRV_IP6=""
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  check_prvip <= __gather_prvip_info
+#%   DESCRIPTION:  Discover private ip information
+#%	 Usage: prvip [PRV_IP4|PRV_IPv4|PRV_IP6|PRV_IPv6]
+#----------------------------------------------------------------------------------------------------------------------
+_check_prvip() {
+    dev="$(ifconfig | grep "Ethernet"  | awk '{ print $1 }' | head -n 1)"
+	if [ -z "$dev" ] ; then
+			PRV_IPv4="$(ifconfig eth0 | awk -F: '/inet addr:/ {print $2}' | awk '{print $1}')"
+			PRV_IPv6="$(ifconfig eth0 | awk -F: '/inet6 addr:/ {print $0}' | awk '{print $3}' | head -1)"
+	else
+			PRV_IPv4=$(ifconfig $dev | awk -F: '/inet addr:/ {print $2}' | awk '{print $1}')
+			PRV_IPv6=$(ifconfig $dev | awk -F: '/inet6 addr:/ {print $0}' | awk '{print $3}' | head -1)
+	fi
+	PRV_IP4="$PRV_IPv4"
+	PRV_IP6="$PRV_IPv6"
+	PRVIP="$PRV_IPv4"
+	PRVIPv4="$PRV_IPv4"
+}
+
+
+
+_check_prvip
+
+if [ $# -lt 1 ]; then
+	export PRV_IPv4
+	export PRV_IP4
+	export PRV_IPv6
+	export PRV_IP6
+	if [ -n "$PRV_IPv4" ]; then
+		echo "$PRV_IPv4"
+	fi
+else
+	for _vx in "$@"; do
+		if [ -n "${!_vx}" ]; then
+			echo "${!_vx}"
+		fi
+	done
+fi
+
+unset -f _check_prvip
+unset _vx 
+exit 0
