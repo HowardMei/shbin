@@ -45,7 +45,7 @@ _pupdate() {
 	
 	if iscommand apt-get 2>/dev/null;then
 		echo "Updating $pkgname via apt-get"
-		shc "apt-get update -y -q" && pinstall "$pkgname" || echo "$pkgname apt-get update failed!"
+		shc "apt-get update -y -q && apt-get install --fix-missing --no-install-recommends --force-yes -y -q -o DPkg::Options::=--force-confold $pkgname" || echo "$pkgname apt-get update failed!"
 		shift
 		if [ $# -lt 1 ] ; then
 			return 0
