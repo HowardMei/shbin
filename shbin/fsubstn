@@ -44,9 +44,9 @@ _fsubstn() {
 	else
 	   shift
 	fi
-	local pat="$(escape "$1")"
+	local pat="$(echo "$1" | sed -e 's/[]\/$*.^|[]/\\&/g')"
 	shift
-	local txt="$(escape "$@")"
+	local txt="$(echo "$@" | sed -e 's/[\/&]/\\&/g')"
 	local suf="bk$(date +%s)"
 	local nst=""
 	nst="$(sed -n -e "/$pat/=" "$fn" 2>/dev/null)"

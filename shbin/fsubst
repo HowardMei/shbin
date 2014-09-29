@@ -27,11 +27,11 @@ _fsubst() {
 	   shift
 	fi
     ## Wrong: local pat=$(escape "$1")
-	local pat="$(escape $1)"
+	local pat="$(echo "$1" | sed -e 's/[]\/$*.^|[]/\\&/g')"
 	shift
 	## Wrong: local txt=$(escape "$2")
 	##local txt="$(escape "$2")"
-	local txt="$(escape "$@")"
+	local txt="$(echo "$@" | sed -e 's/[\/&]/\\&/g')"
 	local suf="bk$(date +%s)"
 	if [ "$line" -lt 512 ]; then
 		echo "Replacing all [$pat] with [$txt] in $fn ..."

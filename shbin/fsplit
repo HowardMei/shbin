@@ -11,24 +11,28 @@ _fsplit() {
         return 1
     fi;
     local fpos=0
-    local num=1
+    local nth=1
     case "$1" in
         -n | --nth | --num | --number)
             shift
-            local num="$(echo $1 | tr -cd '[:digit:]')"
-            if [ -z "$num" ]; then
+            local nth="$(echo $1 | tr -cd '[:digit:]')"
+            if [ -z "$nth" ]; then
                 echo "A non-digit value is given to -n option."
                 return 1
             fi
             shift
-            if [ "-a" == "$1" ] || [ "--after" == "$1" ]; then
-                fpos=1024
-                shift
-            fi
-            if [ "-b" == "$1" ] || [ "--before" == "$1" ]; then
-                fpos=0
-                shift
-            fi
+            case "$1" in
+				-a | --after)
+					fpos=1024
+					shift
+                ;;
+                -b | --before)
+					fpos=0
+					shift
+				;;
+				-- | *)
+				;;
+			esac
         ;;
 		-a | --after)
 				fpos=1024
@@ -56,12 +60,12 @@ _fsplit() {
 	else
 		local pat="$*"
 	fi
-	pat="$(escape "$pat")"
-    local nst="$(sed -n -e "/$pat/=" "$fn")"
-    local n1t="$(getrow 1 "$nst")"
-    local nmt="$(getrow $num "$nst")"
+	pat="$(echo "$pat" | sed -e 's/[]\/$*.^|[]/\\&/g')"
+    nst="$(sed -n -e "/${pat}/=" "$fn" 2>/dev/null)"
+    local n1t="$(erow 1 "$nst")"
+    local nmt="$(erow $nth "$nst")"
     if [ -z "$nmt" ] || [ "$nmt" -lt 1 ]; then
-		echo "Cannot find the #$num $pat in $fn" >&2
+		echo "Cannot find the #$nth $pat in $fn" >&2
 		return 1
 	fi
 	local floc="after"
@@ -69,8 +73,8 @@ _fsplit() {
 		nmt="$((nmt-1))"
 		floc="before"
 	fi
-	local nrtot="$(wc -l < $fn)"
-	local nlf="$((nrtot-nmt))"
+	local nrtot="$(cat $fn | nrows)"
+	local nlf="$(ecalc "$nrtot-$nmt")"
 	if [ "$nmt" -lt "$nrtot" ];then
 	   echo "Splitting $fn into $fb.part1 and $fb.part2 $floc #$num [$pat] matching line #$nmt"
 			head -n "$nmt" "$fn" > "$fb.part1"
