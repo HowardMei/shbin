@@ -76,9 +76,9 @@ _estrip() {
 			## strip empty/blank lines
 			shift
 			if [ $# -lt 1 ]; then
-				echo "$(cat)" | sed -e 's/^ *//; s/ *$//; /^$/d' 2>/dev/null
+				echo "$(cat)" | sed -e 's/^ *//; s/ *$//; /^$/d; /^\s*$/d' 2>/dev/null
 			else
-				echo "$*" | sed -e 's/^ *//; s/ *$//; /^$/d' 2>/dev/null
+				echo "$*" | sed -e 's/^ *//; s/ *$//; /^$/d; /^\s*$/d' 2>/dev/null
 			fi
 			;;
 		-f | --format)
@@ -94,9 +94,9 @@ _estrip() {
 			## strip blank lines and # commented lines from the 3rd line onwards to avoid the shebang
 			shift
 			if [ $# -lt 1 ]; then
-				echo "$(cat)" | sed -e '3,$s/^\s*\t*#.*$//g' 2>/dev/null | sed -e 's/ *$//; /^$/d' 2>/dev/null
+				echo "$(cat)" | sed -e '3,$s/^\s*\t*#.*$//g' 2>/dev/null | _estrip --blankline 2>/dev/null
 			else
-				echo "$*" | sed -e '3,$s/^\s*\t*#.*$//g' 2>/dev/null | sed -e 's/ *$//; /^$/d' 2>/dev/null
+				echo "$*" | sed -e '3,$s/^\s*\t*#.*$//g' 2>/dev/null | _estrip --blankline 2>/dev/null
 			fi
 			;;
 		-h | --hex | --xdigit)
