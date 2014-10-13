@@ -11,7 +11,8 @@ _pservice() {
 	 return 1
 	fi
 	local paction="$1"
-	local pdaemon="$(pcmdupkg --showpack "$2")"
+	local pcmdbin="$2"
+	local pdaemon="$(pcmdupkg --showpack "$pcmdbin" | head -1)"
 	shift 2
 	local popts="$@" 
 	
@@ -19,11 +20,11 @@ _pservice() {
 		-e | enable | turnon)
 			if shc "chkconfig --list 1>/dev/null 2>&1"; then
 				## System V & Upstart [service + update-rc.d]
-				shc "chkconfig $pdaemon on"
+				shc "chkconfig $pcmdbin on || chkconfig $pdaemon on"
 				return 0
 			elif shc "systemctl --all 1>/dev/null 2>&1"; then
 				## Systemd [systemctl]
-				shc "systemctl enable $pdaemon.service"
+				shc "systemctl enable $pcmdbin.service || systemctl enable $pdaemon.service"
 				return 0
 			elif shc "initctl list 1>/dev/null 2>&1"; then
 				## Upstart [start/.../status + initctl]
@@ -31,27 +32,27 @@ _pservice() {
 					echo "update-rc.d needs runlevel options to work properly"
 					return 1
 				else
-					shc "update-rc.d $pdaemon $popts"
+					shc "update-rc.d $pcmdbin $popts || update-rc.d $pdaemon $popts"
 					return 0
 				fi
 			elif shc "rc-status 1>/dev/null 2>&1"; then
 				## OpenRC [/etc/init.d/* + 
-				shc "rc-update add $pdaemon"
+				shc "rc-update add $pcmdbin || rc-update add $pdaemon"
 				return 0
 			else
-				echo "Cannot find a [SysVinit|Upstart|Systemd|OpenRC] to enable $pdaemon service." >&2
-				echo "Please check the $pdaemon configurations manually." >&2
+				echo "Cannot find a [SysVinit|Upstart|Systemd|OpenRC] to enable $pcmdbin/$pdaemon service." >&2
+				echo "Please check the $pcmdbin/$pdaemon configurations manually." >&2
 				return 1
 			fi
 			;;
 		-x | -off | disable | turnoff)
 			if shc "chkconfig --list 1>/dev/null 2>&1"; then
 				## System V & Upstart [service + update-rc.d]
-				shc "chkconfig $pdaemon off"
+				shc "chkconfig $pcmdbin off || chkconfig $pdaemon off"
 				return 0
 			elif shc "systemctl --all 1>/dev/null 2>&1"; then
 				## Systemd [systemctl]
-				shc "systemctl disable $pdaemon.service"
+				shc "systemctl disable $pcmdbin.service || systemctl disable $pdaemon.service"
 				return 0
 			elif shc "initctl list 1>/dev/null 2>&1"; then
 				## Upstart [start/.../status + initctl]
@@ -59,60 +60,60 @@ _pservice() {
 					echo "update-rc.d needs runlevel options to work properly"
 					return 1
 				else
-					shc "update-rc.d $pdaemon stop $popts"
+					shc "update-rc.d $pcmdbin stop $popts || update-rc.d $pdaemon stop $popts"
 					return 0
 				fi
 			elif shc "rc-status 1>/dev/null 2>&1"; then
 				## OpenRC [/etc/init.d/* + 
-				shc "rc-update del $pdaemon"
+				shc "rc-update del $pcmdbin || rc-update del $pdaemon"
 				return 0
 			else
-				echo "Cannot find a [SysVinit|Upstart|Systemd|OpenRC] to disable $pdaemon service." >&2
-				echo "Please check the $pdaemon configurations manually." >&2
+				echo "Cannot find a [SysVinit|Upstart|Systemd|OpenRC] to disable $pcmdbin/$pdaemon service." >&2
+				echo "Please check the $pcmdbin/$pdaemon configurations manually." >&2
 				return 1
 			fi
 			;;
 		-s | start)
-			if shc "service $pdaemon status 2>/dev/null | grep -q 'start/running'"; then
-				echo "Service $pdaemon is already running."
+			if shc "service $pcmdbin status 2>/dev/null || service $pdaemon status 2>/dev/null | grep -q 'start/running'"; then
+				echo "Service $pcmdbin/$pdaemon is already running."
 				return 1
-			elif shc "service $pdaemon status 2>/dev/null | grep -q 'stop/waiting'"; then
+			elif shc "service $pcmdbin status 2>/dev/null || service $pdaemon status 2>/dev/null | grep -q 'stop/waiting'"; then
 				## System V & Upstart
-				shc "service $pdaemon start"
+				shc "service $pcmdbin start || service $pdaemon start"
 				return 0
 			else
-				if shc "systemctl is-active $pdaemon.service 2>/dev/null" = "active"; then
-					echo "Service $pdaemon is already running."
+				if shc "systemctl is-active $pcmdbin.service 2>/dev/null || systemctl is-active $pdaemon.service 2>/dev/null" = "active"; then
+					echo "Service $pcmdbin/$pdaemon is already running."
 					return 1
-				elif shc "systemctl is-active $pdaemon.service 2>/dev/null" = "unknown"; then
+				elif shc "systemctl is-active $pcmdbin.service 2>/dev/null || systemctl is-active $pdaemon.service 2>/dev/null" = "unknown"; then
 					## https://bugzilla.redhat.com/show_bug.cgi?id=1073481
 					## Systemd
-					shc "systemctl start $pdaemon.service"
-					shc "systemctl status $pdaemon.service"
+					shc "systemctl start $pcmdbin.service || systemctl start $pdaemon.service"
+					shc "systemctl status $pcmdbin.service || systemctl status $pdaemon.service"
 					return 0
-				elif shc "systemctl is-active $pdaemon.service 2>/dev/null" = "failed"; then
-					shc "systemctl restart $pdaemon.service"
-					shc "systemctl status $pdaemon.service"
+				elif shc "systemctl is-active $pcmdbin.service 2>/dev/null || systemctl is-active $pdaemon.service 2>/dev/null" = "failed"; then
+					shc "systemctl restart $pcmdbin.service || systemctl restart $pdaemon.service"
+					shc "systemctl status $pcmdbin.service || systemctl status $pdaemon.service"
 					return 0
 				else
-					if shc "status $pdaemon 2>/dev/null | grep -q 'start/running'"; then
+					if shc "status $pcmdbin 2>/dev/null || status $pdaemon 2>/dev/null | grep -q 'start/running'"; then
 						## Upstart
-						echo "Service $pdaemon is already running."
+						echo "Service $pcmdbin/$pdaemon is already running."
 						return 1
-					elif shc "status $pdaemon 2>/dev/null | grep -q 'stop/waiting'"; then
-						shc "start $pdaemon"
+					elif shc "status $pcmdbin 2>/dev/null || status $pdaemon 2>/dev/null | grep -q 'stop/waiting'"; then
+						shc "start $pcmdbin || start $pdaemon"
 						return 0
 					else
-						if shc "/etc/init.d/$pdaemon status 2>/dev/null | grep -q 'is running'"; then
-							echo "Service $pdaemon is already running."
+						if shc "/etc/init.d/$pcmdbin status 2>/dev/null || /etc/init.d/$pdaemon status 2>/dev/null | grep -q 'is running'"; then
+							echo "Service $pcmdbin/$pdaemon is already running."
 							return 1
-						elif shc "/etc/init.d/$pdaemon status 2>/dev/null | grep -q 'not running'"; then
+						elif shc "/etc/init.d/$pcmdbin status 2>/dev/null || /etc/init.d/$pdaemon status 2>/dev/null | grep -q 'not running'"; then
 							## OpenRC/System V symlinks from /etc/rc?.d
-							shc "/etc/init.d/$pdaemon start"
+							shc "/etc/init.d/$pcmdbin start || /etc/init.d/$pdaemon start"
 							return 0
 						else
-							echo "Cannot find a [SysVinit|Upstart|Systemd|OpenRC] to start $pdaemon service." >&2
-							echo "Please check the $pdaemon configurations manually." >&2
+							echo "Cannot find a [SysVinit|Upstart|Systemd|OpenRC] to start $pcmdbin/$pdaemon service." >&2
+							echo "Please check the $pcmdbin/$pdaemon configurations manually." >&2
 							return 1
 						fi
 					fi
@@ -120,45 +121,45 @@ _pservice() {
 			fi
 			;;
 		-p | stop)
-			if shc "service $pdaemon status 2>/dev/null | grep -q 'stop/waiting'"; then
-				echo "Service $pdaemon is already stopped."
+			if shc "service $pcmdbin status 2>/dev/null || service $pdaemon status 2>/dev/null | grep -q 'stop/waiting'"; then
+				echo "Service $pcmdbin/$pdaemon is already stopped."
 				return 1
-			elif shc "service $pdaemon status 2>/dev/null | grep -q 'start/running'"; then
+			elif shc "service $pcmdbin status 2>/dev/null || service $pdaemon status 2>/dev/null | grep -q 'start/running'"; then
 				## System V & Upstart
-				shc "service $pdaemon stop"
+				shc "service $pcmdbin stop || service $pdaemon stop"
 				return 0
 			else
-				if shc "systemctl is-active $pdaemon.service 2>/dev/null" = "failed"; then
-					echo "Service $pdaemon is failed and stopped."
+				if shc "systemctl is-active $pcmdbin.service 2>/dev/null || systemctl is-active $pdaemon.service 2>/dev/null" = "failed"; then
+					echo "Service $pcmdbin/$pdaemon is failed and stopped."
 					return 1
-				elif shc "systemctl is-active $pdaemon.service 2>/dev/null" = "unknown"; then
+				elif shc "systemctl is-active $pcmdbin.service 2>/dev/null || systemctl is-active $pdaemon.service 2>/dev/null" = "unknown"; then
 					## https://bugzilla.redhat.com/show_bug.cgi?id=1073481
 					## Systemd
-					shc "systemctl stop $pdaemon.service 2>/dev/null"
+					shc "systemctl stop $pcmdbin.service 2>/dev/null || systemctl stop $pdaemon.service 2>/dev/null"
 					return 0
-				elif shc "systemctl is-active $pdaemon.service 2>/dev/null" = "active"; then
-					shc "systemctl stop $pdaemon.service"
-					shc "systemctl status $pdaemon.service"
+				elif shc "systemctl is-active $pcmdbin.service 2>/dev/null || systemctl is-active $pdaemon.service 2>/dev/null" = "active"; then
+					shc "systemctl stop $pcmdbin.service || systemctl stop $pdaemon.service"
+					shc "systemctl status $pcmdbin.service || systemctl status $pdaemon.service"
 					return 0
 				else
-					if shc "status $pdaemon 2>/dev/null | grep -q 'stop/waiting'"; then
+					if shc "status $pcmdbin 2>/dev/null || status $pdaemon 2>/dev/null | grep -q 'stop/waiting'"; then
 						## Upstart
-						echo "Service $pdaemon is already stopped."
+						echo "Service $pcmdbin/$pdaemon is already stopped."
 						return 1
-					elif shc "status $pdaemon 2>/dev/null | grep -q 'start/running'"; then
-						shc "stop $pdaemon"
+					elif shc "status $pcmdbin 2>/dev/null || status $pdaemon 2>/dev/null | grep -q 'start/running'"; then
+						shc "stop $pcmdbin || stop $pdaemon"
 						return 0
 					else
-						if shc "/etc/init.d/$pdaemon status 2>/dev/null | grep -q 'not running'"; then
-							echo "Service $pdaemon is already stopped."
+						if shc "/etc/init.d/$pcmdbin status 2>/dev/null || /etc/init.d/$pdaemon status 2>/dev/null | grep -q 'not running'"; then
+							echo "Service $pcmdbin/$pdaemon is already stopped."
 							return 1
-						elif shc "/etc/init.d/$pdaemon status 2>/dev/null | grep -q 'is running'"; then
+						elif shc "/etc/init.d/$pcmdbin status 2>/dev/null || /etc/init.d/$pdaemon status 2>/dev/null | grep -q 'is running'"; then
 							## OpenRC/System V symlinks from /etc/rc?.d
-							shc "/etc/init.d/$pdaemon stop"
+							shc "/etc/init.d/$pcmdbin stop || /etc/init.d/$pdaemon stop"
 							return 0
 						else
-							echo "Cannot find a [SysVinit|Upstart|Systemd|OpenRC] to stop $pdaemon service." >&2
-							echo "Please check the $pdaemon configurations manually." >&2
+							echo "Cannot find a [SysVinit|Upstart|Systemd|OpenRC] to stop $pcmdbin/$pdaemon service." >&2
+							echo "Please check the $pcmdbin/$pdaemon configurations manually." >&2
 							return 1
 						fi
 					fi
@@ -166,44 +167,44 @@ _pservice() {
 			fi
 			;;
 		-u | status)
-			if shc "service $pdaemon status 2>/dev/null | grep -q 'start/running'"; then
-				shc "service $pdaemon status"
+			if shc "service $pcmdbin status 2>/dev/null || service $pdaemon status 2>/dev/null | grep -q 'start/running'"; then
+				shc "service $pcmdbin status || service $pdaemon status"
 				return 0
-			elif shc "service $pdaemon status 2>/dev/null | grep -q 'stop/waiting'"; then
+			elif shc "service $pcmdbin status 2>/dev/null || service $pdaemon status 2>/dev/null | grep -q 'stop/waiting'"; then
 				## System V & Upstart
-				shc "service $pdaemon status"
+				shc "service $pcmdbin status || service $pdaemon status"
 				return 0
 			else
-				if shc "systemctl is-active $pdaemon.service 2>/dev/null" = "active"; then
-					shc "systemctl status $pdaemon.service"
+				if shc "systemctl is-active $pcmdbin.service 2>/dev/null || systemctl is-active $pdaemon.service 2>/dev/null" = "active"; then
+					shc "systemctl status $pcmdbin.service || systemctl status $pdaemon.service"
 					return 0
-				elif shc "systemctl is-active $pdaemon.service 2>/dev/null" = "unknown"; then
+				elif shc "systemctl is-active $pcmdbin.service 2>/dev/null || systemctl is-active $pdaemon.service 2>/dev/null" = "unknown"; then
 					## https://bugzilla.redhat.com/show_bug.cgi?id=1073481
 					## Systemd
-					shc "systemctl status $pdaemon.service"
+					shc "systemctl status $pcmdbin.service || systemctl status $pdaemon.service"
 					return 0
-				elif shc "systemctl is-active $pdaemon.service 2>/dev/null" = "failed"; then
-					shc "systemctl status $pdaemon.service"
+				elif shc "systemctl is-active $pcmdbin.service 2>/dev/null || systemctl is-active $pdaemon.service 2>/dev/null" = "failed"; then
+					shc "systemctl status $pcmdbin.service || systemctl status $pdaemon.service"
 					return 0
 				else
-					if shc "status $pdaemon 2>/dev/null | grep -q 'start/running'"; then
+					if shc "status $pcmdbin 2>/dev/null || status $pdaemon 2>/dev/null | grep -q 'start/running'"; then
 						## Upstart
-						shc "status $pdaemon"
+						shc "status $pcmdbin || status $pdaemon"
 						return 0
-					elif shc "status $pdaemon 2>/dev/null | grep -q 'stop/waiting'"; then
-						shc "status $pdaemon"
+					elif shc "status $pcmdbin 2>/dev/null || status $pdaemon 2>/dev/null | grep -q 'stop/waiting'"; then
+						shc "status $pcmdbin || status $pdaemon"
 						return 0
 					else
-						if shc "/etc/init.d/$pdaemon status 2>/dev/null | grep -q 'is running'"; then
-							shc "/etc/init.d/$pdaemon status"
+						if shc "/etc/init.d/$pcmdbin status 2>/dev/null || /etc/init.d/$pdaemon status 2>/dev/null | grep -q 'is running'"; then
+							shc "/etc/init.d/$pcmdbin status || /etc/init.d/$pdaemon status"
 							return 0
-						elif shc "/etc/init.d/$pdaemon status 2>/dev/null | grep -q 'not running'"; then
+						elif shc "/etc/init.d/$pcmdbin status 2>/dev/null || /etc/init.d/$pdaemon status 2>/dev/null | grep -q 'not running'"; then
 							## OpenRC/System V symlinks from /etc/rc?.d
-							shc "/etc/init.d/$pdaemon status"
+							shc "/etc/init.d/$pcmdbin status || /etc/init.d/$pdaemon status"
 							return 0
 						else
-							echo "Cannot find a [SysVinit|Upstart|Systemd|OpenRC] to check $pdaemon status." >&2
-							echo "Please check the $pdaemon configurations manually." >&2
+							echo "Cannot find a [SysVinit|Upstart|Systemd|OpenRC] to check $pcmdbin/$pdaemon status." >&2
+							echo "Please check the $pcmdbin/$pdaemon configurations manually." >&2
 							return 1
 						fi
 					fi
@@ -211,46 +212,46 @@ _pservice() {
 			fi
 			;;
 		-r | restart)
-			if shc "service $pdaemon status 2>/dev/null | grep -q 'start/running'"; then
-				shc "service $pdaemon restart"
+			if shc "service $pcmdbin status 2>/dev/null || service $pdaemon status 2>/dev/null | grep -q 'start/running'"; then
+				shc "service $pcmdbin restart || service $pdaemon restart"
 				return 0
-			elif shc "service $pdaemon status 2>/dev/null | grep -q 'stop/waiting'"; then
+			elif shc "service $pcmdbin status 2>/dev/null || service $pdaemon status 2>/dev/null | grep -q 'stop/waiting'"; then
 				## System V & Upstart
-				shc "service $pdaemon restart"
+				shc "service $pcmdbin restart || service $pdaemon restart"
 				return 0
 			else
-				if shc "systemctl is-active $pdaemon.service 2>/dev/null" = "active"; then
-					shc "systemctl restart $pdaemon.service"
+				if shc "systemctl is-active $pcmdbin.service 2>/dev/null || systemctl is-active $pdaemon.service 2>/dev/null" = "active"; then
+					shc "systemctl restart $pcmdbin.service || systemctl restart $pdaemon.service"
 					return 0
-				elif shc "systemctl is-active $pdaemon.service 2>/dev/null" = "unknown"; then
+				elif shc "systemctl is-active $pcmdbin.service 2>/dev/null || systemctl is-active $pdaemon.service 2>/dev/null" = "unknown"; then
 					## https://bugzilla.redhat.com/show_bug.cgi?id=1073481
 					## Systemd
-					shc "systemctl restart $pdaemon.service"
-					shc "systemctl status $pdaemon.service"
+					shc "systemctl restart $pcmdbin.service || systemctl restart $pdaemon.service"
+					shc "systemctl status $pcmdbin.service || systemctl status $pdaemon.service"
 					return 0
-				elif shc "systemctl is-active $pdaemon.service 2>/dev/null" = "failed"; then
-					shc "systemctl restart $pdaemon.service"
-					shc "systemctl status $pdaemon.service"
+				elif shc "systemctl is-active $pcmdbin.service 2>/dev/null || systemctl is-active $pdaemon.service 2>/dev/null" = "failed"; then
+					shc "systemctl restart $pcmdbin.service || systemctl restart $pdaemon.service"
+					shc "systemctl status $pcmdbin.service || systemctl status $pdaemon.service"
 					return 0
 				else
-					if shc "status $pdaemon 2>/dev/null | grep -q 'start/running'"; then
+					if shc "status $pcmdbin 2>/dev/null || status $pdaemon 2>/dev/null | grep -q 'start/running'"; then
 						## Upstart
-						shc "restart $pdaemon"
+						shc "restart $pcmdbin || restart $pdaemon"
 						return 0
-					elif shc "status $pdaemon 2>/dev/null | grep -q 'stop/waiting'"; then
-						shc "restart $pdaemon"
+					elif shc "status $pcmdbin 2>/dev/null || status $pdaemon 2>/dev/null | grep -q 'stop/waiting'"; then
+						shc "restart $pcmdbin || restart $pdaemon"
 						return 0
 					else
-						if shc "/etc/init.d/$pdaemon status 2>/dev/null | grep -q 'is running'"; then
-							shc "/etc/init.d/$pdaemon restart"
+						if shc "/etc/init.d/$pcmdbin status 2>/dev/null || /etc/init.d/$pdaemon status 2>/dev/null | grep -q 'is running'"; then
+							shc "/etc/init.d/$pcmdbin restart || /etc/init.d/$pdaemon restart"
 							return 0
-						elif shc "/etc/init.d/$pdaemon status 2>/dev/null | grep -q 'not running'"; then
+						elif shc "/etc/init.d/$pcmdbin status 2>/dev/null || /etc/init.d/$pdaemon status 2>/dev/null | grep -q 'not running'"; then
 							## OpenRC/System V symlinks from /etc/rc?.d
-							shc "/etc/init.d/$pdaemon restart"
+							shc "/etc/init.d/$pcmdbin restart || /etc/init.d/$pdaemon restart"
 							return 0
 						else
-							echo "Cannot find a [SysVinit|Upstart|Systemd|OpenRC] to restart $pdaemon service." >&2
-							echo "Please check the $pdaemon configurations manually." >&2
+							echo "Cannot find a [SysVinit|Upstart|Systemd|OpenRC] to restart $pcmdbin/$pdaemon service." >&2
+							echo "Please check the $pcmdbin/$pdaemon configurations manually." >&2
 							return 1
 						fi
 					fi
