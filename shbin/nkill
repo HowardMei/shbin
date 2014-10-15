@@ -14,29 +14,12 @@ _nkill() {
       local nname="$1"
       echo "There're following processes with name similar to \"$nname\":" >&2
       getprocsbyglob "$nname"
-      local pn=0
-      while true; do
-          local x="$(getpid $nname)"
-          if [ -n "$x" ]; then
-			cecho -r "killing proc: $x $(getpnamebyid $x) $(getppath $x)"
-			$sh_c "kill -9 $x"
-			pn="$((pn+1))"
-		  elif [ "$pn" -eq 0 ]; then
-			echo "Cannot get the pid of the given process name."
-			echo "Please use the exact name listed above."
-			return 1
-		  elif [ "$pn" -gt 15 ]; then
-			echo "It costs too many loops to kill the given process." >&2
-			echo "Please use process manager to stop it: \"service stop $nname\"" >&2
-			break
-			return 1
-		  else
-			break
-			return 1
-		  fi
+      local npids="$(getpidsbyname $nname)"
+      for pid in $npids; do
+		shc "kill -9 $pid"
       done
-	  echo "$nname processes status after killing and cleaning up:"
-	  ps axwww -o pid,command | grep $nname 2>/dev/null | grep -v grep | grep -v ps
+      echo "$nname processes status after killing and cleaning up:"
+      getprocsbyglob "$nname"
    fi
 }
 

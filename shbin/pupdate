@@ -31,15 +31,18 @@ _pupdate() {
 			fi
 			;;
 		-- | *)
-			local pkgname="$1"
-			if ! ispinstalled "$pkgname" 2>/dev/null;then
-				echo "$pkgname has not yet been installed."
-				pinstall "$pkgname"
+			local pkgn="$1"
+			if ! ispinstalled "$pkgn" 2>/dev/null;then
+				echo "$pkgn has not yet been installed."
+				pinstall "$pkgn"
 				shift
 				_pupdate "$@"
 				return 1
+			else
+				pservice stop "$pkgn"
 			fi
-			pkgname="$(pcmdupkg --showpack "$1" 2>/dev/null)"
+			local pkgname="$(pcmdupkg --showpack "$pkgn" 2>/dev/null | tr '\n' ' ')"
+			pkgname="${pkgname:=$pkgn}"
 			;;
 	esac
 	
