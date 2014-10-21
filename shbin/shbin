@@ -1,3 +1,5 @@
+__ShbinVersion="1.0"
+__ShbinRelease="2014.10.20"
 
 #%   DESCRIPTION: Essential binary tools to enhance sh/bash environment.
 #%	 USAGE:	Usage: shbin list | show | help abspath
@@ -47,6 +49,9 @@ else
 		elif [ -n "$filename" ]; then
 			echo "$filename is NOT a valid shbin file. No help will be presented." >&2
 		fi
+		;;
+		-v | --version | version)
+			echo "shbin version ${__ShbinVersion} release ${__ShbinRelease}"
 		;;
 		-- | *)
 			echo "$@ option is not supported. Usage: shbin list | show | help"
