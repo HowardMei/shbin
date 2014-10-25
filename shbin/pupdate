@@ -34,12 +34,9 @@ _pupdate() {
 			local pkgn="$1"
 			if ! ispinstalled "$pkgn" 2>/dev/null;then
 				echo "$pkgn has not yet been installed."
-				pinstall "$pkgn"
-				shift
-				_pupdate "$@"
-				return 1
+				echo "If the update failed, please try again after pinstall $pkgn in advance."
 			else
-				pservice stop "$pkgn"
+				pservice status $pkgn 2>/dev/null | grep -iq 'process [[:digit:]]' && pservice stop "$pkgn"
 			fi
 			local pkgname="$(pcmdupkg --showpack "$pkgn" 2>/dev/null | tr '\n' ' ')"
 			pkgname="${pkgname:=$pkgn}"
@@ -48,7 +45,8 @@ _pupdate() {
 	
 	if iscommand apt-get 2>/dev/null;then
 		echo "Updating $pkgname via apt-get"
-		shc "apt-get update -y -q && apt-get install --fix-missing --no-install-recommends --force-yes -y -q -o DPkg::Options::=--force-confold $pkgname" || echo "$pkgname apt-get update failed!"
+		shc "apt-get update -y -q" || echo "apt-get update failed" >&2
+		shc "apt-get install --fix-missing --no-install-recommends --force-yes -y -q -o DPkg::Options::=--force-confold $pkgname" || echo "$pkgname apt-get update failed!"
 		shift
 		if [ $# -lt 1 ] ; then
 			return 0
@@ -60,6 +58,7 @@ _pupdate() {
 	
 	if iscommand yum 2>/dev/null;then
 		echo "Updating $pkgname via yum"
+		shc "yum clean expire-cache -y && yum check-update -y" || echo "yum check-update failed" >&2
 		shc "yum update -y $pkgname" || echo "$pkgname yum update failed!"
 		shift
 		if [ $# -lt 1 ] ; then
@@ -72,6 +71,7 @@ _pupdate() {
 	
 	if iscommand pacman 2>/dev/null;then
 		echo "Updating $pkgname via pacman"
+		shc "pacman -Sy" || echo "pacman -Sy failed" >&2
 		shc "pacman -S --noconfirm $pkgname" || echo "$pkgname pacman update failed!"
 		shift
 		if [ $# -lt 1 ] ; then
@@ -84,6 +84,7 @@ _pupdate() {
 	
 	if iscommand emerge 2>/dev/null;then
 		echo "Updating $pkgname via emerge"
+		shc "emerge --sync" || echo "emerge --sync failed" >&2
 		shc "emerge -uDNav $pkgname" || echo "$pkgname emerge update failed!"
 		shift
 		if [ $# -lt 1 ] ; then
@@ -96,7 +97,8 @@ _pupdate() {
 	
 	if iscommand pkgin 2>/dev/null;then
 		echo "Updating $pkgname via pkgin"
-		shc "pkgin -y update" && pinstall "$pkgname" || echo "$pkgname pkgin update failed!"
+		shc "pkgin -y update" || echo "$pkgname pkgin update failed!"
+		shc "pkgin -y install $pkgname" || echo "$pkgname pkgin reinstall failed!"
 		shift
 		if [ $# -lt 1 ] ; then
 			return 0
@@ -108,7 +110,8 @@ _pupdate() {
 	
 	if iscommand zypper 2>/dev/null;then
 		echo "Updating $pkgname via zypper"
-		shc "zypper update -y" && pinstall "$pkgname" || echo "$pkgname zypper update failed!"
+		shc "zypper refresh -y" || echo "zypper refresh -y failed" >&2
+		shc "zypper update -y $pkgname" || echo "$pkgname zypper update failed!"
 		shift
 		if [ $# -lt 1 ] ; then
 			return 0

@@ -70,7 +70,7 @@ _pinstall() {
 	fi
 	if iscommand pacman 2>/dev/null;then
 		echo "Installing $pkgname via pacman" >&2
-		shc "pacman -Syu --noconfirm $pkgname" || echo "$pkgname pacman install failed!" >&2
+		shc "pacman -S --noconfirm $pkgname" || echo "$pkgname pacman install failed!" >&2
 		shift
 		if [ $# -lt 1 ] ; then
 			return 0
@@ -81,7 +81,7 @@ _pinstall() {
 	fi
 	if iscommand emerge 2>/dev/null;then
 		echo "Installing $pkgname via emerge" >&2
-		shc "emerge -uDNav $pkgname" || echo "$pkgname emerge install failed!" >&2
+		shc "emerge -a $pkgname" || echo "$pkgname emerge install failed!" >&2
 		shift
 		if [ $# -lt 1 ] ; then
 			return 0
