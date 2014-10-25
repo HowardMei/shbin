@@ -37,33 +37,33 @@ _cecho() {
    if [ -n "$__RED_COLOR" ] && [ -n "$__ENDOF_COLOR" ]; then
      case "$1" in
      -r)shift
-	printf "${__RED_COLOR}%s${__ENDOF_COLOR}\\n" "$@"
+	printf "${__RED_COLOR}%s${__ENDOF_COLOR}\\n" "$*"
 	;;
      -g)shift
-	printf "${__GREEN_COLOR}%s${__ENDOF_COLOR}\\n" "$@"
+	printf "${__GREEN_COLOR}%s${__ENDOF_COLOR}\\n" "$*"
 	;;
      -o)shift
-	printf "${__ORANGE_COLOR}%s${__ENDOF_COLOR}\\n" "$@"
+	printf "${__ORANGE_COLOR}%s${__ENDOF_COLOR}\\n" "$*"
 	;;
      -b)shift
-	printf "${__BLUE_COLOR}%s${__ENDOF_COLOR}\\n" "$@"
+	printf "${__BLUE_COLOR}%s${__ENDOF_COLOR}\\n" "$*"
 	;;
      -p)shift
-	printf "${__PURPLE_COLOR}%s${__ENDOF_COLOR}\\n" "$@"
+	printf "${__PURPLE_COLOR}%s${__ENDOF_COLOR}\\n" "$*"
 	;;
      -c)shift
-	printf "${__CYAN_COLOR}%s${__ENDOF_COLOR}\\n" "$@"
+	printf "${__CYAN_COLOR}%s${__ENDOF_COLOR}\\n" "$*"
 	;;
      -w)shift
-	printf "${__WHITE_COLOR}%s${__ENDOF_COLOR}\\n" "$@"
+	printf "${__WHITE_COLOR}%s${__ENDOF_COLOR}\\n" "$*"
 	;;
      -d)shift
-		_cecho "$@          $(date '+%D %T')"
+		_cecho "$*          $(date '+%D %T')"
 	;;
      -*)shift
-		printf "${__BLUE_COLOR}%s${__ENDOF_COLOR}\\n" "$@"
+		printf "${__BLUE_COLOR}%s${__ENDOF_COLOR}\\n" "$*"
 	;;
-      *)printf "${__BLUE_COLOR}%s${__ENDOF_COLOR}\\n" "$@"
+      *)printf "${__BLUE_COLOR}%s${__ENDOF_COLOR}\\n" "$*"
 	;;
       esac
    else
@@ -83,18 +83,18 @@ _cecho() {
      -w)shift
 	;;
      -d)shift
-		_cecho "$@         $(date '+%D %T')"
+		_cecho "$*         $(date '+%D %T')"
 	;;
-     -*)printf "%s\\n" "$@"
+     -*)printf "%s\\n" "$*"
 	;;
-      *)printf "%s\\n" "$@"
+      *)printf "%s\\n" "$*"
 	;;
       esac
    fi
 }
 
 
-_cecho "$@" 
+_cecho "$*" 
 
 
 unset -f _cecho 

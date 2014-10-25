@@ -30,6 +30,17 @@ _premove() {
 				return 1
 			fi
 			;;
+		-a | --auto | --autoremove | --autoclean | autoclean)
+			iscommand apt-get 2>/dev/null && apt-get autoremove -yq && apt-get clean -yq 
+			iscommand yum 2>/dev/null yum autoremove -y 
+			iscommand pacman 2>/dev/null && pacman -Sc && pacman -R --noconfirm $(pacman -Qdtq) 
+			iscommand emerge 2>/dev/null && emerge --depclean 
+			iscommand zypper 2>/dev/null && zypper rm -u && zypper pa -n 
+			iscommand pkgin 2>/dev/null && pkgin -y autoremove && pkgin -y clean 
+			iscommand pkg 2>/dev/null && pkg autoremove -y && pkg clean -y 
+			[ -e "/usr/local/sbin/pkg" ] && /usr/local/sbin/pkg autoremove -y && /usr/local/sbin/pkg clean -y 2>/dev/null 
+			return 0
+			;;
 		-- | *)
 			local pkgn="$1"
 			if ! ispinstalled "$pkgn" 2>/dev/null;then
@@ -38,7 +49,7 @@ _premove() {
 				_premove "$@"
 				return 1
 			else
-				pservice stop "$pkgn"
+				pservice status $pkgn 2>/dev/null | grep -iq 'process [[:digit:]]' && pservice stop "$pkgn"
 			fi
 			local pkgname="$(pcmdupkg --showpack "$pkgn" 2>/dev/null | tr '\n' ' ')"
 			pkgname="${pkgname:=$pkgn}"
@@ -79,7 +90,7 @@ _premove() {
 	fi
 	if iscommand emerge 2>/dev/null;then
 		echo "Uninstalling $pkgname via emerge"
-		shc "emerge --unmerge $pkgname" || echo "$pkgname emerge remove failed!"
+		shc "emerge -Cv $pkgname" || echo "$pkgname emerge remove failed!"
 		shift
 		if [ $# -lt 1 ] ; then
 			return 0
@@ -101,7 +112,7 @@ _premove() {
 	fi
 	if iscommand zypper 2>/dev/null;then
 		echo "Uninstalling $pkgname via zypper"
-		shc "zypper rm $pkgname" || echo "$pkgname zypper remove failed!"
+		shc "zypper remove $pkgname" || echo "$pkgname zypper remove failed!"
 		shift
 		if [ $# -lt 1 ] ; then
 			return 0
