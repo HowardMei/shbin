@@ -91,7 +91,7 @@ _check_diskspace() {
 }
 
 if [ -r "/tmp/shbin/hwstat.info" ]; then
-	source "/tmp/shbin/hwstat.info"
+	. "/tmp/shbin/hwstat.info"
 else
 	_check_hardware
 	_check_diskspace

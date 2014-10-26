@@ -430,7 +430,7 @@ _check_operatingsystem() {
 }
 
 if [ -r "/tmp/shbin/osstat.info" ]; then
-	source "/tmp/shbin/osstat.info"
+	. "/tmp/shbin/osstat.info"
 else
 	_check_operatingsystem
 	mkdir -p "/tmp/shbin"
