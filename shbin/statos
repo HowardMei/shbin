@@ -429,8 +429,26 @@ _check_operatingsystem() {
 	__gather_operatingsystem_info
 }
 
-
-_check_operatingsystem
+if [ -r "/tmp/shbin/osstat.info" ]; then
+	source "/tmp/shbin/osstat.info"
+else
+	_check_operatingsystem
+	mkdir -p "/tmp/shbin"
+	cat > "/tmp/shbin/osstat.info" <<EOF
+OS_NAME=$OS_NAME
+OS_NAME_L=$OS_NAME_L
+OS_ARCH=$OS_ARCH
+OS_VERSION=$OS_VERSION
+OS_VERSION_L=$OS_VERSION_L
+OS_KERVER=$OS_KERVER
+OS_VERNUM=$OS_VERNUM
+DISTRO_NAME=$DISTRO_NAME
+DISTRO_NAME_L=$DISTRO_NAME_L
+DISTRO_VERSION=$DISTRO_VERSION
+DISTRO_MAJOR_VERSION=$DISTRO_MAJOR_VERSION
+DISTRO_MINOR_VERSION=$DISTRO_MINOR_VERSION
+EOF
+fi
 
 if [ $# -lt 1 ]; then
 	export OS_NAME

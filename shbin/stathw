@@ -55,12 +55,6 @@ _check_hardware() {
 		SWAP_TOT=$(awk '/SwapTotal/ {print int($2/1024+0.5)}' /proc/meminfo)
 		SWAP_FREE=$(awk '/SwapFree/ {print int($2/1024+0.5)}' /proc/meminfo)
     fi
-    if [ -n "$(command -v df)" ];then
-		DISK_TOT=$(df -h | sed -n 2p | awk '{print $2}' | tr -d 'G')
-		DISK_FREE=$(df -h | sed -n 2p | awk '{print $4}' | tr -d 'G')
-		DISK_USAGE=$(df -h | sed -n 2p | awk '{print $5}' | tr -d '%')
-		DISK_AVAIL=$((100-DISK_USAGE))
-    fi
     local dt=$(cat /sys/block/sda/queue/rotational 2>/dev/null)
     local vdt=$(cat /sys/block/vda/queue/rotational 2>/dev/null)
     vdt=${vdt:-$(cat /sys/block/xvda/queue/rotational 2>/dev/null)}
@@ -79,14 +73,55 @@ _check_hardware() {
 	MEM_FREEMB="$MEM_FREE"MB
 	MEM_USAGEPC="$MEM_USAGE"%
 	MEM_AVAILPC="$MEM_AVAIL"%
+}
+
+_check_diskspace() {
+	## Sometimes df hangs and block the parent shell process
+	## Put it in a separate func or a separate cmd if necessary
+    if [ -n "$(command -v df)" ];then
+		DISK_TOT=$(df -h | sed -n 2p | awk '{print $2}' | tr -d 'G')
+		DISK_FREE=$(df -h | sed -n 2p | awk '{print $4}' | tr -d 'G')
+		DISK_USAGE=$(df -h | sed -n 2p | awk '{print $5}' | tr -d '%')
+		DISK_AVAIL=$((100-DISK_USAGE))
+    fi
 	DISK_TOTGB="$DISK_TOT"GB
 	DISK_FREEGB="$DISK_FREE"GB
 	DISK_USAGEPC="$DISK_USAGE"%
 	DISK_AVAILPC="$DISK_AVAIL"%
 }
 
-
-_check_hardware
+if [ -r "/tmp/shbin/hwstat.info" ]; then
+	source "/tmp/shbin/hwstat.info"
+else
+	_check_hardware
+	_check_diskspace
+	mkdir -p "/tmp/shbin"
+	cat > "/tmp/shbin/hwstat.info" <<EOF
+CPU_VENDOR_ID=$CPU_VENDOR_ID
+CPU_CORES=$CPU_CORES
+CPU_FREQ=$CPU_FREQ
+CPU_VENDOR_ID_L=$CPU_VENDOR_ID_L
+CPU_ARCH=$CPU_ARCH
+CPU_ARCH_L=$CPU_ARCH_L
+MEM_TOT=$MEM_TOT
+MEM_FREE=$MEM_FREE
+MEM_TOTMB=$MEM_TOTMB
+MEM_FREEMB=$MEM_FREEMB
+MEM_USAGE=$MEM_USAGE
+MEM_AVAIL=$MEM_AVAIL
+MEM_USAGEPC=$MEM_USAGEPC
+MEM_AVAILPC=$MEM_AVAILPC
+DISK_TOT=$DISK_TOT
+DISK_FREE=$DISK_FREE
+DISK_TOTGB=$DISK_TOTGB
+DISK_FREEGB=$DISK_FREEGB
+DISK_USAGE=$DISK_USAGE
+DISK_AVAIL=$DISK_AVAIL
+DISK_USAGEPC=$DISK_USAGEPC
+DISK_AVAILPC=$DISK_AVAILPC
+DISK_TYPE=$DISK_TYPE
+EOF
+fi
 
 if [ $# -lt 1 ]; then
 	export CPU_VENDOR_ID
@@ -107,7 +142,7 @@ if [ $# -lt 1 ]; then
 	export DISK_FREE
 	export DISK_USAGE
 	export DISK_AVAIL
-	export DISK_TOTGB=
+	export DISK_TOTGB
 	export DISK_FREEGB
 	export DISK_USAGEPC
 	export DISK_AVAILPC
@@ -131,5 +166,5 @@ else
 fi
 
 unset _vvx
-unset -f _check_hardware 
+unset -f _check_hardware _check_diskspace
 exit 0
