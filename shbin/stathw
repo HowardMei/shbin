@@ -27,7 +27,8 @@ DISK_TYPE=""
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  check_hardware <= __gather_hardware_info
-#   DESCRIPTION:  Discover hardware information
+#%   DESCRIPTION:  Discover hardware information
+#%	 Usage: stathw [CPU_VENDOR_ID|CPU_CORES|CPU_FREQ|CPU_VENDOR_ID_L|CPU_ARCH|CPU_ARCH_L|MEM_TOT|MEM_FREE|MEM_USAGE|MEM_AVAIL|MEM_TOTMB|MEM_FREEMB|MEM_USAGEPC|MEM_AVAILPC|DISK_TOT|DISK_FREE|DISK_USAGE|DISK_AVAIL|DISK_TOTGB|DISK_FREEGB|DISK_USAGEPC|DISK_AVAILPC|DISK_TYPE]
 #----------------------------------------------------------------------------------------------------------------------
 _check_hardware() {
     if [ -f /proc/cpuinfo ]; then

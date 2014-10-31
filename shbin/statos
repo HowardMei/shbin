@@ -16,7 +16,8 @@ DISTRO_MINOR_VERSION=""
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  check_os <= __gather_os_info
-#   DESCRIPTION:  Discover operating system information
+#%   DESCRIPTION:  Discover operating system information
+#%	 Usage: statos [OS_NAME|OS_NAME_L|OS_ARCH|OS_VERSION|OS_VERSION_L|OS_KERVER|OS_VERNUM|DISTRO_NAME|DISTRO_NAME_L|DISTRO_VERSION|DISTRO_MAJOR_VERSION|DISTRO_MINOR_VERSION]
 #----------------------------------------------------------------------------------------------------------------------
 __gather_kernel_info() {
     OS_NAME=$(uname -s 2>/dev/null)

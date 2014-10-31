@@ -2,7 +2,8 @@
 ## require shbin/getpnamebyid
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  waiton
-#   DESCRIPTION:  Wait until the given pid finish
+#%   DESCRIPTION:  Wait until the given pid finish
+#%	 Usage: waiton "$(getpid curl)"
 #----------------------------------------------------------------------------------------------------------------------
 _waiton() {
    if [ -z "$*" ]; then

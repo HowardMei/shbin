@@ -2,7 +2,7 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  erow
 #%   DESCRIPTION:  Get the nth row from the given string
-#%   Usage: erow 2 "$(psp salt)" OR psp salt | erow 2
+#%   Usage: erow 2[:6] "$(psp salt)" OR psp salt | erow 2[:6]
 #----------------------------------------------------------------------------------------------------------------------
 _erow() {
 	if echo "$1" | grep -q : 2>/dev/null; then

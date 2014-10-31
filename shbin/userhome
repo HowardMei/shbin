@@ -2,7 +2,8 @@
 ## require shbin/abspath
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  userhome
-#   DESCRIPTION:  Return the home dir path of the given user
+#%   DESCRIPTION:  Return the home dir path of the given user
+#%	 Usage: userhome [howardmei]
 #----------------------------------------------------------------------------------------------------------------------
 
 _userhome() {

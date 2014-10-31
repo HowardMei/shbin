@@ -1,6 +1,7 @@
 
 #%   DESCRIPTION:  Super sh shell [ sudo sh -c for sh called scriptfile/sh console ]
 #%	 Usage: 	sush 'echo "Current shell is $SHELL"' OR sush "echo 'Current shell is $SHELL'"
+#%	 			OR	sush shcmd | shfile
 
 ##----------------------------------------------------  Super SH Shell ------------------------------------------------
 sush='sh -c'

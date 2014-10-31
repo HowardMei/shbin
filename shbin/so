@@ -1,7 +1,8 @@
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  so
-#   DESCRIPTION:  Quick filename search using locate
+#%   DESCRIPTION:  Quick filename search using locate
+#%	 Usage: so my.cnf
 #----------------------------------------------------------------------------------------------------------------------
 _so() {
   if [ $# -lt 1 ] ; then

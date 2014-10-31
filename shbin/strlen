@@ -1,7 +1,8 @@
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  strlen
-#   DESCRIPTION:  Get the length of the given strings
+#%   DESCRIPTION:  Get the length of the given strings
+#%	 Usage: echo "strings" | strlen OR strlen "strings"
 #----------------------------------------------------------------------------------------------------------------------
 _strlen() {  
    if [ $# -lt 1 ]; then
