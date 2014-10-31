@@ -2,7 +2,8 @@
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  sob
-#   DESCRIPTION:  Quick binary search using whereis
+#%   DESCRIPTION:  Quick binary search using whereis
+#%	 Usage: sob docker
 #----------------------------------------------------------------------------------------------------------------------
 _sob() {
   if [ $# -lt 1 ] ; then

@@ -2,7 +2,7 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  ecol 
 #%   DESCRIPTION:  Get the nth column from the given string
-#%	 Usage: ecol 2 "$(psp salt)" OR psp salt | ecol 2
+#%	 Usage: ecol [-d , ] 2[:8] "$(psp salt)" OR psp salt | ecol [-d ,] 2[:8]
 #----------------------------------------------------------------------------------------------------------------------
 _ecol() {
     local dlm=" "
@@ -32,6 +32,7 @@ _ecol() {
 	nca="${nca:=1}" 
 	ncb="${ncb:="$nctot"}" 
 	if [ "$nca" -ge 0 ] && [ "$nca" -le "$ncb" ] && [ "$ncb" -le "$nctot" ]; then
+		## Also works: awk -F"$dlm" -v f="$nca" -v t="$ncb" '{for(i=f;i<=t;i++) printf("%s%s",$i,(i==t)?"\n":OFS)}'
 		## Inside awk: printf FS$i will produce errors due to special chars like %, use printf("%s", FS$i) to avoid
 		printf "%s" "$ostr" | awk -F"$dlm" '{for (i='"$nca"'; i<='"$ncb"'; i++) printf("%s", FS$i); print NL}' 2>/dev/null | estrips -r "^${dlm}" 
 		return 0

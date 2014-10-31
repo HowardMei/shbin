@@ -1,7 +1,8 @@
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  shsrc
-#   DESCRIPTION:  Get the real path of the script file being executed, sourced or called.
+#%   DESCRIPTION:  Get the real path of the script file being executed, sourced or called.
+#%	 Usage: shsrc "shbin" "$_" "$0" "$BASH_SOURCE"
 #----------------------------------------------------------------------------------------------------------------------
 _shsrc() {
 	if [ $# -lt 2 ]; then

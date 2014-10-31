@@ -18,7 +18,7 @@ _check_pubip() {
 	elif iscommand "busybox" 2>/dev/null && [ -n "$(busybox --list-modules | grep -i wget)" ];then
 		local chk='busybox wget -qO-'
 	fi
-	PUB_IPv4="$($chk https://ip.appspot.com/ 2>/dev/null)"
+	PUB_IPv4="$($chk http://ip.appspot.com/ 2>/dev/null)"
 	## sh cannot recognize '==' and '=' is error prone, use '!=' instead
 	if ! isipv4 "$PUB_IPv4" 2>/dev/null;then
 	    ##echo "Checking public ip over checkip.dyndns.org"

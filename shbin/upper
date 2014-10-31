@@ -1,7 +1,8 @@
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  upper
-#   DESCRIPTION:  Upper case the letters of the given string
+#%   DESCRIPTION:  Upper case the letters of the given string
+#%	 Usage: echo "string" | upper OR upper "non empty string"
 #----------------------------------------------------------------------------------------------------------------------
 _upper() {
 	if [ $# -lt 1 ]; then

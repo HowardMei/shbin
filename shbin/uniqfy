@@ -2,7 +2,8 @@
 ## require shbin/abspath, shbin/estrips
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  uniqfy
-#   DESCRIPTION:  Remove redundant lines of the given files even if the duplicates are not adjacent (uniq's drawback)
+#%   DESCRIPTION:  Remove redundant lines of the given files even if the duplicates are not adjacent (uniq's drawback)
+#%	 Usage: uniqfy filepath OR echo "filepath" | uniqfy
 #----------------------------------------------------------------------------------------------------------------------
 __ScriptTmp="$(mktemp -d)"
 _uniqfy() {
