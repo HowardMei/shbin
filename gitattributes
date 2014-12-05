@@ -1,0 +1,50 @@
+# Set the default behavior, in case people don't have core.autocrlf set.
+* text=auto
+
+# Explicitly declare source files you want to always be normalized and converted
+# to native line endings on checkout.
+*.c text
+*.h text
+*.sh text
+*.py text
+*.rb text
+*.go text
+*.jl text
+*.ex text
+*.hs text
+*.bat text
+*.exs text
+*.php text
+*.hrl text
+*.erl text
+*.java text
+*.bash text
+*.scala text
+*.groovy text
+
+# Declare files that will always have CRLF line endings on checkout.
+*.sln text eol=crlf
+*.ebuild text eol=lf
+
+# Denote all files that are truly binary and should not be modified.
+*.png binary
+*.jpg binary
+*.gif binary
+*.bmp binary
+*.tar binary
+*.zip binary
+*.gz binary
+*.pyc binary
+*.pyo binary
+*.pyd binary
+*.a
+
+*.o binary
+*.out binary
+*.obj binary
+*.lib binary
+*.exe binary
+*.jar binary
+*.war binary
+*.ear binary
+*.dll binary
