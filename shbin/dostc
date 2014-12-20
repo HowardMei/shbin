@@ -1,0 +1,32 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  dostc
+#%   DESCRIPTION:  docker stop the given container
+#%   Usage: dostc [-a] | [imagename:tag | containerid]
+#----------------------------------------------------------------------------------------------------------------------
+_dostc() {
+    if [ $# -lt 1 ]; then
+        echo "At least one container name or id is required." >&2
+        return 1
+    elif [ "$1" == "-a" ] || [ "$1" == "all" ] || [ "$1" == "--all" ]; then
+        echo "[dostc]Stopping all the running containers:" >&2
+        sudo docker stop --time=3 $(sudo docker ps -a -q) 2>/dev/null
+    elif [ -n "$(dollc -r "$1")" ]; then
+        echo "[dostc]Stopping the container exactly matching $@" >&2
+        sudo docker stop --time=3 $(dollc -ri "$1") 2>/dev/null
+    else
+        echo "[dostc]No running containers matching $1 are found." >&2
+        echo "[dostc]Please run dollc -r to list all running containers." >&2
+        return 1
+    fi
+}
+
+
+if [ $# -lt 1 ]; then
+    _dostc
+else
+    _dostc "$1"
+fi
+
+unset -f _dostc
+exit 0

@@ -1,0 +1,28 @@
+
+## require shbin/abspath, shbin/urifilename
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  gensshpubkey
+#%   DESCRIPTION:  Generate a ssh key pub key matching the given private key
+#%	 Usage: gensshpubkey private.key
+#----------------------------------------------------------------------------------------------------------------------
+_gensshpubkey() {
+   if [ $# -ne 1 ] ; then
+      echo "Generate a public key based on the given private key"
+      echo "Usage:gensshpubkey private.key"
+      return 1
+   fi
+   if ! iscommand ssh-keygen 2>/dev/null; then
+		pinstall openssh-client openssh-server
+   fi
+   if [ -f "$(abspath $1)" ]; then
+	  local kname="$(dirname $(abspath $1))/$(urifilename $1)"
+	  ssh-keygen -y "$(abspath $1)" > "${kname}.pub"
+   else
+	  echo "The given private key $1 is not a valid file."
+   fi
+}
+
+_gensshpubkey "$@"
+
+unset -f _gensshpubkey
+exit 0

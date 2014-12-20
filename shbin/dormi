@@ -1,0 +1,65 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  dormi
+#%   DESCRIPTION:  remove docker images by keywords.
+#%   Usage: dormi [-a] | [imagename:tag | imageid]
+#----------------------------------------------------------------------------------------------------------------------
+_dormi() {
+    if [ $# -lt 1 ]; then
+        echo "No docker image name or id is provided." >&2
+        return 1
+    else
+        case "$1" in
+            -a | --all | allimages)
+                echo "[dormi]Killing all running containers and removing all docker images:" >&2
+                [ -n "$(dollc -r)" ] && dostc --all
+                [ -n "$(dollc -ri)" ] && dokic --all
+                sudo docker rmi -f $(dolsi --all | ecol 1) 2>/dev/null
+            ;;
+            -- | *)
+                local img=""
+                for img in "$@"; do
+                    echo "[dormi]Prepare to remove docker images matching <$img>" >&2
+                    local imgnames=$(dolsi -n "$img")
+                    if [ -n "$imgnames" ]; then
+                        echo "[dormi]Found following docker images matching <$img>:" >&2
+                        echo "$imgnames" >&2
+                        local theimgname=""
+                        for theimgname in $imgnames; do
+                            echo "[dormi]Cleaning the attached containers and removing the docker image <$theimgname>:" >&2
+                            local atcntids=$(dollc -i "$theimgname")
+                            if [ -n "$atcntids" ]; then
+                                dormc "$theimgname"
+                            else
+                                echo "[dormi]No containers are related to the image <$theimgname>. Let's remove it directly." >&2
+                            fi
+                            local imgids=$(dolsi -i "$theimgname")
+                            if [ -n "$imgids" ]; then
+                                echo "[dormi]Found following layer ids of the docker image <$theimgname>" >&2
+                                local theimgid=""
+                                for theimgid in $imgids; do
+                                    sudo docker rmi -f "$theimgid" 2>/dev/null
+                                done
+                            else
+                                echo "[dormi]Failed to get the id of the docker image <$theimgname>, skipping ... ..." >&2
+                                continue
+                            fi
+                        done
+                    else
+                        echo "[dormi]Cannot find any docker image matching $img" >&2
+                    fi
+                done
+            ;;
+        esac
+    fi
+}
+
+
+if [ $# -lt 1 ]; then
+    _dormi
+else
+    _dormi "$@"
+fi
+
+unset -f _dormi
+exit 0

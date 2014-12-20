@@ -1,0 +1,13 @@
+
+#%  DESCRIPTION:  Extract and echo the proto of the given url
+#%	Usage: urlproto "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
+#%		   echo "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1" | urlproto
+
+
+if [ $# -lt 1 ]; then
+	uriproto "$(cat)"
+else
+	uriproto "$@"
+fi
+
+exit 0

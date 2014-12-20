@@ -1,0 +1,40 @@
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  gensslpem
+#%   DESCRIPTION:  Generate a SSL private pem to sign your certificate
+#%	 Usage: gensslpem pemname [2048]
+#----------------------------------------------------------------------------------------------------------------------
+_gensslpem() {
+   if [ $# -lt 1 ] ; then
+      echo "Usage:gensslpem pemname [2048]"
+      return 1
+   fi
+   local dname="$(psbpath $1)"
+   local kname="$(dirname $dname)/$(basename $1)"
+   if [ -f "${kname}.key" ] || [ -f "${kname}.pem" ]; then
+	  cecho -r "${kname}.key/${kname}.pem already exists, please change the name."
+	  return 1
+   fi
+   if [ -n "$2" ]; then
+	  local kleng="$(echo $2 | tr -cd '[[:digit:]]')"
+   else
+	  local kleng=2048
+   fi
+   if ! iscommand openssl 2>/dev/null; then
+		pinstall openssl
+   fi
+   gensslkey "$kname" "$kleng"
+   cecho "Please enter the password to unlock and generate the SSL .pem from .key file ..."
+   if [ -f "${kname}.key" ]; then
+	  openssl rsa -in "${kname}.key" -out "${kname}.pem"
+   else
+	  cecho "Cannot find the generated key file: ${kname}.key"
+   fi
+}
+
+
+_gensslpem "$@"
+
+unset -f _gensslpem
+exit 0

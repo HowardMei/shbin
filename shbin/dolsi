@@ -1,0 +1,52 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  dolsi
+#%   DESCRIPTION:  docker list all images by keywords
+#%   Usage: dolsi [-a] | [-i name:tag] | [-n imageid]
+#----------------------------------------------------------------------------------------------------------------------
+_dolsi() {
+    if [ $# -lt 1 ]; then
+        ## Remove the head line: tail -n +2  OR  sed '1d'
+        sudo docker images | sed '1d' | awk '{print $1":"$2,$3,$(NF-1)$NF}'
+    else
+        case "$1" in
+            -i | --id | --index)
+            shift
+            if [ $# -lt 1 ]; then
+                local imglist=""
+            else
+                local imglist="$(sudo docker images -a | sed '1d' | awk '{print $1":"$2,$3,$(NF-1)$NF}' | efilters -rl "$@" 2>/dev/null | ecol 2 2>/dev/null)"
+                [ -z "$imglist" ] && imglist="$(sudo docker images -a | sed '1d' | awk '{print $3}' | efilters -rl "^$@$" 2>/dev/null)"
+            fi
+            [ -n "$imglist" ] && echo "$imglist" | estrips -bl
+            ;;
+            -n | --name)
+            shift
+            if [ $# -lt 1 ]; then
+                local imglist="$(sudo docker images -a | sed '1d' | awk '{print $1":"$2,$3,$(NF-1)$NF}' | ecol 1 2>/dev/null)"
+            else
+                local imglist="$(sudo docker images -a | sed '1d' | awk '{print $1":"$2,$3,$(NF-1)$NF}' | efilters -rl "$@" 2>/dev/null | ecol 1 2>/dev/null)"
+                [ -z "$imglist" ] && imglist="$(sudo docker images -a | sed '1d' | awk '{print $1":"$2}' | efilters -rl "^$@$" 2>/dev/null)"
+            fi
+            [ -n "$imglist" ] && echo "$imglist" | estrips -bl 2>/dev/null
+            ;;
+            -a | --all)
+            shift
+            sudo docker images -a | sed '1d' | awk '{print $1":"$2,$3,$(NF-1)$NF}'
+            ;;
+            -- | *)
+            sudo docker images -a | sed '1d' | awk '{print $1":"$2,$3,$(NF-1)$NF}' | efilters -rl "$@" 2>/dev/null
+            ;;
+        esac
+    fi
+}
+
+
+if [ $# -lt 1 ]; then
+    _dolsi
+else
+    _dolsi "$@"
+fi
+
+unset -f _dolsi
+exit 0

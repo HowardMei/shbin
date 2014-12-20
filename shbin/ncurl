@@ -1,0 +1,132 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#         NAME:  mcurl
+#%  DESCRIPTION:  Multipart curl function
+#%	Usage: ncurl [-n|--npart 5 --option '--digest'] proto://user:pass@sub.domain.com:port/path/file.ext [local_filename]
+#----------------------------------------------------------------------------------------------------------------------
+_mcurl() {
+   if ! iscommand curl 2>/dev/null;then
+      echo "curl is not installed, please pinstall curl!" >&2
+      return 1
+   fi
+   if ! iscommand getpid 2>/dev/null; then
+      echo "getpid is not defined, please check shbin/getpid" >&2
+      return 1
+   fi
+   if [ $# -lt 1 ] || [ $# -gt 4 ]; then
+      echo "Usage: ncurl [-n|--npart 5 --option '--digest'] proto://user:pass@sub.domain.com:port/path/file.ext [local_filename]" >&2
+      return 1
+   fi
+   local nparts=3
+   local curlopt="-L#"
+   if [ "--npart" == "$1" ] || [ "-n" == "$1" ]; then
+      shift
+      nparts="$(echo $1 | tr -cd '[:digit:]')"
+      nparts="${nparts:-3}"
+      if [ "$nparts" -gt 1 ] && [ "$nparts" -lt 10 ]; then
+          nparts="$((nparts+1-1))"
+      fi
+      shift
+   fi
+   if [ "--option" == "$1" ] || [ "-o" == "$1" ]; then
+      shift
+      curlopt="$1"
+      shift
+   fi
+   local fsrc="$1"
+   local fdst="$2"
+   if [ -n "$fsrc" ] && [ -n "$(urihost $fsrc)" ]; then
+      local fporto="$(uriproto $fsrc)"
+      local furl="$fporto://$(urionly $fsrc)"
+      local facc="$(uriaccount $fsrc)"
+      local fname="$(urifilename $fsrc)"
+      local fext="$(urifileext $fsrc)"
+   else
+      echo "Cannot locate the remote host $(urihost $fsrc) !" >&2
+      return 1
+   fi
+   local dstfn="$(urifile $fsrc)"
+   if [ -n "$fdst" ]; then
+      if [ -d "$fdst" ]; then
+         fdst="$(psbpath $fdst)/$dstfn"
+      fi
+   else
+      fdst="$(psbpath .)/$dstfn"
+   fi
+   if [ -n "$facc" ]; then
+      local fsize="$(curl --head --silent --digest --user $facc $furl | grep Content-Length | sed 's/[^0-9]*//g')"
+   else
+      local fsize="$(curl --head --silent $furl | grep Content-Length | sed 's/[^0-9]*//g')"
+   fi
+   local http_ver="$(curl -sI "$furl" | grep -i '^HTTP' | awk '{gsub("/"," ");print int($2*10)}')"
+   if [ "${http_ver:=10}" -lt 11 ] || [ "${fsize:=0}" -lt 102400 ]; then
+      echo "File is too small OR server protocol HTTP/1.0 does not support multipart download." >&2
+      echo "File $dstfn, Size $fsize, Downloading ... ..." >&2
+      if [ -n "$facc" ]; then
+         echo "curl $curlopt --digest --user $facc $furl -o $fdst" >&2
+	     curl "$curlopt" --digest --user "$facc" "$furl" -o "$fdst"
+	  else
+         curl "$curlopt" "$fsrc" -o "$fdst"
+	  fi
+   else
+      printf "File $dstfn, Size $((fsize/1024))KB, Downloading in $nparts parts ... ...\n\n"
+	  if [ -n "$facc" ]; then
+	     for (( c=1; c<="$nparts"; c++ )); do
+				local from="$(ecalc "$fsize*($c-1)/$nparts")"
+				if [ "$c" != "$nparts" ]; then
+					local to="$(ecalc "($fsize*$c/$nparts)-1")"
+				else
+					local to="$(ecalc "$fsize*$c/$nparts")"
+				fi
+				local fout="$fdst.part$c"
+				##echo " Starting download thread #$c " >&2
+				printf "\033[A"
+				curl "$curlopt" --digest --user "$facc" --range "$from-$to" "$furl" -o "$fout" &
+		 done
+		 waiton "$(getpid curl)"
+		 printf "\nCombining downloaded parts ... ...\n"
+		 for (( c=1; c<="$nparts"; c++ )); do
+		    if [ -f "$fdst.part$c" ];then
+			   cat "$fdst.part$c" >> "$fdst"
+			   \rm -f "$fdst.part$c"
+			else
+			   echo "$fdst.part$c is missing."  >&2
+			   break
+			   return 1
+			fi
+		 done
+	  else
+	     for (( c=1; c<="$nparts"; c++ )); do
+				local from="$(ecalc "$fsize*($c-1)/$nparts")"
+				if [ "$c" != "$nparts" ]; then
+					local to="$(ecalc "($fsize*$c/$nparts)-1")"
+				else
+					local to="$(ecalc "$fsize*$c/$nparts")"
+				fi
+				local fout="$fdst.part$c"
+				##echo " Starting download thread #$c " >&2
+				printf "\033[A"
+				curl "$curlopt" --range "$from-$to" "$furl" -o "$fout" &
+		 done
+		 waiton "$(getpid curl)"
+		 printf "\nCombining downloaded parts ... ...\n"
+		 for (( c=1; c<="$nparts"; c++ )); do
+		    if [ -f "$fdst.part$c" ];then
+			   cat "$fdst.part$c" >> "$fdst"
+			   \rm -f "$fdst.part$c"
+			else
+			   echo "$fdst.part$c is missing." >&2
+			   break
+			   return 1
+			fi
+		 done
+	  fi
+   fi
+   printf "\nMultipart Download complete!\n"
+   return 0
+}
+
+_mcurl "$@"
+
+unset -f _mcurl
+exit 0
