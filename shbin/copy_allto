@@ -50,9 +50,9 @@ _copy_allto() {
 			for srcfod in $(find $srcpath -mindepth 1 -maxdepth 1);do
 				echo "Copying $srcfod to $dst ... ..."
 				if [ "$forcetag" -lt 512 ]; then
-					\cp -ri "$srcfod" "$dst/"
+					\cp -ri "$srcfod" "$dst/" 
 				else
-					\cp -rf "$srcfod" "$dst/"
+					\cp -rf "$srcfod" "$dst/" 
 				fi
 			done
 		fi

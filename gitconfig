@@ -19,8 +19,8 @@
     changes = show --stat --oneline
     ci = commit
     cl = clone
-    clr = !"git clean -f -d"
-    cls = !"git stash; git clean -f -d"
+    clrf = !"git clean -f -d"
+    clsrf = !"git stash; git clean -f -d"
     cm = commit -am
     co = checkout
     conflicts = diff --name-only --diff-filter=U
@@ -70,6 +70,7 @@
     pl = pull --no-edit
     plre = pull --no-edit --rebase
     pr = !"git pull; git submodule foreach git pull origin master"
+    prune = !"git gc --aggressive --prune=now"
     # Pull in remote changes for the current repository and all its submodules
     pull = pull --no-edit
     pushf = push --force
@@ -80,17 +81,19 @@
     pushtags = push --tags
 
     # Interactive rebase with the given number of latest commits
-    reb = !"r() { git rebase -i HEAD~$1; }; r"
+    rebi = !"r() { git rebase -i HEAD~$1; }; r"
     remotes = remote -v
     ra = remote add
     rao = remote add origin
-    ru = remote set-url
-    ruo = remote set-url origin
+    reurl = remote set-url
+    reurlo = remote set-url origin
+    reduce = !"git gc --aggressive --prune=now"
 
     # View the current working tree status using the short format
     s = status -s
     sb = status -s -b
     serve = !"git daemon --reuseaddr --verbose --base-path=. --export-all ./.git"
+    size = !"git count-objects -Hv"
     snapshot = !"git stash save snapshot: $(date) && git stash apply stash@{0}"
     svnpull = !"git-svn fetch && git-svn rebase -l"
     svnpush = !"git-svn dcommit"

@@ -1,5 +1,5 @@
 __ShbinVersion="1.0"
-__ShbinRelease="2014.12.17"
+__ShbinRelease="2014.12.23"
 
 #%   DESCRIPTION: Essential binary tools to enhance sh/bash environment.
 #%   USAGE: Usage: shbin list | show | help abspath

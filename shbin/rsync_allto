@@ -47,7 +47,7 @@ _rsync_allto() {
 				read -r -p "This may overwrite existing file: $dst/$srcfn. Are you sure? (y/n) " answer
 				case "$answer" in
 					[yY][eE][sS]|[yY])
-						## --exclude ".git/" --exclude ".hg/" --exclude ".svn/" --exclude ".bzr/"
+						## --exclude ".git/" --exclude ".hg/" --exclude ".svn/" --exclude ".bzr/" 
 						rsync -rW --no-perms "$srcpath" "$dst"
 					;;
 					-- | *)
@@ -55,7 +55,7 @@ _rsync_allto() {
 					;;
 				esac
 			else
-				## --exclude ".git/" --exclude ".hg/" --exclude ".svn/" --exclude ".bzr/"
+				## --exclude ".git/" --exclude ".hg/" --exclude ".svn/" --exclude ".bzr/" 
 				rsync -rW --no-perms "$srcpath" "$dst"
 			fi
 		elif [ -d "$srcpath" ]; then

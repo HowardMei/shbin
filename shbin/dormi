@@ -36,10 +36,8 @@ _dormi() {
                             local imgids=$(dolsi -i "$theimgname")
                             if [ -n "$imgids" ]; then
                                 echo "[dormi]Found following layer ids of the docker image <$theimgname>" >&2
-                                local theimgid=""
-                                for theimgid in $imgids; do
-                                    sudo docker rmi -f "$theimgid" 2>/dev/null
-                                done
+                                echo "$imgids" >&2
+                                sudo docker rmi -f $imgids 2>/dev/null
                             else
                                 echo "[dormi]Failed to get the id of the docker image <$theimgname>, skipping ... ..." >&2
                                 continue

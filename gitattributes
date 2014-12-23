@@ -3,27 +3,27 @@
 
 # Explicitly declare source files you want to always be normalized and converted
 # to native line endings on checkout.
-*.c text
-*.h text
-*.sh text
-*.py text
-*.rb text
-*.go text
-*.jl text
-*.ex text
-*.hs text
-*.bat text
-*.exs text
-*.php text
-*.hrl text
-*.erl text
-*.java text
-*.bash text
-*.scala text
-*.groovy text
+*.c text eol=lf
+*.h text eol=lf
+*.sh text eol=lf
+*.py text eol=lf
+*.rb text eol=lf
+*.go text eol=lf
+*.jl text eol=lf
+*.ex text eol=lf
+*.hs text eol=lf
+*.bat text eol=lf
+*.exs text eol=lf
+*.php text eol=lf
+*.hrl text eol=lf
+*.erl text eol=lf
+*.java text eol=lf
+*.bash text eol=lf
+*.scala text eol=lf
+*.groovy text eol=lf
 
 # Declare files that will always have CRLF line endings on checkout.
-*.sln text eol=crlf
+*.sln text eol=lf
 *.ebuild text eol=lf
 
 # Denote all files that are truly binary and should not be modified.

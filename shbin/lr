@@ -62,13 +62,13 @@ _ls() {
                     [ -r "$dst" ] && find "$dst" -mindepth "$mindepth" -maxdepth "$maxdepth" -not -iname ".*" -printf '%T@ %p\n' | sort -k 1nr 2>/dev/null | awk '{print $2}' 2>/dev/null
                     ;;
                 d | dir)
-                    [ -r "$dst" ] && find "$dst" -mindepth "$mindepth" -maxdepth "$maxdepth" -type d -not -iname ".*"
+                    [ -r "$dst" ] && find "$dst" -mindepth "$mindepth" -maxdepth "$maxdepth" -type d \( ! -regex '.*/\..*' \)
                     ;;
                 f | file)
-                    [ -r "$dst" ] && find "$dst" -mindepth "$mindepth" -maxdepth "$maxdepth" -type f -not -iname ".*"
+                    [ -r "$dst" ] && find "$dst" -mindepth "$mindepth" -maxdepth "$maxdepth" -type f \( ! -regex '.*/\..*' \)
                     ;;
                 l | link)
-                    [ -r "$dst" ] && find "$dst" -mindepth "$mindepth" -maxdepth "$maxdepth" -type l -not -iname ".*"
+                    [ -r "$dst" ] && find "$dst" -mindepth "$mindepth" -maxdepth "$maxdepth" -type l \( ! -regex '.*/\..*' \)
                     ;;
                 h | hidden)
                     [ -r "$dst" ] && find "$dst" -mindepth "$mindepth" -maxdepth "$maxdepth" -iname ".*"
@@ -191,7 +191,6 @@ _lr() {
                   statargs='%N'
                ;;
                 d | dirs)
-                  [ "$depth" -le 1 ] && depth=1
                   lscmd="_ls --dir${depth}"
                   statargs='%N'
                ;;
