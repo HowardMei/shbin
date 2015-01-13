@@ -2,7 +2,7 @@
 * text=auto
 
 # Explicitly declare source files you want to always be normalized and converted
-# to native line endings on checkout.
+# to native line endings on checkout. Enforce Unix newlines for all environment.
 *.c text eol=lf
 *.h text eol=lf
 *.sh text eol=lf
@@ -21,6 +21,13 @@
 *.bash text eol=lf
 *.scala text eol=lf
 *.groovy text eol=lf
+*.css   text eol=lf
+*.html  text eol=lf
+*.js    text eol=lf
+*.json  text eol=lf
+*.less  text eol=lf
+*.md    text eol=lf
+*.yml   text eol=lf
 
 # Declare files that will always have CRLF line endings on checkout.
 *.sln text eol=lf

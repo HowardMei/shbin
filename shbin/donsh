@@ -21,7 +21,7 @@ _donsh() {
 		# Use env to clear all host environment variables and set then anew
 		sudo nsenter --target "$cpid" --mount --uts --ipc --net --pid -- env -i - "$_NENV" $cmdopt
 	else
-		[ -n "$cntidn" ] && sudo docker exec -i -t "$cntidn" bash 
+		[ -n "$cntidn" ] && sudo docker exec -i -t "$cntidn" bash
 	fi
 }
 

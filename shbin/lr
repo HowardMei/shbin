@@ -146,45 +146,99 @@ _lr() {
               lscmd="_ls -${opt}${depth}"
               case "$opt" in
                 s | sizes)
-                    cecho -r "It takes a while to list the sizes of all files and dirs under $dst:" >&2
-                    lscmd="_lu -a${depth}"
-                    ducmd='du -h --max-depth=0'
+                    if [ -f "$dst" ]; then
+                        lscmd="_lu -f"
+                        ducmd='du -h --max-depth=0'
+                        statargs=''
+                    else
+                        cecho -r "It takes a while to list the sizes of all files and dirs under $dst:" >&2
+                        depth=$(ecalc "$depth+1")
+                        lscmd="_lu -a${depth}"
+                        ducmd='du -h --max-depth=0'
+                    fi
                 ;;
                 S | SIZESUM)
-                    cecho -r "It takes a while to list the sizes of all dirs under $dst:" >&2
-                    lscmd="_lu -d${depth}"
-                    ducmd='du -h --max-depth=0'
+                    if [ -f "$dst" ]; then
+                        lscmd="_lu -f"
+                        ducmd='du -h --max-depth=0'
+                        statargs=''
+                    else
+                        cecho -r "It takes a while to list the sizes of all dirs under $dst:" >&2
+                        lscmd="_lu -d${depth}"
+                        ducmd='du -h --max-depth=0'
+                    fi
                 ;;
                 t | time)
-                    statargs='%z %N'
+                    if [ -f "$dst" ]; then
+                        statargs='%z'
+                    else
+                        statargs='%z %N'
+                    fi
                 ;;
                 T | timestamp)
-                    statargs='%Z %N'
+                    if [ -f "$dst" ]; then
+                        statargs='%Z'
+                    else
+                        statargs='%Z %N'
+                    fi
                 ;;
                 r | rights)
-                    statargs='%A %N'
+                    if [ -f "$dst" ]; then
+                        statargs='%A'
+                    else
+                        statargs='%A %N'
+                    fi
                 ;;
                 R | RCODE)
-                  statargs='%a %N'
+                  if [ -f "$dst" ]; then
+                    statargs='%a'
+                  else
+                    statargs='%a %N'
+                  fi
                 ;;
                 I | INODE)
-                  lscmd='_ls'
-                  statargs='%i %N'
+                  if [ -f "$dst" ]; then
+                    lscmd='_ls -f'
+                    statargs='%i'
+                  else
+                    lscmd='_ls'
+                    statargs='%i %N'
+                  fi
                 ;;
                 U | UID)
-                  statargs='%u %N'
+                  if [ -f "$dst" ]; then
+                    statargs='%u'
+                  else
+                    statargs='%u %N'
+                  fi
                 ;;
                 u | username)
-                  statargs='%U %N'
+                  if [ -f "$dst" ]; then
+                    statargs='%U'
+                  else
+                    statargs='%U %N'
+                  fi
                 ;;
                 G | GID)
-                  statargs='%g %N'
+                  if [ -f "$dst" ]; then
+                    statargs='%g'
+                  else
+                    statargs='%g %N'
+                  fi
                 ;;
                 g | groupname)
-                  statargs='%G %N'
+                  if [ -f "$dst" ]; then
+                    statargs='%G'
+                  else
+                    statargs='%G %N'
+                  fi
                 ;;
                 F | FTYPE)
-                  statargs='%f %N'
+                  if [ -f "$dst" ]; then
+                    statargs='%f'
+                  else
+                    statargs='%f %N'
+                  fi
                 ;;
                 f | files)
                   lscmd="_ls --file${depth}"
