@@ -2,9 +2,8 @@
 ## require shbin/uriproto, shbin/esubst
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #         NAME:  urifull
-#%   DESCRIPTION:  Extract and echo the full path of the given url
-#%   USAGE: urifull "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
-#%   REQUIRES: uriproto
+#%  DESCRIPTION:  Extract and echo the full path of the given url
+#%	Usage: urifull "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
 #----------------------------------------------------------------------------------------------------------------------
 _urifull() {
    if [ $# -lt 1 ]; then
@@ -19,9 +18,9 @@ _urifull() {
 
 
 if [ $# -lt 1 ]; then
-    _urifull "$(cat)"
+	_urifull "$(cat)"
 else
-    _urifull "$@"
+	_urifull "$@"
 fi
 
 unset -f _urifull

@@ -3,35 +3,34 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  donsh
 #%   DESCRIPTION:  Use nsenter to enter a docker container's shell environment.
-#%   USAGE: donsh CONTAINER [COMMAND [ARG]...]
-#%   REQUIRES: iscommand, [nsenter], sudo, docker
+#%	 Usage: donsh CONTAINER [COMMAND [ARG]...]
 #----------------------------------------------------------------------------------------------------------------------
 _donsh() {
-    local cntidn="$1"
-    shift
-    local cmdopt="$@"
-    local cpid=""
-    if iscommand nsenter 2>/dev/null; then
-        [ -n "$cntidn" ] && cpid="$(sudo docker inspect --format '{{.State.Pid}}' "$cntidn")"
-        [ -z "$cpid" ] && return 1
-        # Get environment variables from the container's root process
-        local _NENV="$([ -f "/proc/$cpid/environ" ] && sudo cat "/proc/$cpid/environ" | xargs -0)"
-        # If no command is given, default to `su` which executes the default login shell
-        # Otherwise, execute the given command
-        [ -z "$cmdopt" ] && cmdopt="su -l -m root"
-        # Use env to clear all host environment variables and set then anew
-        sudo nsenter --target "$cpid" --mount --uts --ipc --net --pid -- env -i - "$_NENV" $cmdopt
-    else
-        [ -n "$cntidn" ] && sudo docker exec -i -t "$cntidn" bash
-    fi
+	local cntidn="$1"
+	shift
+	local cmdopt="$@"
+	local cpid=""
+	if iscommand nsenter 2>/dev/null; then
+		[ -n "$cntidn" ] && cpid="$(sudo docker inspect --format '{{.State.Pid}}' "$cntidn")"
+		[ -z "$cpid" ] && return 1
+		# Get environment variables from the container's root process
+		local _NENV="$([ -f "/proc/$cpid/environ" ] && sudo cat "/proc/$cpid/environ" | xargs -0)"
+		# If no command is given, default to `su` which executes the default login shell
+		# Otherwise, execute the given command
+		[ -z "$cmdopt" ] && cmdopt="su -l -m root"
+		# Use env to clear all host environment variables and set then anew
+		sudo nsenter --target "$cpid" --mount --uts --ipc --net --pid -- env -i - "$_NENV" $cmdopt
+	else
+		[ -n "$cntidn" ] && sudo docker exec -i -t "$cntidn" bash
+	fi
 }
 
 
 if [ $# -lt 1 ]; then
-    echo "Usage: donsh CONTAINER [COMMAND [ARG]...]"
-    echo "If COMMAND is not specified, runs an interactive shell in CONTAINER."
+	echo "Usage: donsh CONTAINER [COMMAND [ARG]...]"
+	echo "If COMMAND is not specified, runs an interactive shell in CONTAINER."
 else
-    _donsh "$@"
+	_donsh "$@"
 fi
 
 unset -f _donsh

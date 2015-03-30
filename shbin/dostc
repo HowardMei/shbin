@@ -2,8 +2,7 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  dostc
 #%   DESCRIPTION:  docker stop the given container
-#%   USAGE: dostc [-a] | [imagename:tag | containerid]
-#%   REQUIRES: dollc, docker
+#%   Usage: dostc [-a] | [imagename:tag | containerid]
 #----------------------------------------------------------------------------------------------------------------------
 _dostc() {
     if [ $# -lt 1 ]; then

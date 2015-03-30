@@ -2,16 +2,14 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  doclr
 #%   DESCRIPTION:  remove docker images by keywords.
-#%   USAGE: doclr [--all|imagename:tag]
-#%   REQUIRES: dollc, grep, estrip, sudo, docker, dormc, dormi, dolsi
+#%   Usage: doclr [--all|imagename:tag]
 #----------------------------------------------------------------------------------------------------------------------
 _doclr() {
     if [ $# -lt 1 ]; then
-        local cnts="$(dollc -b | grep -v : | estrip -u)"
+        local cnts="$(dollc -b | grep -v : | estrips -u)"
         for cnt in "$cnts"; do
             dormc "$cnt"
         done
-        dormi "<none>:<none>"
         dormc "<none>:<none>"
         sudo docker rmi -f $(sudo docker images -f "dangling=true" -q) 2>/dev/null
         dormi "<none>:<none>"

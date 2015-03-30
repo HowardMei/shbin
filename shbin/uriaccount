@@ -1,9 +1,9 @@
 
+## require shbin/urifull, shbin/urionly, shbin/esubst
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #         NAME:  uriaccount
-#%   DESCRIPTION:  Extract and echo the account of the given url
-#%   USAGE: uriaccount "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
-#%   REQUIRES: urifull, urionly, esubst, grep, cut
+#%  DESCRIPTION:  Extract and echo the account of the given url
+#%	Usage: uriaccount "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
 #----------------------------------------------------------------------------------------------------------------------
 _uriaccount() {
    if [ $# -lt 1 ]; then

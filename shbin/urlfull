@@ -1,14 +1,13 @@
 
-#%   DESCRIPTION:  Extract and echo the full url of the given url stripping off the proto
-#%   USAGE: urlfull "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
-#%         echo "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1" | urlfull
-#%   REQUIRES: urifull
+#%  DESCRIPTION:  Extract and echo the full url of the given url stripping off the proto
+#%	Usage: urlfull "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
+#%		   echo "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1" | urlfull
 
 
 if [ $# -lt 1 ]; then
-    urifull "$(cat)"
+	urifull "$(cat)"
 else
-    urifull "$@"
+	urifull "$@"
 fi
 
 exit 0
