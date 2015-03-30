@@ -1,62 +1,62 @@
 
+## require shbin/abspath, shbin/urifilename
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  ugetloc
 #%   DESCRIPTION:  Curl/fetch down a remote tar ball, extract it and return the script dir location
-#%   USAGE: ugetloc srcurl anchorfile
-#%   REQUIRES: abspath, urifilename, mktemp, curl, [wget], dirname
+#%	 Usage: ugetloc srcurl anchorfile
 #----------------------------------------------------------------------------------------------------------------------
 __ScriptTmp="$(mktemp -d)"
 _ugetloc() {
   ## ugetloc srcurl scriptname
   if [ $# -lt 1 ]; then
-     echo "Usage: ugetloc srcurl anchorfile"
+	 echo "Usage: ugetloc srcurl anchorfile"
      return 1
   else
-     local srcurl="$1"
-     local scriptfile="$2"
+	 local srcurl="$1"
+	 local scriptfile="$2"
   fi
   local urlfile="$(urifile "$srcurl")"
   if [ -z "$urlfile" ]; then
-    echo "No downloadable file is found." >&2
-    return 1
+	echo "No downloadable file is found." >&2
+	return 1
   else
-    scriptfile="${scriptfile:="$urlfile"}"
+	scriptfile="${scriptfile:="$urlfile"}"
   fi
   if iscommand "curl" 2>/dev/null;then
-    curl -L# "$srcurl" -o "$__ScriptTmp/$urlfile" 2>/dev/null
+	curl -L# "$srcurl" -o "$__ScriptTmp/$urlfile" 2>/dev/null
   elif iscommand "wget" 2>/dev/null;then
-    wget -q "$srcurl" -O "$__ScriptTmp/$urlfile" 2>/dev/null
+	wget -q "$srcurl" -O "$__ScriptTmp/$urlfile" 2>/dev/null
   elif iscommand "busybox" 2>/dev/null && [ busybox --list-modules | grep -q wget ];then
-    busybox wget -q "$srcurl" -O "$__ScriptTmp/$urlfile" 2>/dev/null
+	busybox wget -q "$srcurl" -O "$__ScriptTmp/$urlfile" 2>/dev/null
   elif iscommand "fetch" 2>/dev/null;then
-    fetch -q "$srcurl" -o "$__ScriptTmp/$urlfile" 2>/dev/null
+	fetch -q "$srcurl" -o "$__ScriptTmp/$urlfile" 2>/dev/null
   fi
   local dstloc=""
   local hisdir="$(abspath .)"
   cd "$__ScriptTmp" >/dev/null 2>&1
-    case "$urlfile" in
-       *.tar.bz2)   tar xjf "$urlfile"
-                    local realfile="$(find "$__ScriptTmp" -mindepth 0 -maxdepth 2 -type f -name "$scriptfile")"
-                    ;;
-       *.tar.gz)    tar xzf "$urlfile"
-                    local realfile="$(find "$__ScriptTmp" -mindepth 0 -maxdepth 2 -type f -name "$scriptfile")"
-                    ;;
-       *.zip)       unzip "$urlfile"
-                    local realfile="$(find "$__ScriptTmp" -mindepth 0 -maxdepth 2 -type f -name "$scriptfile")"
-                    ;;
-       *.sh | *.py | *.bash | *.*)
-                    local realfile="$(find "$__ScriptTmp" -mindepth 0 -maxdepth 2 -type f -name "$scriptfile")"
-                    ;;
-       *)
-                    local realfile="$(find "$__ScriptTmp" -mindepth 0 -maxdepth 2 -type f -name "$scriptfile")"
-                    ;;
-    esac
-    if [ -f "$realfile" ]; then
-        dstloc="$(dirname $(abspath "$realfile"))"
-    else
-        echo "Cannot find the anchor file [$scriptfile] in downloaded files." >&2
-        return 1
-    fi
+	case "$urlfile" in
+	   *.tar.bz2)   tar xjf "$urlfile"
+					local realfile="$(find "$__ScriptTmp" -mindepth 0 -maxdepth 2 -type f -name "$scriptfile")"
+					;;
+	   *.tar.gz)    tar xzf "$urlfile"
+					local realfile="$(find "$__ScriptTmp" -mindepth 0 -maxdepth 2 -type f -name "$scriptfile")"
+					;;
+	   *.zip)       unzip "$urlfile"
+					local realfile="$(find "$__ScriptTmp" -mindepth 0 -maxdepth 2 -type f -name "$scriptfile")"
+					;;
+	   *.sh | *.py | *.bash | *.*)
+					local realfile="$(find "$__ScriptTmp" -mindepth 0 -maxdepth 2 -type f -name "$scriptfile")"
+					;;
+	   *)
+					local realfile="$(find "$__ScriptTmp" -mindepth 0 -maxdepth 2 -type f -name "$scriptfile")"
+					;;
+	esac
+	if [ -f "$realfile" ]; then
+		dstloc="$(dirname $(abspath "$realfile"))"
+	else
+		echo "Cannot find the anchor file [$scriptfile] in downloaded files." >&2
+		return 1
+	fi
   cd "$hisdir" >/dev/null 2>&1
   echo "$dstloc"
 }

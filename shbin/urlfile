@@ -1,14 +1,13 @@
 
-#%   DESCRIPTION:  Extract and echo the file part of the given url
-#%   USAGE: urlfile "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
-#%         echo "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1" | urlfile
-#%   REQUIRES: urifile
+#%  DESCRIPTION:  Extract and echo the file part of the given url
+#%	Usage: urlfile "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
+#%		   echo "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1" | urlfile
 
 
 if [ $# -lt 1 ]; then
-    urifile "$(cat)"
+	urifile "$(cat)"
 else
-    urifile "$@"
+	urifile "$@"
 fi
 
 exit 0

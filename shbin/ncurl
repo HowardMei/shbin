@@ -1,9 +1,8 @@
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #         NAME:  mcurl
-#%   DESCRIPTION:  Multipart curl function
-#%   USAGE: ncurl [-n|--npart 5 --option '--digest'] proto://user:pass@sub.domain.com:port/path/file.ext [local_filename]
-#%   REQUIRES: curl, getpid, waiton, uriproto, uriaccount, urifilename, urifileext, urifile, urihost, psbpath, sed, awk, ecalc
+#%  DESCRIPTION:  Multipart curl function
+#%	Usage: ncurl [-n|--npart 5 --option '--digest'] proto://user:pass@sub.domain.com:port/path/file.ext [local_filename]
 #----------------------------------------------------------------------------------------------------------------------
 _mcurl() {
    if ! iscommand curl 2>/dev/null;then
@@ -65,63 +64,63 @@ _mcurl() {
       echo "File $dstfn, Size $fsize, Downloading ... ..." >&2
       if [ -n "$facc" ]; then
          echo "curl $curlopt --digest --user $facc $furl -o $fdst" >&2
-         curl "$curlopt" --digest --user "$facc" "$furl" -o "$fdst"
-      else
+	     curl "$curlopt" --digest --user "$facc" "$furl" -o "$fdst"
+	  else
          curl "$curlopt" "$fsrc" -o "$fdst"
-      fi
+	  fi
    else
       printf "File $dstfn, Size $((fsize/1024))KB, Downloading in $nparts parts ... ...\n\n"
-      if [ -n "$facc" ]; then
-         for (( c=1; c<="$nparts"; c++ )); do
-                local from="$(ecalc "$fsize*($c-1)/$nparts")"
-                if [ "$c" != "$nparts" ]; then
-                    local to="$(ecalc "($fsize*$c/$nparts)-1")"
-                else
-                    local to="$(ecalc "$fsize*$c/$nparts")"
-                fi
-                local fout="$fdst.part$c"
-                ##echo " Starting download thread #$c " >&2
-                printf "\033[A"
-                curl "$curlopt" --digest --user "$facc" --range "$from-$to" "$furl" -o "$fout" &
-         done
-         waiton "$(getpid curl)"
-         printf "\nCombining downloaded parts ... ...\n"
-         for (( c=1; c<="$nparts"; c++ )); do
-            if [ -f "$fdst.part$c" ];then
-               cat "$fdst.part$c" >> "$fdst"
-               \rm -f "$fdst.part$c"
-            else
-               echo "$fdst.part$c is missing."  >&2
-               break
-               return 1
-            fi
-         done
-      else
-         for (( c=1; c<="$nparts"; c++ )); do
-                local from="$(ecalc "$fsize*($c-1)/$nparts")"
-                if [ "$c" != "$nparts" ]; then
-                    local to="$(ecalc "($fsize*$c/$nparts)-1")"
-                else
-                    local to="$(ecalc "$fsize*$c/$nparts")"
-                fi
-                local fout="$fdst.part$c"
-                ##echo " Starting download thread #$c " >&2
-                printf "\033[A"
-                curl "$curlopt" --range "$from-$to" "$furl" -o "$fout" &
-         done
-         waiton "$(getpid curl)"
-         printf "\nCombining downloaded parts ... ...\n"
-         for (( c=1; c<="$nparts"; c++ )); do
-            if [ -f "$fdst.part$c" ];then
-               cat "$fdst.part$c" >> "$fdst"
-               \rm -f "$fdst.part$c"
-            else
-               echo "$fdst.part$c is missing." >&2
-               break
-               return 1
-            fi
-         done
-      fi
+	  if [ -n "$facc" ]; then
+	     for (( c=1; c<="$nparts"; c++ )); do
+				local from="$(ecalc "$fsize*($c-1)/$nparts")"
+				if [ "$c" != "$nparts" ]; then
+					local to="$(ecalc "($fsize*$c/$nparts)-1")"
+				else
+					local to="$(ecalc "$fsize*$c/$nparts")"
+				fi
+				local fout="$fdst.part$c"
+				##echo " Starting download thread #$c " >&2
+				printf "\033[A"
+				curl "$curlopt" --digest --user "$facc" --range "$from-$to" "$furl" -o "$fout" &
+		 done
+		 waiton "$(getpid curl)"
+		 printf "\nCombining downloaded parts ... ...\n"
+		 for (( c=1; c<="$nparts"; c++ )); do
+		    if [ -f "$fdst.part$c" ];then
+			   cat "$fdst.part$c" >> "$fdst"
+			   \rm -f "$fdst.part$c"
+			else
+			   echo "$fdst.part$c is missing."  >&2
+			   break
+			   return 1
+			fi
+		 done
+	  else
+	     for (( c=1; c<="$nparts"; c++ )); do
+				local from="$(ecalc "$fsize*($c-1)/$nparts")"
+				if [ "$c" != "$nparts" ]; then
+					local to="$(ecalc "($fsize*$c/$nparts)-1")"
+				else
+					local to="$(ecalc "$fsize*$c/$nparts")"
+				fi
+				local fout="$fdst.part$c"
+				##echo " Starting download thread #$c " >&2
+				printf "\033[A"
+				curl "$curlopt" --range "$from-$to" "$furl" -o "$fout" &
+		 done
+		 waiton "$(getpid curl)"
+		 printf "\nCombining downloaded parts ... ...\n"
+		 for (( c=1; c<="$nparts"; c++ )); do
+		    if [ -f "$fdst.part$c" ];then
+			   cat "$fdst.part$c" >> "$fdst"
+			   \rm -f "$fdst.part$c"
+			else
+			   echo "$fdst.part$c is missing." >&2
+			   break
+			   return 1
+			fi
+		 done
+	  fi
    fi
    printf "\nMultipart Download complete!\n"
    return 0

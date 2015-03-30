@@ -2,9 +2,7 @@
 ## require shbin/psbpath, shbin/pinstall
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __gensshkeypair
-#%   DESCRIPTION:  Generate a ssh key pair for authentication
-#%   USAGE: gensshkeypair keypairname [2048]
-#%   REQUIRES: psbpath, dirname, basename, [pacapt], ssh-keygen, userhome
+#   DESCRIPTION:  Generate a ssh key pair for authentication
 #----------------------------------------------------------------------------------------------------------------------
 __gensshkeypair() {
    if [ $# -lt 1 ] ; then
@@ -14,24 +12,24 @@ __gensshkeypair() {
    local dname="$(psbpath $1)"
    local kname="$(dirname $dname)/$(basename $1)"
    if [ -f "$kname" ] || [ -f "${kname}.pem" ]; then
-      echo "$kname/${kname}.pem already exists, please change the name."
-      return 1
+	  echo "$kname/${kname}.pem already exists, please change the name."
+	  return 1
    fi
    if [ -n "$2" ]; then
-      local kleng="$(echo $2 | tr -cd '[[:digit:]]')"
+	  local kleng="$(echo $2 | tr -cd '[[:digit:]]')"
    else
-      local kleng=2048
+	  local kleng=2048
    fi
    if ! iscommand ssh-keygen 2>/dev/null; then
-        pacapt -S openssh-client openssh-server
+		pinstall openssh-client openssh-server
    fi
    echo "Generating a SSH pem/pub key pair, please keep the pem file in a safe place ..."
    ssh-keygen -t rsa -f "$kname" -b "$kleng" >/dev/null
    if [ -f "$kname" ]; then
-      \mv -f "$kname" "${kname}.pem"
-      ssh-keygen -l -f "${kname}.pub"
+	  \mv -f "$kname" "${kname}.pem"
+	  ssh-keygen -l -f "${kname}.pub"
    else
-      echo "$kname has not been generated yet."
+	  echo "$kname has not been generated yet."
    fi
 }
 
@@ -39,7 +37,7 @@ __gensshkeypair() {
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  gensshkeypair
 #%   DESCRIPTION:  Generate and save the keypair to a users $HOME/.ssh
-#%   Usage: gensshkeypair [-s [howardmei]] keypairname [2048]
+#%	 Usage: gensshkeypair [-s [howardmei]] keypairname [2048]
 #----------------------------------------------------------------------------------------------------------------------
 _gensshkeypair() {
    if [ $# -lt 1 ] ; then
@@ -48,24 +46,24 @@ _gensshkeypair() {
       return 1
    fi
    case "$1" in
-      -s | --save)
-         shift
-         if [ -d "$(userhome "$1")" ]; then
-            local sshome="$(userhome "$1")/.ssh"
-            shift
-         else
-            local sshome="$(userhome)/.ssh"
-            shift
-         fi
-         local dname="$(psbpath "$1")"
-         local kname="$(dirname "$dname")/$(basename "$1")"
-         __gensshkeypair "$@"
-         cp "${kname}.pem" "$sshome/$(basename ${kname}.pem)"
-         cp "${kname}.pub" "$sshome/$(basename ${kname}.pub)"
-        ;;
-      -- | *)
-        __gensshkeypair "$@"
-        ;;
+	  -s | --save)
+		 shift
+		 if [ -d "$(userhome "$1")" ]; then
+			local sshome="$(userhome "$1")/.ssh"
+			shift
+		 else
+			local sshome="$(userhome)/.ssh"
+			shift
+		 fi
+		 local dname="$(psbpath "$1")"
+		 local kname="$(dirname "$dname")/$(basename "$1")"
+		 __gensshkeypair "$@"
+		 cp "${kname}.pem" "$sshome/$(basename ${kname}.pem)"
+		 cp "${kname}.pub" "$sshome/$(basename ${kname}.pub)"
+		;;
+	  -- | *)
+		__gensshkeypair "$@"
+		;;
    esac
 }
 

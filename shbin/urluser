@@ -1,14 +1,13 @@
 
-#%   DESCRIPTION:  Extract and echo the user name of the given url
-#%   USAGE: urluser "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
-#%         echo "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1" | urluser
-#%   REQUIRES: uriuser
+#%  DESCRIPTION:  Extract and echo the user name of the given url
+#%	Usage: urluser "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
+#%		   echo "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1" | urluser
 
 
 if [ $# -lt 1 ]; then
-    uriuser "$(cat)"
+	uriuser "$(cat)"
 else
-    uriuser "$@"
+	uriuser "$@"
 fi
 
 exit 0

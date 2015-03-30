@@ -2,8 +2,7 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  dollc
 #%   DESCRIPTION:  docker list all containers by keywords, ids use exact matching
-#%   USAGE: dollc [-r|-a] | [-i|-ri|-pi|-ei imagename:tag] | [-n|-b containerid]
-#%   REQUIRES: docker, sudo, awk, ecol, efilter
+#%   Usage: dollc [-r|-a] | [-i|-ri|-pi|-ei imagename:tag] | [-n|-b containerid]
 #----------------------------------------------------------------------------------------------------------------------
 _dollc() {
     if [ $# -lt 1 ]; then
@@ -16,8 +15,8 @@ _dollc() {
             if [ $# -lt 1 ]; then
                 local cntlist="$(sudo docker ps -a | sed '1d' | awk '{print $1,$2,$NF,""}' | ecol 1 2>/dev/null)"
             else
-                local cntlist="$(sudo docker ps -a | sed '1d' | awk '{print $1,$2,$NF,""}' | efilter -rl " $@ " 2>/dev/null | ecol 1 2>/dev/null)"
-                [ -z "$cntlist" ] && cntlist="$(sudo docker ps -a | sed '1d' | awk '{print $1}' | efilter -rl "^$@$" 2>/dev/null)"
+                local cntlist="$(sudo docker ps -a | sed '1d' | awk '{print $1,$2,$NF,""}' | efilters -rl " $@ " 2>/dev/null | ecol 1 2>/dev/null)"
+                [ -z "$cntlist" ] && cntlist="$(sudo docker ps -a | sed '1d' | awk '{print $1}' | efilters -rl "^$@$" 2>/dev/null)"
             fi
             [ -n "$cntlist" ] && echo "$cntlist"
             ;;
@@ -26,8 +25,8 @@ _dollc() {
             if [ $# -lt 1 ]; then
                 local cntlist="$(sudo docker ps -a | sed '1d' | awk '{print $1,$2,$NF,""}' | ecol 2 2>/dev/null)"
             else
-                local cntlist="$(sudo docker ps -a | sed '1d' | awk '{print $1,$2,$NF,""}' | efilter -rl "$@" 2>/dev/null | ecol 2 2>/dev/null)"
-                [ -z "$cntlist" ] && cntlist="$(sudo docker ps -a | sed '1d' | awk '{print $2}' | efilter -rl "^$@$" 2>/dev/null)"
+                local cntlist="$(sudo docker ps -a | sed '1d' | awk '{print $1,$2,$NF,""}' | efilters -rl "$@" 2>/dev/null | ecol 2 2>/dev/null)"
+                [ -z "$cntlist" ] && cntlist="$(sudo docker ps -a | sed '1d' | awk '{print $2}' | efilters -rl "^$@$" 2>/dev/null)"
             fi
             [ -n "$cntlist" ] && echo "$cntlist"
             ;;
@@ -36,8 +35,8 @@ _dollc() {
             if [ $# -lt 1 ]; then
                 local cntlist="$(sudo docker ps -a | sed '1d' | awk '{print $1,$2,$NF,""}' | ecol 3 2>/dev/null)"
             else
-                local cntlist="$(sudo docker ps -a | sed '1d' | awk '{print $1,$2,$NF,""}' | efilter -rl "$@" 2>/dev/null | ecol 3 2>/dev/null)"
-                [ -z "$cntlist" ] && cntlist="$(sudo docker ps -a | sed '1d' | awk '{print $NF}' | efilter -rl "^$@$" 2>/dev/null)"
+                local cntlist="$(sudo docker ps -a | sed '1d' | awk '{print $1,$2,$NF,""}' | efilters -rl "$@" 2>/dev/null | ecol 3 2>/dev/null)"
+                [ -z "$cntlist" ] && cntlist="$(sudo docker ps -a | sed '1d' | awk '{print $NF}' | efilters -rl "^$@$" 2>/dev/null)"
             fi
             [ -n "$cntlist" ] && echo "$cntlist"
             ;;
@@ -59,7 +58,7 @@ _dollc() {
             if [ $# -lt 1 ]; then
                 sudo docker ps -a -f status=running | sed '1d' | awk '{print $1,$2,$NF,""}'
             else
-                sudo docker ps -a -f status=running | sed '1d' | awk '{print $1,$2,$NF,""}' | efilter -rl "$@" 2>/dev/null
+                sudo docker ps -a -f status=running | sed '1d' | awk '{print $1,$2,$NF,""}' | efilters -rl "$@" 2>/dev/null
             fi
             ;;
             -pi | --pauseid | --pauseindex)
@@ -76,7 +75,7 @@ _dollc() {
             if [ $# -lt 1 ]; then
                 sudo docker ps -a -f status=paused | sed '1d' | awk '{print $1,$2,$NF,""}'
             else
-                sudo docker ps -a -f status=paused | sed '1d' | awk '{print $1,$2,$NF,""}' | efilter -rl "$@" 2>/dev/null
+                sudo docker ps -a -f status=paused | sed '1d' | awk '{print $1,$2,$NF,""}' | efilters -rl "$@" 2>/dev/null
             fi
             ;;
             -ei | --exitid | --exitindex)
@@ -93,11 +92,11 @@ _dollc() {
             if [ $# -lt 1 ]; then
                 sudo docker ps -a -f status=exited | sed '1d' | awk '{print $1,$2,$NF,""}'
             else
-                sudo docker ps -a -f status=exited | sed '1d' | awk '{print $1,$2,$NF,""}' | efilter -rl "$@" 2>/dev/null
+                sudo docker ps -a -f status=exited | sed '1d' | awk '{print $1,$2,$NF,""}' | efilters -rl "$@" 2>/dev/null
             fi
             ;;
             -- | *)
-            sudo docker ps -a | sed '1d' | awk '{print $1,$2,$NF}' | efilter -rl "$@" 2>/dev/null
+            sudo docker ps -a | sed '1d' | awk '{print $1,$2,$NF}' | efilters -rl "$@" 2>/dev/null
             ;;
         esac
     fi

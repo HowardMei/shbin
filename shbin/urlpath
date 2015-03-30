@@ -1,14 +1,13 @@
 
-#%   DESCRIPTION:  Extract and echo the full path of the given url
-#%   USAGE: urlpath "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
-#%         echo "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1" | urlpath
-#%   REQUIRES: uripath
+#%  DESCRIPTION:  Extract and echo the full path of the given url
+#%	Usage: urlpath "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
+#%		   echo "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1" | urlpath
 
 
 if [ $# -lt 1 ]; then
-    uripath "$(cat)"
+	uripath "$(cat)"
 else
-    uripath "$@"
+	uripath "$@"
 fi
 
 exit 0
