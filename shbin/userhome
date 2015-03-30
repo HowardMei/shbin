@@ -1,0 +1,37 @@
+
+## require shbin/abspath
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  userhome
+#%   DESCRIPTION:  Return the home dir path of the given user
+#%	 Usage: userhome [howardmei]
+#----------------------------------------------------------------------------------------------------------------------
+
+_userhome() {
+    if [ $# -lt 1 ]; then
+        local cusr="$(shuser)"
+    else
+        local cusr="$1";
+    fi;
+    local userhome="";
+    eval userhome="$(printf "~%q" "$cusr")";
+    userhome="$(abspath "$userhome")"
+    if [ -z "$userhome" ]; then
+		userhome="$(getent passwd $cusr | cut -d: -f6)"
+		userhome="$(abspath "$userhome")"
+    fi
+    if [ -d "$userhome" ]; then
+        echo "$userhome"
+    else
+		return 1
+    fi
+}
+
+
+if [ $# -lt 1 ]; then
+	_userhome
+else
+	_userhome "$@"
+fi	
+
+unset -f _userhome
+exit 0

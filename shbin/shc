@@ -1,0 +1,23 @@
+
+#%   DESCRIPTION:  Super sh shell [ sudo sh/bash -c for sh/bash script file & console ]
+#%	 Usage: 	shc 'echo "Current shell is $SHELL"' OR shc "echo 'Current shell is $SHELL'"
+#%	 			OR shc sh/bashcmd | sh/bashfile
+
+
+if [ -n "$_" ] && [ -x "$_" ]; then
+	if [ -n "$(echo "$_" | grep -i "/bash" 2>/dev/null)" ]; then
+		echo "sudo bash -c $@" >&2 
+		suba "$@" 
+	else
+		echo "sudo sh -c $@" >&2 
+		sush "$@" 
+	fi
+else
+	if [ -n "$(echo "$SHELL" | grep -i "/bash" 2>/dev/null)" ]; then
+		echo "sudo bash -c $@" >&2 
+		suba "$@" 
+	else
+		echo "sudo sh -c $@" >&2
+		sush "$@" 
+	fi
+fi

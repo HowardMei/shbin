@@ -1,0 +1,19 @@
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  sob
+#%   DESCRIPTION:  Quick binary search using whereis
+#%	 Usage: sob docker
+#----------------------------------------------------------------------------------------------------------------------
+_sob() {
+  if [ $# -lt 1 ] ; then
+     echo "Usage: sob docker packer"
+     return 0
+  fi
+  whereis "$@" 2>/dev/null | tr ' ' '\n'
+}
+
+_sob "$@" 
+
+unset -f _sob 
+exit 0

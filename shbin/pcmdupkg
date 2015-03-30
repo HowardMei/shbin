@@ -1,0 +1,154 @@
+
+## require shbin/whichis, shbin/iscommand, shbin/efilter, shbin/estrip
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  _pcmd2pkg
+#%   DESCRIPTION:  List the package who owns the bin file
+#%   Usage: pcmdupkg docker
+#----------------------------------------------------------------------------------------------------------------------
+_pcmd2pkg() {
+	if [ $# -lt 1 ] ; then
+		echo "Too few options, at leat one command name is required." >&2
+		return 1
+	else
+		local binloc="$(whichis "$1")"
+		if [ -z "$binloc" ]; then
+			binloc="$(sob "$pkgopt" 2>/dev/null | efilters -rl ".*/bin/.*" | erow 1)" 
+			if [ -z "$binloc" ]; then
+				echo "$1 is not a valid command or binary." >&2
+				return 1
+			fi
+		fi
+	fi
+	
+	if [ -f "$binloc" ] && [ -x "$binloc" ]; then
+		echo "Trace back the package name based on the given binary [${binloc}]:" >&2
+	else
+		echo "Command binary cannot be found, unable to trace back its package." >&2
+		return 1 
+	fi
+
+	if iscommand "dlocate" 2>/dev/null;then
+		dlocate -S --package-only "$binloc" 2>/dev/null
+		return 0 
+	fi
+	
+	if iscommand "dpkg" 2>/dev/null;then
+		dpkg -S "$binloc" 2>/dev/null | estrips -r ":.*"
+		return 0 
+	fi
+	
+	if iscommand "rpm" 2>/dev/null;then
+		rpm -qf "$binloc" 2>/dev/null | estrips -r ":.*"
+		return 0 
+	fi
+	
+	if iscommand "pacman" 2>/dev/null;then
+		pacman -Qo "$binloc" 2>/dev/null | estrips -r ":.*"
+		return 0 
+	fi
+	
+	if iscommand "equery" 2>/dev/null;then
+		equery belongs -e "$binloc" 2>/dev/null | efilters -r "/.*(" | estrips -m '/' | estrips -m ' ('
+		return 0 
+	fi
+	
+	if iscommand "pkg_info" 2>/dev/null;then
+		pkg_info -qF "$binloc" 2>/dev/null | estrips -r ":.*"
+		return 0 
+	fi
+	
+	if iscommand "opkg" 2>/dev/null;then
+		opkg search "$binloc" 2>/dev/null | estrips -r ":.*"
+		return 0 
+	fi
+}
+
+
+_ppkg2cmd() {
+	if [ $# -lt 1 ] ; then
+		echo "Too few options, at leat 1 package name is required." >&2
+		return 1
+	else
+		local pkgname="$1"
+		echo "List commands provided by the given package [${pkgname}]:" >&2
+	fi
+		
+	if iscommand "dlocate" 2>/dev/null;then
+		dlocate -L "$pkgname" 2>/dev/null | efilters -r ".*/bin/.*" | estrips -r "/bin/" 
+		return 0 
+	fi
+		
+	if iscommand "dpkg" 2>/dev/null;then
+		dpkg -L "$pkgname" 2>/dev/null | efilters -r ".*/bin/.*" | estrips -r "/bin/" 
+		return 0 
+	fi
+	
+	if iscommand "rpm" 2>/dev/null;then
+		rpm -ql "$pkgname" 2>/dev/null | efilters -r ".*/bin/.*" | estrips -r "/bin/" 
+		return 0 
+	fi
+	
+	if iscommand "packman" 2>/dev/null;then
+		packman -Ql "$pkgname" 2>/dev/null | efilters -r ".*/bin/.*" | estrips -r "/bin/" 
+		return 0 
+	fi
+	
+	if iscommand "equery" 2>/dev/null;then
+		equery files "$pkgname" 2>/dev/null | efilters -r ".*/bin/.*" | estrips -r "/bin/" 
+		return 0 
+	fi
+	
+	if iscommand "pkg_info" 2>/dev/null;then
+		pkg_info -qL "$pkgname" 2>/dev/null | efilters -r ".*/bin/.*" | estrips -r "/bin/" 
+		return 0 
+	fi
+	
+	if iscommand "opkg" 2>/dev/null;then
+		opkg files "$pkgname" 2>/dev/null | efilters -r ".*/bin/.*" | estrips -r "/bin/" 
+		return 0 
+	fi
+}
+
+
+if [ $# -lt 1 ]; then
+	echo "Usage: pcmdupkg [--listcmd | --showpack] cmdname | pkgname" >&2
+elif [ $# -eq 1 ]; then
+	opt="--showapp"
+	binorpkg="$1"
+else
+	opt="$1"
+	binorpkg="$2"
+fi
+
+cmdlist="$(_ppkg2cmd "$binorpkg" 2>/dev/null)"
+pkgname="$(_pcmd2pkg "$binorpkg" 2>/dev/null)"
+
+case "$opt" in
+   -b | -c | -lb | -lc | --listcmd | --listbin | listbinary | listcommand)
+		if [ -z "$cmdlist" ] && [ -z "$pkgname" ]; then
+			echo "Package $binorpkg is not installed yet or its binary commands are missing." >&2 
+		elif [ -z "$cmdlist" ] && [ -n "$pkgname" ]; then
+			echo "$binorpkg" 
+		else
+			echo "$cmdlist" 
+		fi
+	;;
+   -p | -a | -sa | -sp | --showapp | --showpack | showpack | showpackage)
+		if [ -z "$pkgname" ] && [ -z "$cmdlist" ]; then
+			echo "Command $binorpkg is missing or its parent package is not installed yet." >&2 
+		elif [ -z "$pkgname" ] && [ -n "$cmdlist" ]; then
+			echo "$binorpkg" 
+		else
+			echo "$pkgname" 
+		fi
+	;;
+	"" | -- | *)
+		echo "Unsupported option, usage: pcmdupkg [--listcmd | --showpack] cmdname | pkgname" >&2
+	;;
+esac
+
+
+unset opt binorpkg cmdlist pkgname
+unset -f _pcmd2pkg 
+unset -f _ppkg2cmd 
+exit 0

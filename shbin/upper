@@ -1,0 +1,23 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  upper
+#%   DESCRIPTION:  Upper case the letters of the given string
+#%	 Usage: echo "string" | upper OR upper "non empty string"
+#----------------------------------------------------------------------------------------------------------------------
+_upper() {
+	if [ $# -lt 1 ]; then
+		echo "$(cat)" | tr '[:lower:]' '[:upper:]'
+	else
+		echo "$@" | tr '[:lower:]' '[:upper:]'
+	fi
+}
+
+
+if [ $# -lt 1 ]; then
+	echo "$(cat)" | _upper
+else
+	echo "$*" | _upper
+fi
+
+unset -f _upper
+exit 0

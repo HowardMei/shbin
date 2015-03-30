@@ -1,0 +1,61 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  ecol 
+#%   DESCRIPTION:  Get the nth column from the given string
+#%	 Usage: ecol [-d , ] 2[:8] "$(psp salt)" OR psp salt | ecol [-d ,] 2[:8]
+#----------------------------------------------------------------------------------------------------------------------
+_ecol() {
+    local dlm=" "
+    case "$1" in
+		-d | --delimiter | --separator)
+			shift
+			dlm="$1"
+			shift
+		;;
+		-- | *)
+		;;
+	esac
+	if echo "$1" | grep -q : 2>/dev/null; then
+		local nca="$(echo "$1" | cut -d: -f1 | tr -cd '[:digit:]')"
+		local ncb="$(echo "$1" | cut -d: -f2 | tr -cd '[:digit:]')"
+	else
+		local nca="$(echo "$1" | tr -cd '[:digit:]')"
+		local ncb="$nca"
+	fi
+	shift
+	if [ $# -lt 1 ]; then
+		local ostr="$(cat)"
+	else
+		local ostr="$@"
+	fi
+	local nctot="$(echo "$ostr" | ncols -d "$dlm")" 
+	nca="${nca:=1}" 
+	ncb="${ncb:="$nctot"}" 
+	if [ "$nca" -ge 0 ] && [ "$nca" -le "$ncb" ] && [ "$ncb" -le "$nctot" ]; then
+		## Also works: awk -F"$dlm" -v f="$nca" -v t="$ncb" '{for(i=f;i<=t;i++) printf("%s%s",$i,(i==t)?"\n":OFS)}'
+		## Inside awk: printf FS$i will produce errors due to special chars like %, use printf("%s", FS$i) to avoid
+		printf "%s" "$ostr" | awk -F"$dlm" '{for (i='"$nca"'; i<='"$ncb"'; i++) printf("%s", FS$i); print NL}' 2>/dev/null | estrips -r "^${dlm}" 
+		return 0
+	else
+		return 1
+	fi
+}
+
+
+if [ $# -lt 1 ]; then
+	_ecol 1 "$(cat)"
+elif [ $# -eq 3 ]; then
+    case "$1" in
+		-d | --delimiter | --separator)
+		_ecol "$1" "$2" "$3" "$(cat)"
+		;;
+	-- | *)
+		_ecol "$@" 
+		;;
+	esac
+else
+	_ecol "$@"
+fi
+
+unset -f _ecol
+exit 0

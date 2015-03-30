@@ -1,0 +1,147 @@
+
+## require shbin/shc, shbin/iscommand
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  pinstall
+#%   DESCRIPTION:  Universal package installer for all distros with apt-get, yum and ... under the hood
+#%	 Usage: pinstall curl wget git
+#----------------------------------------------------------------------------------------------------------------------
+_pinstall() {
+	if [ $# -lt 1 ] ; then
+	 echo "Nothing is specified/left to be installed."
+	 return 1
+	fi
+	
+	case "$1" in
+		-p | --pip | pip)	
+			shift
+			local pkgname="$1"
+			shift
+			if iscommand pip 2>/dev/null;then
+				echo "Installing $pkgname via pip" >&2
+				shc "pip install $pkgname" || echo "$pkgname pip install failed!" >&2
+				if [ $# -lt 1 ] ; then
+					return 0
+				else
+					_pinstall --pip "$@"
+					return 1
+				fi
+			else
+				_pinstall pip python-pip
+				_pinstall --pip "$@"
+				return 0
+			fi
+			;;
+		-- | *)
+			local pkgname="$1" 
+			if ispinstalled "$pkgname" 2>/dev/null; then
+				echo "$pkgname has already been installed." >&2
+				shift
+				if [ $# -lt 1 ] ; then
+					return 0
+				else
+					_pinstall "$@"
+					return 1
+				fi
+			fi
+			;;
+	esac
+	
+	if iscommand apt-get 2>/dev/null;then
+		echo "Installing $pkgname via apt-get" >&2
+		shc "apt-get install --fix-missing --no-install-recommends --force-yes -y -q -o DPkg::Options::=--force-confold $pkgname" || echo "$pkgname apt-get install failed!" >&2
+		shift
+		if [ $# -lt 1 ] ; then
+			return 0
+		else
+			_pinstall "$@"
+			return 1
+		fi
+	fi
+	if iscommand yum 2>/dev/null;then
+		echo "Installing $pkgname via yum" >&2
+		shc "yum install -y -q --merge-conf $pkgname" || echo "$pkgname yum install failed!" >&2
+		shift
+		if [ $# -lt 1 ] ; then
+			return 0
+		else
+			_pinstall "$@"
+			return 1
+		fi
+	fi
+	if iscommand pacman 2>/dev/null;then
+		echo "Installing $pkgname via pacman" >&2
+		shc "pacman -S --noconfirm $pkgname" || echo "$pkgname pacman install failed!" >&2
+		shift
+		if [ $# -lt 1 ] ; then
+			return 0
+		else
+			_pinstall "$@"
+			return 1
+		fi
+	fi
+	if iscommand emerge 2>/dev/null;then
+		echo "Installing $pkgname via emerge" >&2
+		shc "emerge -a $pkgname" || echo "$pkgname emerge install failed!" >&2
+		shift
+		if [ $# -lt 1 ] ; then
+			return 0
+		else
+			_pinstall "$@"
+			return 1
+		fi
+	fi
+
+	if iscommand zypper 2>/dev/null;then
+		echo "Installing $pkgname via zypper" >&2
+		shc "zypper --non-interactive install --auto-agree-with-licenses $pkgname" || echo "$pkgname zypper install failed!" >&2
+		shift
+		if [ $# -lt 1 ] ; then
+			return 0
+		else
+			_pinstall "$@"
+			return 1
+		fi
+	fi
+	
+	if iscommand pkgin 2>/dev/null;then
+		echo "Installing $pkgname via pkgin" >&2
+		shc "pkgin -y install $pkgname" || echo "$pkgname pkgin install failed!" >&2
+		shift
+		if [ $# -lt 1 ] ; then
+			return 0
+		else
+			_pinstall "$@"
+			return 1
+		fi
+	fi
+	
+	if iscommand pkg_add 2>/dev/null;then
+		echo "Installing $pkgname via pkg_add" >&2
+	    shc "pkg_add -r $pkgname" || echo "$pkgname pkg_add install failed" >&2
+		##pkgng:  /usr/local/sbin/pkg install -y -r FreeBSD "$pkgname" || echo "/usr/local/sbin/pkg install failed!"
+		shift
+		if [ $# -lt 1 ] ; then
+			return 0
+		else
+			_pinstall "$@"
+			return 1
+		fi
+	fi
+	
+	if iscommand opkg 2>/dev/null;then
+		echo "Installing $pkgname via opkg" >&2
+	    shc "opkg install $pkgname" || echo "$pkgname opkg install failed" >&2
+		shift
+		if [ $# -lt 1 ] ; then
+			return 0
+		else
+			_pinstall "$@"
+			return 1
+		fi
+	fi
+}
+
+_pinstall "$@" 
+
+unset -f _pinstall 
+exit 0

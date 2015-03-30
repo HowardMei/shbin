@@ -1,0 +1,11 @@
+
+#%   DESCRIPTION:  Reverse the order of chars of the given string.
+#%	 Usage: erev "the string" or echo "the string" | erev 
+
+if [ $# -lt 1 ]; then
+	erev "$(cat)" 
+else
+	erev "$@" 
+fi
+
+exit 0

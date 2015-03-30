@@ -1,0 +1,296 @@
+
+## requires shbin/abspath
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  lr
+#%   DESCRIPTION:  Alternative to ls showing the permission numbers
+#%   Usage: lr [-s|-S|-t|-T|-r|-R|-i|-u|-U|-g|-G|-*[0-9]:[0-9]] [dirorfilepath]
+#----------------------------------------------------------------------------------------------------------------------
+unset -f _ls _lu _lr
+_ls() {
+   local opt=""
+   local depth=0
+   local dst="$(pwd)"
+   local mindepth=0
+   local maxdepth=1
+
+   if [ $# -lt 1 ]; then
+      find "$(pwd)" -mindepth "$mindepth" -maxdepth "$maxdepth" -not -iname ".*"
+      return 0
+   elif [ -r "$1" ]; then
+      find "$1" -mindepth "$mindepth" -maxdepth "$maxdepth" -not -iname ".*"
+      return 0
+   elif [ -n "$1" ]; then
+      case "$1" in
+        -[0-9] | --[0-9] | -[0-9]: | -:[0-9] | -[0-9]:[0-9] | --[0-9]: | --:[0-9] | --[0-9]:[0-9])
+            mindepth="$(echo "$1" | tr -d "-" | cut -d: -f1 | tr -cd '[:digit:]')"
+            maxdepth="$(echo "$1" | tr -d "-" | cut -d: -f2 | tr -cd '[:digit:]')"
+            if [ -z "$mindepth" ] || [ "$mindepth" -lt 0 ]; then
+                mindepth=0
+            fi
+            if [ -z "$maxdepth" ] || [ "$maxdepth" -gt 9 ]; then
+                maxdepth=9
+            fi
+            if [ "$maxdepth" -lt "$mindepth" ]; then
+                maxdepth=mindepth
+            fi
+            shift
+            [ -n "$1" ] && dst="$(abspath "$1")"
+            [ -r "$dst" ] && find "$dst" -mindepth "$mindepth" -maxdepth "$maxdepth" -not -iname ".*"
+            ;;
+        -* | --* | -*[0-9] | --*[0-9] | -*[0-9]: | -*:[0-9] | -*[0-9]:[0-9] | --*[0-9]: | --*:[0-9] | --*[0-9]:[0-9])
+            opt="$(echo "$1" | tr -d "-" | tr -d ":" | tr -d "[[:digit:]]")"
+            depth="$(echo "$1" | tr -d "-" | tr -d "$opt")"
+            local mindepth="$(echo "$depth" | cut -d: -f1 | tr -cd '[:digit:]')"
+            local maxdepth="$(echo "$depth" | cut -d: -f2 | tr -cd '[:digit:]')"
+            if [ -z "$mindepth" ]; then
+                mindepth=1
+            elif [ "$mindepth" -lt 0 ]; then
+                mindepth=0
+            fi
+            if [ -z "$maxdepth" ]; then
+                maxdepth=1
+            elif [ "$maxdepth" -gt 9 ]; then
+                maxdepth=9
+            fi
+            if [ "$maxdepth" -lt "$mindepth" ]; then
+                maxdepth=mindepth
+            fi
+            shift
+            [ -r "$1" ] && dst="$(abspath "$1")" || return 1
+            case "$opt" in
+                t | time | T | timestamp)
+                    [ -r "$dst" ] && find "$dst" -mindepth "$mindepth" -maxdepth "$maxdepth" -not -iname ".*" -printf '%T@ %p\n' | sort -k 1nr 2>/dev/null | awk '{print $2}' 2>/dev/null
+                    ;;
+                d | dir)
+                    [ -r "$dst" ] && find "$dst" -mindepth "$mindepth" -maxdepth "$maxdepth" -type d \( ! -regex '.*/\..*' \)
+                    ;;
+                f | file)
+                    [ -r "$dst" ] && find "$dst" -mindepth "$mindepth" -maxdepth "$maxdepth" -type f \( ! -regex '.*/\..*' \)
+                    ;;
+                l | link)
+                    [ -r "$dst" ] && find "$dst" -mindepth "$mindepth" -maxdepth "$maxdepth" -type l \( ! -regex '.*/\..*' \)
+                    ;;
+                h | hidden)
+                    [ -r "$dst" ] && find "$dst" -mindepth "$mindepth" -maxdepth "$maxdepth" -iname ".*"
+                    ;;
+                hf | hiddenfile)
+                    [ -r "$dst" ] && find "$dst" -mindepth "$mindepth" -maxdepth "$maxdepth" -type f -iname ".*"
+                    ;;
+                hd | hiddendir)
+                    [ -r "$dst" ] && find "$dst" -mindepth "$mindepth" -maxdepth "$maxdepth" -type d -iname ".*"
+                    ;;
+                hl | hiddenlink)
+                    [ -r "$dst" ] && find "$dst" -mindepth "$mindepth" -maxdepth "$maxdepth" -type l -iname ".*"
+                    ;;
+                a | all)
+                    [ -r "$dst" ] && find "$dst" -mindepth "$mindepth" -maxdepth "$maxdepth"
+                    ;;
+                -- | *)
+                    [ -r "$dst" ] && find "$dst" -mindepth "$mindepth" -maxdepth "$maxdepth" || find "$(pwd)" -mindepth "$mindepth" -maxdepth "$maxdepth"
+                    ;;
+            esac
+            ;;
+        -- | *)
+            [ -n "$1" ] && dst="$(abspath "$1")"
+            [ -r "$dst" ] && find "$dst" -mindepth "$mindepth" -maxdepth "$maxdepth"
+            return 0
+            ;;
+      esac
+   fi
+}
+
+_lu() {
+   local opt=""
+   local depth=0
+   if [ $# -lt 1 ]; then
+      return 1
+   else
+      case "$1" in
+        -* | --* | -*[0-9] | --*[0-9] | -*[0-9]: | -*:[0-9] | -*[0-9]:[0-9] | --*[0-9]: | --*:[0-9] | --*[0-9]:[0-9])
+            opt="$(echo "$1" | tr -d "-" | tr -d ":" | tr -d "[[:digit:]]")"
+            depth="$(echo "$1" | tr -d "-" | tr -d "$opt")"
+            [ -z "$depth" ] && depth=0
+            shift
+            if [ -n "$1" ] && [ -r "$1" ]; then
+                local flist="$(_ls "-${opt}${depth}" "$1" 2>/dev/null)"
+                [ -n "$flist" ] && du -had 0 $flist | sort -h 2>/dev/null | awk '{print $2}' 2>/dev/null
+            fi
+            ;;
+        -- | *)
+            ;;
+      esac
+   fi
+}
+
+_lr() {
+   local opt=""
+   local dst=""
+   local depth=0
+   local lscmd='_ls -1'
+   local statargs='%a %U:%G %N'
+   local ducmd='false $@ >/dev/null 2>/dev/null'
+   if [ $# -lt 1 ]; then
+      dst="$(pwd)"
+   elif [ -r "$1" ]; then
+      depth="$(echo "$1" | tr -d "-" | tr -d "$opt")"
+      [ -n "$1" ] && dst="$(abspath "$1")"
+      shift
+   elif [ -n "$1" ]; then
+       case "$1" in
+           -* | --* | -*[0-9] | --*[0-9] | -*[0-9]: | -*:[0-9] | -*[0-9]:[0-9] | --*[0-9]: | --*:[0-9] | --*[0-9]:[0-9])
+              opt="$(echo "$1" | tr -d "-" | tr -d ":" | tr -d "[[:digit:]]")"
+              depth="$(echo "$1" | tr -d "-" | tr -d "$opt")"
+              [ -z "$depth" ] && depth=0
+              shift
+              [ -r "$1" ] && dst="$(abspath "$1")" || dst="$(pwd)"
+              lscmd="_ls -${opt}${depth}"
+              case "$opt" in
+                s | sizes)
+                    if [ -f "$dst" ]; then
+                        lscmd="_lu -f"
+                        ducmd='du -h --max-depth=0'
+                        statargs=''
+                    else
+                        cecho -r "It takes a while to list the sizes of all files and dirs under $dst:" >&2
+                        depth=$(ecalc "$depth+1")
+                        lscmd="_lu -a${depth}"
+                        ducmd='du -h --max-depth=0'
+                    fi
+                ;;
+                S | SIZESUM)
+                    if [ -f "$dst" ]; then
+                        lscmd="_lu -f"
+                        ducmd='du -h --max-depth=0'
+                        statargs=''
+                    else
+                        cecho -r "It takes a while to list the sizes of all dirs under $dst:" >&2
+                        lscmd="_lu -d${depth}"
+                        ducmd='du -h --max-depth=0'
+                    fi
+                ;;
+                t | time)
+                    if [ -f "$dst" ]; then
+                        statargs='%z'
+                    else
+                        statargs='%z %N'
+                    fi
+                ;;
+                T | timestamp)
+                    if [ -f "$dst" ]; then
+                        statargs='%Z'
+                    else
+                        statargs='%Z %N'
+                    fi
+                ;;
+                r | rights)
+                    if [ -f "$dst" ]; then
+                        statargs='%A'
+                    else
+                        statargs='%A %N'
+                    fi
+                ;;
+                R | RCODE)
+                  if [ -f "$dst" ]; then
+                    statargs='%a'
+                  else
+                    statargs='%a %N'
+                  fi
+                ;;
+                I | INODE)
+                  if [ -f "$dst" ]; then
+                    lscmd='_ls -f'
+                    statargs='%i'
+                  else
+                    lscmd='_ls'
+                    statargs='%i %N'
+                  fi
+                ;;
+                U | UID)
+                  if [ -f "$dst" ]; then
+                    statargs='%u'
+                  else
+                    statargs='%u %N'
+                  fi
+                ;;
+                u | username)
+                  if [ -f "$dst" ]; then
+                    statargs='%U'
+                  else
+                    statargs='%U %N'
+                  fi
+                ;;
+                G | GID)
+                  if [ -f "$dst" ]; then
+                    statargs='%g'
+                  else
+                    statargs='%g %N'
+                  fi
+                ;;
+                g | groupname)
+                  if [ -f "$dst" ]; then
+                    statargs='%G'
+                  else
+                    statargs='%G %N'
+                  fi
+                ;;
+                F | FTYPE)
+                  if [ -f "$dst" ]; then
+                    statargs='%f'
+                  else
+                    statargs='%f %N'
+                  fi
+                ;;
+                f | files)
+                  lscmd="_ls --file${depth}"
+                  statargs='%N'
+               ;;
+                d | dirs)
+                  lscmd="_ls --dir${depth}"
+                  statargs='%N'
+               ;;
+                l | links)
+                  lscmd="_ls --link${depth}"
+                  statargs='%N'
+               ;;
+                -- | *)
+                  statargs='%N'
+               ;;
+              esac
+           ;;
+           -- | *)
+              [ -n "$1" ] && dst="$(abspath "$1")"
+              shift
+           ;;
+       esac
+   fi
+
+   if [ -n "$dst" ] && [ -f "$dst" ];then
+      $ducmd "$(abspath -f "$dst")" 2>/dev/null | awk '{print $1}' 2>/dev/null | tr '\r' ' ' | tr '\n' ' '
+      stat -c "$statargs" "$dst" 2>/dev/null | tr -d "'" | tr -d "‘" | tr -d "’"
+   elif [ -n "$dst" ] && [ -d "$dst" ];then
+      local dstfs="$($lscmd "$dst")"
+      for dstf in $dstfs; do
+        [ -n "$(abspath $dstf)" ] && dstf="$(abspath $dstf)" || dstf="$dst/$dstf"
+        $ducmd "$dstf" 2>/dev/null | awk '{print $1}' 2>/dev/null | tr '\r' ' ' | tr '\n' ' '
+        stat -c "$statargs" "$dstf" 2>/dev/null | tr -d "'" | tr -d "‘" | tr -d "’"
+      done
+      unset dstf
+   else
+      return 1
+   fi
+}
+
+if [ $# -le 2 ]; then
+    _lr "$@"
+else
+    opts="$1"
+    shift
+    while [ $# -ge 1 ]; do
+        [ -r "$1" ] && _lr "$opts" "$1"
+        shift
+    done
+fi
+
+unset opts
+unset -f _ls _lu _lr
+exit 0

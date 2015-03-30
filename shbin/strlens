@@ -1,0 +1,11 @@
+
+#%   DESCRIPTION:  Get the length of the given strings
+#%	 Usage: echo "strings" | strlens OR strlens "strings"
+
+if [ $# -lt 1 ]; then
+	echo "$(cat)" | strlen 
+else
+	echo "$*" | strlen 
+fi
+
+exit 0

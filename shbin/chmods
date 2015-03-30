@@ -1,0 +1,56 @@
+
+## requires shbin/abspath, shbin/lr
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  chmods
+#%   DESCRIPTION:  Chmod all files/dirs in the given path
+#%   Usage: chmodf [-a | all | f | file | d | dir | l | link | h | hidden | hf | hiddenfile | hd | hiddendir | hl | hiddenlink[0-9]:[0-9]] path 750
+#----------------------------------------------------------------------------------------------------------------------
+_chmodf() {
+   local opt=""
+   local depth=1
+   case "$1" in
+        -* | --* | -*[0-9] | --*[0-9] | -*[0-9]: | -*:[0-9] | -*[0-9]:[0-9] | --*[0-9]: | --*:[0-9] | --*[0-9]:[0-9])
+            opt="$(echo "$1" | tr -d "-" | tr -d ":" | tr -d "[[:digit:]]")"
+            depth="$(echo "$1" | tr -d "-" | tr -d "$opt")"
+            [ -z "$depth" ] && depth=1
+            case "$opt" in
+                a | all | f | file | d | dir | l | link | h | hidden | hf | hiddenfile | hd | hiddendir | hl | hiddenlink)
+                ;;
+                -- | *)
+                  opt="file"
+                ;;
+            esac
+            shift
+        ;;
+        -- | *)
+        ;;
+   esac
+
+   if [ -n "$(abspath "$1")" ] && [ -r "$(abspath "$1")" ];then
+      case "$2" in
+        [0-7][0-7][0-7] | [0-3][0-7][0-7][0-7])
+               local pt="$(abspath "$1")"
+               lr -${opt}${depth} "$pt" | sudo xargs chmod -c "$2" >/dev/null
+            ;;
+        -- | *)
+            echo "Error: $2 is not a correct permission number like 755/2750"
+            return 1
+            ;;
+      esac
+      lr -R $(lr -${opt}${depth} "$pt")
+   else
+      echo "Warning:$1 is not valid file/dir path"
+      return 1
+   fi
+}
+
+
+
+if [ $# -lt 1 ]; then
+    _chmodf "$(pwd)" 750
+else
+    _chmodf "$@"
+fi
+
+unset -f _chmodf
+exit 0

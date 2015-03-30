@@ -1,0 +1,162 @@
+
+## require shbin/escape
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  efilter [efilter -a|-an|...|-x "$(genpasswd -sp 128)" OR genpasswd -an 128 | efilter -d]
+#%   DESCRIPTION:  Filter wanted chars from the given string.
+#%   Usage: efilter [-a|-an|-cl|-d|-h|-lo|-m|-ml|-r|-rl|-sp|-up] "the string"
+#----------------------------------------------------------------------------------------------------------------------
+_efilter() {
+    case "$1" in
+        -a | --alpha)
+            ## only output pure alphabetical chars string
+            shift
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | tr -cd '[:alpha:]';echo
+            else
+                echo "$*" | tr -cd '[:alpha:]';echo
+            fi
+            ;;
+        -an | --alphanum)
+            ## only output pure alphabetical + numberic chars string
+            shift
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | tr -cd '[:alnum:]';echo
+            else
+                echo "$*" | tr -cd '[:alnum:]';echo
+            fi
+            ;;
+        -cl | --commentline)
+            ## output comment lines started with # [=:echo "$*" | _efilter -rl "^ *#.*$"]
+            shift
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | sed -ne 's/^\s*\t*#\(.*$\)/#\1/p' 2>/dev/null
+            else
+                echo "$*" | sed -ne 's/^\s*\t*#\(.*$\)/#\1/p' 2>/dev/null
+            fi
+            ;;
+        -lo | --lower)
+            ## only output pure lower case chars string
+            shift
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | tr -cd '[:lower:]';echo
+            else
+                echo "$*" | tr -cd '[:lower:]';echo
+            fi
+            ;;
+        -up | --upper)
+            ## only output pure upper case chars string
+            shift
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | tr -cd '[:upper:]';echo
+            else
+                echo "$*" | tr -cd '[:upper:]';echo
+            fi
+            ;;
+        -d | --digit)
+            ## only output pure digits string
+            shift
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | tr -cd '[:digit:]';echo
+            else
+                echo "$*" | tr -cd '[:digit:]';echo
+            fi
+            ;;
+        -h | --hex | --xdigit)
+            ## only output pure hexadecimal string
+            shift
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | tr -cd '[:xdigit:]';echo
+            else
+                echo "$*" | tr -cd '[:xdigit:]';echo
+            fi
+            ;;
+        -m | --mention | --match)
+            ## only output lines mentioning or matching the given phrase
+            shift
+            local pat="$(escape "$1")"
+            if [ -z "$pat" ]; then
+                ##echo "The $pat string should not be empty." >&2
+                return 1
+            else
+                shift
+            fi
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | sed -ne "s/\(^.*\)\(${pat}\)\(.*$\)/\2/p" 2>/dev/null
+            else
+                echo "$*" | sed -ne "s/\(^.*\)\(${pat}\)\(.*$\)/\2/p" 2>/dev/null
+            fi
+            ;;
+        -ml | --mentionline | --matchline)
+            ## only output lines mentioning or matching the given phrase
+            shift
+            local pat="$(escape "$1")"
+            if [ -z "$pat" ]; then
+                ##echo "The $pat string should not be empty." >&2
+                return 1
+            else
+                shift
+            fi
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | sed -e "/^.*$pat.*$/!d"
+            else
+                echo "$*" | sed -e "/^.*$pat.*$/!d"
+            fi
+            ;;
+        -r | --regex)
+            ## only output strings matching the given regex pattern
+            ## usage: echo "1a2b3c4d5e6f7g8h9i10j11k12l12345678" | efilter -r "[2-3][0-4][0-5][0-5][0-8]" => 23456
+            shift
+            local pat="$(echo "$1" | sed -e 's^[\/&]^\\&^g' 2>/dev/null)"
+            if [ -z "$pat" ]; then
+                echo "The $pat pattern is not valid." >&2
+                return 1
+            else
+                shift
+            fi
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | sed -e "/${pat}/!d" 2>/dev/null | sed -ne "s/\(^.*\)\(${pat}\)\(.*$\)/\2/p" 2>/dev/null
+            else
+                echo "$*" | sed -e "/${pat}/!d" 2>/dev/null | sed -ne "s/\(^.*\)\(${pat}\)\(.*$\)/\2/p" 2>/dev/null
+            fi
+            ;;
+        -rl | --regexline)
+            ## only output lines matching the given regex pattern
+            shift
+            local pat="$(echo "$1" | sed -e 's^[\/&]^\\&^g' 2>/dev/null)"
+            if [ -z "$pat" ]; then
+                echo "The $pat pattern is not valid." >&2
+                return 1
+            else
+                shift
+            fi
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | sed -e "/${pat}/!d" 2>/dev/null
+            else
+                echo "$*" | sed -e "/${pat}/!d" 2>/dev/null
+            fi
+            ;;
+        -sp | --special)
+            ## output any chars string including special chars
+            shift
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | tr -cd '[:graph:]';echo
+            else
+                echo "$*" | tr -cd '[:graph:]';echo
+            fi
+            ;;
+        "" | -- | *)
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | tr -cd '[:alnum:]';echo
+            else
+                echo "$*" | tr -cd '[:alnum:]';echo
+            fi
+            ;;
+    esac
+    return 0
+}
+
+
+_efilter "$@"
+
+unset -f _efilter
+exit 0

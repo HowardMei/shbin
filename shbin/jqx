@@ -1,0 +1,49 @@
+
+#%   DESCRIPTION: Automatically choose jqx64/32 to process json string/file.
+#%	 Usage: echo "json_string" | jqx opts  OR  jqx opts jsonfile
+
+unset jq opts
+unset -f jq
+
+opts="$@"
+
+if iscommand "jq" 2>/dev/null; then
+	jqcmd="jq"
+else
+	arch="$(uname -m 2>/dev/null | efilters -d | sed 's/^8664$/64/g' | sed 's/^386$/32/g')"
+
+	if [ -z "$arch" ]; then
+		echo "Unknown achitecture! Currently jqx only supports x86_64/i386." >&2
+		unset arch opts
+		exit 1
+	fi
+
+	if [ -n "$(uname -s 2>/dev/null | grep -i linux)" ]; then
+		jqcmd="jqx${arch}"
+	else
+		echo "Unsupported OS! Currently jqx only supports Linux OS." >&2
+		unset arch opts
+		exit 1
+	fi
+fi
+
+if iscommand "$jqcmd" 2>/dev/null; then
+	if [ $# -lt 1 ]; then
+		echo "$(cat)" | $jqcmd -r . 2>/dev/null
+	else
+		fopt="$(ecol "$#" "$opts")"
+		if [ -f "$fopt" ]; then
+			## No double quotes should be added to following command lines
+			$jqcmd $opts 2>/dev/null | estrips -rl "^null$"
+		else
+			echo "$(cat)" | $jqcmd $opts 2>/dev/null | estrips -rl "^null$"
+		fi
+	fi
+else
+	echo "Cannot find the jq/jqx64/32 command!" >&2
+	unset arch jqcmd opts
+	exit 1
+fi
+
+unset arch jqcmd opt fopt opts
+exit 0

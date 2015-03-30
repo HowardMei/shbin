@@ -1,0 +1,108 @@
+
+## require shbin/strlen
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  genpasswd
+#%   DESCRIPTION:  Generate a password phrase
+#%	 Usage: genpasswd [-a|-an|-d|-h|-lo|-sp|-up] [1024]
+#----------------------------------------------------------------------------------------------------------------------
+_genpasswd() {
+   local plen=8
+   local char="[:alnum:]"
+   if [ $# -ge 1 ]; then
+		case "$1" in
+			-a | --alpha)
+				char="[:alpha:]"
+				shift
+				if [ -n "$1" ]; then
+					local pl="$(echo "$1" | tr -cd '[:digit:]')"
+					if [ "$pl" -ge 6 ] && [ "$pl" -le 8192 ];then
+						plen="$pl"
+					fi
+				fi
+				;;
+			-an | --alphanum)
+				char="[:alnum:]"
+				shift
+				if [ -n "$1" ]; then
+					local pl="$(echo "$1" | tr -cd '[:digit:]')"
+					if [ "$pl" -ge 6 ] && [ "$pl" -le 8192 ];then
+						plen="$pl"
+					fi
+				fi
+				;;
+			-lo | --lower)
+				char="[:lower:]"
+				shift
+				if [ -n "$1" ]; then
+					local pl="$(echo $1 | tr -cd '[:digit:]')"
+					if [ "$pl" -ge 6 ] && [ "$pl" -ge 8192 ];then
+						plen="$pl"
+					fi
+				fi
+				;;
+			-up | --upper)
+				char="[:upper:]"
+				shift
+				if [ -n "$1" ]; then
+					local pl="$(echo "$1" | tr -cd '[:digit:]')"
+					if [ "$pl" -ge 6 ] && [ "$pl" -ge 8192 ];then
+						plen="$pl"
+					fi
+				fi
+				;;
+			-d | --digit)
+				char="[:digit:]"
+				shift
+				if [ -n "$1" ]; then
+					local pl="$(echo $1 | tr -cd '[:digit:]')"
+					if [ "$pl" -ge 6 ] && [ "$pl" -le 8192 ];then
+						plen="$pl"
+					fi
+				fi
+				;;
+			-h | --hex | --xdigit)
+				char="[:xdigit:]"
+				shift
+				if [ -n "$1" ]; then
+					local pl="$(echo "$1" | tr -cd '[:digit:]')"
+					if [ "$pl" -ge 6 ] && [ "$pl" -le 8192 ];then
+						plen="$pl"
+					fi
+				fi
+				;;
+			-sp | --special)
+				char="[:graph:]"
+				shift
+				if [ -n "$1" ]; then
+					local pl="$(echo "$1" | tr -cd '[:digit:]')"
+					if [ "$pl" -ge 6 ] && [ "$pl" -le 8192 ];then
+						plen="$pl"
+					fi
+				fi
+				;;
+			[6-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-8][0-9][0-9][0-9])
+				local plen="$1"
+				;;
+			-- | *)
+				;;
+		esac
+   fi
+   
+   local ptr="$(head -c 8192 /dev/urandom | tr -dc $char)"
+   local stl="$(strlen "$ptr")"
+   while true; do
+      if [ "$stl" -ge "$plen" ]; then
+		echo "$ptr" | head -c "$plen";echo
+		break
+		return 0
+	  else
+		ptr="${ptr}$(head -c 8192 /dev/urandom | tr -dc $char)"
+		stl="$(strlen "$ptr")"
+	  fi   
+   done
+}
+
+_genpasswd "$@"
+
+unset -f _genpasswd
+exit 0

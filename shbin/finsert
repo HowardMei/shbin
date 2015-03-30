@@ -1,0 +1,92 @@
+
+## require shbin/abspath, shbin/escape, shbin/fsplit, shbin/fappend
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  finsert
+#%   DESCRIPTION:  Insert the content before/after the pattern matched strings of the given file
+#%	 Usage:finsert [ -n|--nth 3 ] [-a|-b|--after|--before] "$WP_CONFIG_FILE" ".*Matching_Pattern.*" "$ANY_TEXT_TO_INSERT"
+#----------------------------------------------------------------------------------------------------------------------
+__ScriptTmp="$(mktemp -d)"
+_finsert() {
+	if [ $# -lt 3 ]; then
+        echo 'Usage:finsert [ -n|--nth 3 ] [-a|-b|--after|--before] "$WP_CONFIG_FILE" ".*Matching_Pattern.*" "$ANY_TEXT_TO_INSERT"' >&2
+        return 1
+    fi;
+    local fpos='after'
+    local nth=1
+    case "$1" in
+        -n | --nth | --num | --number)
+            shift
+            local nth="$(echo "$1" | tr -cd '[:digit:]')"
+            if [ -z "$nth" ]; then
+                echo "A non-digit value is given to -n option."
+                return 1
+            fi
+            shift
+            case "$1" in
+				-a | --after)
+					fpos='after'
+					shift
+					;;
+				-b | --before)
+					fpos='before'
+					shift
+					;;
+				-- | *)
+					;;
+			esac
+        ;;
+		-a | --after)
+				fpos='after'
+				shift
+				;;
+		-b | --before)
+				fpos='before'
+				shift
+				;;
+		-- | *)
+				;;
+	esac
+    local fn="$(abspath "$1")"
+    if [ ! -r "$fn" ]; then
+        echo "$fn is not a valid file or cannot be read!" 1>&2
+        return 1
+    else
+        shift
+    fi
+	local pat="$(echo "$1" | sed -e 's/[]\/$*.^|[]/\\&/g')"
+	shift
+	local txt="$(echo "$@" | sed -e 's/[\/&]/\\&/g')"
+	local suf="bk$(date +%s)"
+	local nst=""
+	nst="$(sed -n -e "/${pat}/=" "$fn" 2>/dev/null)"
+	if [ -z "$nst" ]; then
+		echo "Cannot find the lines containing the $pat in $fn" >&2
+		return 1
+	fi
+	local ntl=""
+	ntl="$(erow "$nth" "$nst")"
+    if [ -z "$ntl" ]; then
+		echo "Cannot get the number of the #$nth matching line containing $pat in $fn" >&2
+		return 1
+	else
+		echo "Insert [$txt] $fpos [$pat] in the #${ntl} line of $fn."
+	fi
+	case "$fpos" in
+		before)
+			sed -i."$suf" "$ntl,${ntl}s/\(^.*${pat}.*$\)/${txt}\n\1/" "$fn"
+			;;
+		*)
+			sed -i."$suf" "$ntl,${ntl}s/\(^.*${pat}.*$\)/\1\n${txt}/" "$fn"
+			;;
+	esac
+}
+
+
+if [ $# -lt 1 ]; then
+	echo 'Usage:finsert [ -n|--nth 3 ] [-a|-b|--after|--before] "$WP_CONFIG_FILE" ".*Matching_Pattern.*" "$ANY_TEXT_TO_INSERT"' >&2
+else
+	_finsert "$@"
+fi
+
+unset -f _finsert
+exit 0

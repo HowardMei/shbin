@@ -1,0 +1,262 @@
+
+## require shbin/escape
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  estrip [estrip -em "$(cat /etc/apt/sources.list)" OR cat /etc/apt/sources.list | estrip -cm | estrip -e]
+#%   DESCRIPTION:  Strip special chars from the given string.
+#%   Usage: estrip [-a|-an|-b|-ct|-cm|-cl|-d|-e|-em|-f|-h|-lo|-m|-ml|-n|-p|-q|-r|-rl|-sp|-u|-ub|-up] "string"
+#----------------------------------------------------------------------------------------------------------------------
+_estrip() {
+    case "$1" in
+        -a | --alpha)
+            ## strip alphabet chars
+            shift
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | tr -d '[:alpha:]'
+            else
+                echo "$*" | tr -d '[:alpha:]'
+            fi
+            ;;
+        -an | --alphanum)
+            ## strip alphabet + numberic chars
+            shift
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | tr -d '[:alnum:]'
+            else
+                echo "$*" | tr -d '[:alnum:]'
+            fi
+            ;;
+        -b | --blank | --tab)
+            ## strip blanks + tab spaces
+            shift
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | tr -d '[:blank:]' | tr -d '\t'
+            else
+                echo "$*" | tr -d '[:blank:]' | tr -d '\t'
+            fi
+            ;;
+        -ct | --cntrl)
+            ## strip control chars
+            shift
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | tr -d '[:cntrl:]';echo
+            else
+                echo "$*" | tr -d '[:cntrl:]';echo
+            fi
+            ;;
+        -cm | --comment)
+            ## strip the leading #s of the comment lines
+            ## start from the 3rd line to avoid the shebang
+            shift
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | sed -e '3,$s/^\s*\t*#*#//g' 2>/dev/null
+            else
+                echo "$*" | sed -e '3,$s/^\s*\t*#*#//g' 2>/dev/null
+            fi
+            ;;
+        -cl | --commentline)
+            ## strip comment lines started with #
+            ## start from the 3rd line to avoid the shebang
+            shift
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | sed -e '3,$s/^\s*\t*#.*$//g' 2>/dev/null
+            else
+                echo "$*" | sed -e '3,$s/^\s*\t*#.*$//g' 2>/dev/null
+            fi
+            ;;
+        -d | --digit)
+            ## strip numeric/digits chars
+            shift
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | tr -d '[:digit:]'
+            else
+                echo "$*" | tr -d '[:digit:]'
+            fi
+            ;;
+        -e | -bl | --blankline | --empty)
+            ## strip empty/blank lines
+            shift
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | sed -e 's/^ *//; s/ *$//; /^$/d; /^\s*$/d' 2>/dev/null
+            else
+                echo "$*" | sed -e 's/^ *//; s/ *$//; /^$/d; /^\s*$/d' 2>/dev/null
+            fi
+            ;;
+        -f | --format)
+            ## strip article format such as leading/trailing/multiple whitespaces
+            shift
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | sed -e 's/^[ \t]*//;s/[ \t]*$//' 2>/dev/null | sed -e '/^$/{ :l N; s/^\n$//; t l p; d; }' 2>/dev/null | sed -e 's/ \+ / /g' 2>/dev/null
+            else
+                echo "$*" | sed -e 's/^[ \t]*//;s/[ \t]*$//' 2>/dev/null | sed -e '/^$/{ :l N; s/^\n$//; t l p; d; }' 2>/dev/null | sed -e 's/ \+ / /g' 2>/dev/null
+            fi
+            ;;
+        -em | -ce | --commentempty)
+            ## strip blank lines and # commented lines from the 3rd line onwards to avoid the shebang
+            shift
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | sed -e '3,$s/^\s*\t*#.*$//g' 2>/dev/null | _estrip --blankline 2>/dev/null
+            else
+                echo "$*" | sed -e '3,$s/^\s*\t*#.*$//g' 2>/dev/null | _estrip --blankline 2>/dev/null
+            fi
+            ;;
+        -h | --hex | --xdigit)
+            ## strip the hexadecimal chars
+            shift
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | tr -d '[:xdigit:]'
+            else
+                echo "$*" | tr -d '[:xdigit:]'
+            fi
+            ;;
+        -lo | --lower)
+            ## strip lower cased chars
+            shift
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | tr -d '[:lower:]'
+            else
+                echo "$*" | tr -d '[:lower:]'
+            fi
+            ;;
+        -m | --mention | --match)
+            ## strip lines mentioning or matching the given phrase, like grep -v
+            shift
+            local pat="$(escape "$1")"
+            if [ -z "$pat" ]; then
+                ##echo "The $pat string should not be empty." >&2
+                return 1
+            else
+                shift
+            fi
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | sed -e "s/$pat//g" 2>/dev/null
+            else
+                echo "$*" | sed -e "s/$pat//g" 2>/dev/null
+            fi
+            ;;
+        -ml | --mentionline | --matchline)
+            ## strip lines mentioning or matching the given phrase, like grep -v
+            shift
+            local pat="$(escape "$1")"
+            if [ -z "$pat" ]; then
+                ##echo "The $pat string should not be empty." >&2
+                return 1
+            else
+                shift
+            fi
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | sed -e "s/^.*$pat.*$//g" 2>/dev/null
+            else
+                echo "$*" | sed -e "s/^.*$pat.*$//g" 2>/dev/null
+            fi
+            ;;
+        -n | -rn | --enter)
+            ## strip line delimiters to combine all lines into one line
+            shift
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | tr -d '\r' | tr -d '\n';echo
+            else
+                echo "$*" | tr -d '\r' | tr -d '\n';echo
+            fi
+            ;;
+        -up | --upper)
+            ## strip upper cased chars
+            shift
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | tr -d '[:upper:]'
+            else
+                echo "$*" | tr -d '[:upper:]'
+            fi
+            ;;
+        -p | --punct)
+            ## strip punctuation chars
+            shift
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | tr -d '[:punct:]'
+            else
+                echo "$*" | tr -d '[:punct:]'
+            fi
+            ;;
+        -q | --quote)
+            ## strip single and double quotes
+            shift
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | sed -e "s/[\'\"]//g" 2>/dev/null
+            else
+                echo "$*" | sed -e "s/[\'\"]//g" 2>/dev/null
+            fi
+            ;;
+        -r | --regex)
+            ## strip according to the given regex pattern
+            shift
+            local pat="$(echo "$1" | sed -e 's^[\/&]^\\&^g' 2>/dev/null)"
+            if [ -z "$pat" ]; then
+                echo "The $pat pattern is not valid." >&2
+                return 1
+            else
+                shift
+            fi
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | sed -e "s/\(${pat}\)//g" 2>/dev/null
+            else
+                echo "$*" | sed -e "s/${pat}//g" 2>/dev/null
+            fi
+            ;;
+        -rl | --regexline)
+            ## strip according to the given regex pattern
+            shift
+            local pat="$(echo "$1" | sed -e 's^[\/&]^\\&^g' 2>/dev/null)"
+            if [ -z "$pat" ]; then
+                echo "The $pat pattern is not valid." >&2
+                return 1
+            else
+                shift
+            fi
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | sed -e "/${pat}/d" 2>/dev/null
+            else
+                echo "$*" | sed -e "/${pat}/d" 2>/dev/null
+            fi
+            ;;
+        -sp | --special)
+            ## strip the special chars
+            shift
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | tr -d '[:cntrl:]' | tr -d '[:punct:]';echo
+            else
+                echo "$*" | tr -d '[:cntrl:]' | tr -d '[:punct:]';echo
+            fi
+            ;;
+        -u | --uniq | --redundant | --repeat)
+            ## strip the redundant lines
+            shift
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | awk '!x[$0]++' 2>/dev/null
+            else
+                echo "$*" | awk '!x[$0]++' 2>/dev/null
+            fi
+            ;;
+        -ub | --uniqblock | --repeatblock)
+            ## strip the redundant lines
+            shift
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | sed '$!N; /^\(.*\)\n\1$/!P; D' 2>/dev/null
+            else
+                echo "$*" | sed '$!N; /^\(.*\)\n\1$/!P; D' 2>/dev/null
+            fi
+            ;;
+        "" | -- | *)
+            if [ $# -lt 1 ]; then
+                echo "$(cat)" | _estrip -em
+            else
+                echo "$*" | _estrip -em
+            fi
+            ;;
+    esac
+    return 0
+}
+
+
+_estrip "$@"
+
+unset -f _estrip
+exit 0

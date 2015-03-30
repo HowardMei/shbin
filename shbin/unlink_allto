@@ -1,0 +1,71 @@
+
+## require shbin/abspath, shbin/bktohome
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  unlink_allto
+#%   DESCRIPTION:  Unlink the soft links to the dst dir judged by the src dir content
+#%	 Usage: unlink_allto [-f] $dstdir $src1 $src2 $src3
+#----------------------------------------------------------------------------------------------------------------------
+_unlink_allto() {
+        # usage: unlink_allto $dstdir $src1 $src2 $src3 multiple args allowed
+        if [ $# -lt 1 ];then
+           echo 'Usage: unlink_allto [-f] $dstdir $src1 $src2 $src3' >&2
+           return 1
+        fi
+		local forcetag=0
+		case "$1" in
+			-f | --force | --overwrite)
+               shift
+			   forcetag=1024
+			   ;;
+			-- | *)
+			   ;;
+		esac
+        local dst="$(abspath "$1")"
+        if [ ! -d "$dst" ];then
+           echo 'unlink_allto destination should be a directory, not anything else!' >&2
+           return 1
+        fi
+        shopt -s nullglob   #Avoid none file chaos,remove the "" from "$()" to decouple file paths
+        if [ $# -eq 1 ];then
+			local dstlink=""
+			for dstlink in $(find $dst -mindepth 1 -maxdepth 1 -xdev -type l);do
+				if [ -n "$dstlink" ]; then
+					if [ "$forcetag" -lt 512 ]; then
+						\rm -i "$dstlink"
+					else
+						bktohome "$dstlink"
+						\rm -f "$dstlink"
+					fi
+				fi
+			done
+        fi
+        shift
+		if [ $# -lt 1 ];then
+			local srcall="$(abspath $(pwd))"
+		else
+			local srcall="$@"
+		fi
+		   local dstlink=""
+		   local srcpath=""
+		   for dstlink in $(find $dst -mindepth 1 -maxdepth 1 -xdev -type l); do
+			   for srcpath in $srcall; do
+					local srcfile="$(basename $(abspath -f "$dstlink") 2>/dev/null)"
+					if [ -n "$srcfile" ] && [ -f "$srcpath/$srcfile" ]; then
+						if [ "$forcetag" -lt 512 ]; then
+							echo "Unlinking $dstlink from $srcpath/$srcfile ... ..."
+							\rm -i "$dstlink"
+						else
+							bktohome "$dstlink"
+							echo "Unlinking $dstlink from $srcpath/$srcfile ... ..."
+							\rm -f "$dstlink"
+						fi
+					fi
+			   done
+		   done
+        shopt -u nullglob #Revert to normal state
+}
+
+_unlink_allto "$@"
+
+unset -f _unlink_allto
+exit 0

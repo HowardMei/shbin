@@ -1,0 +1,154 @@
+
+## require shbin/shc, shbin/iscommand
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  pupdate
+#%   DESCRIPTION:  Universal package updater for all distros with apt-get, yum and ... under the hood
+#%	 Usage: pupdate curl wget git
+#----------------------------------------------------------------------------------------------------------------------
+_pupdate() {
+	if [ $# -lt 1 ] ; then
+	 echo "Nothing is specified/left to be updated."
+	 return 1
+	fi
+	
+	case "$1" in
+		-p | --pip | pip)	
+			shift
+			local pkgname="$1"
+			shift
+			if iscommand pip 2>/dev/null;then
+				echo "Updating $pkgname via pip"
+				shc "pip install --upgrade $pkgname" || echo "$pkgname pip upgrade failed!"
+				if [ $# -lt 1 ] ; then
+					return 0
+				else
+					_pupdate --pip "$@"
+					return 1
+				fi
+			else
+				echo "No pip command found. pinstall pip first"
+				return 1
+			fi
+			;;
+		-- | *)
+			local pkgn="$1"
+			if ! ispinstalled "$pkgn" 2>/dev/null;then
+				echo "$pkgn has not yet been installed."
+				echo "If the update failed, please try again after pinstall $pkgn in advance."
+			else
+				pservice status $pkgn 2>/dev/null | grep -iq 'process [[:digit:]]' && pservice stop "$pkgn"
+			fi
+			local pkgname="$(pcmdupkg --showpack "$pkgn" 2>/dev/null | tr '\n' ' ')"
+			pkgname="${pkgname:=$pkgn}"
+			;;
+	esac
+	
+	if iscommand apt-get 2>/dev/null;then
+		echo "Updating $pkgname via apt-get"
+		shc "apt-get update -y -q" || echo "apt-get update failed" >&2
+		shc "apt-get install --fix-missing --no-install-recommends --force-yes -y -q -o DPkg::Options::=--force-confold $pkgname" || echo "$pkgname apt-get update failed!"
+		shift
+		if [ $# -lt 1 ] ; then
+			return 0
+		else
+			_pupdate "$@"
+			return 1
+		fi
+	fi
+	
+	if iscommand yum 2>/dev/null;then
+		echo "Updating $pkgname via yum"
+		shc "yum clean expire-cache -y && yum check-update -y" || echo "yum check-update failed" >&2
+		shc "yum update -y $pkgname" || echo "$pkgname yum update failed!"
+		shift
+		if [ $# -lt 1 ] ; then
+			return 0
+		else
+			_pupdate "$@"
+			return 1
+		fi
+	fi
+	
+	if iscommand pacman 2>/dev/null;then
+		echo "Updating $pkgname via pacman"
+		shc "pacman -Sy" || echo "pacman -Sy failed" >&2
+		shc "pacman -S --noconfirm $pkgname" || echo "$pkgname pacman update failed!"
+		shift
+		if [ $# -lt 1 ] ; then
+			return 0
+		else
+			_pupdate "$@"
+			return 1
+		fi
+	fi
+	
+	if iscommand emerge 2>/dev/null;then
+		echo "Updating $pkgname via emerge"
+		shc "emerge --sync" || echo "emerge --sync failed" >&2
+		shc "emerge -uDNav $pkgname" || echo "$pkgname emerge update failed!"
+		shift
+		if [ $# -lt 1 ] ; then
+			return 0
+		else
+			_pupdate "$@"
+			return 1
+		fi
+	fi
+	
+	if iscommand pkgin 2>/dev/null;then
+		echo "Updating $pkgname via pkgin"
+		shc "pkgin -y update" || echo "$pkgname pkgin update failed!"
+		shc "pkgin -y install $pkgname" || echo "$pkgname pkgin reinstall failed!"
+		shift
+		if [ $# -lt 1 ] ; then
+			return 0
+		else
+			_pupdate "$@"
+			return 1
+		fi
+	fi
+	
+	if iscommand zypper 2>/dev/null;then
+		echo "Updating $pkgname via zypper"
+		shc "zypper refresh -y" || echo "zypper refresh -y failed" >&2
+		shc "zypper update -y $pkgname" || echo "$pkgname zypper update failed!"
+		shift
+		if [ $# -lt 1 ] ; then
+			return 0
+		else
+			_pupdate "$@"
+			return 1
+		fi
+	fi
+	
+	if iscommand pkg_add 2>/dev/null;then
+		echo "Updating $pkgname via pkg_add"
+	    shc "pkg_add -Uu $pkgname" || echo "$pkgname pkg update failed"
+		##pkgng:  /usr/local/sbin/pkg install -y -r FreeBSD "$pkgname" || echo "/usr/local/sbin/pkg install failed!"
+		shift
+		if [ $# -lt 1 ] ; then
+			return 0
+		else
+			_pupdate "$@"
+			return 1
+		fi
+	fi
+	
+	if iscommand opkg 2>/dev/null;then
+		echo "Updating $pkgname via opkg" >&2
+		shc "opkg update" || echo "opkg update failed" >&2
+	    shc "opkg --force-reinstall install $pkgname" || echo "$pkgname opkg --force-reinstall failed" >&2
+		shift
+		if [ $# -lt 1 ] ; then
+			return 0
+		else
+			_pupdate "$@"
+			return 1
+		fi
+	fi
+}
+
+_pupdate "$@" 
+
+unset -f _pupdate 
+exit 0

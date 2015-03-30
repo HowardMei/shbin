@@ -1,0 +1,79 @@
+
+
+PRV_IPv4=""
+PRV_IP4=""
+PRV_IPv6=""
+PRV_IP6=""
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  check_prvip <= __gather_prvip_info
+#%   DESCRIPTION:  Discover private ip information
+#%	 Usage: prvip [list|eth0|docker0] [PRV_IP4|PRV_IPv4|PRV_IP6|PRV_IPv6]
+#----------------------------------------------------------------------------------------------------------------------
+_check_prvip() {
+	local dev="$1"
+	dev="${dev:=eth0}"
+	if iscommand ip 2>/dev/null; then
+		local devlist="$(ip addr | efilters -r "^[[:digit:]]: .*:" | estrips -r "^[[:digit:]]: " | estrips -m ":" | estrips -rl "lo")"
+	elif iscommand ifconfig 2>/dev/null; then
+		local devlist="$(ifconfig | grep "Ethernet"  | awk '{ print $1 }')"
+	fi
+	
+	case $dev in 
+		list)
+			echo "$devlist"
+			return 0
+			;;
+		eth0)
+			if iscommand ip 2>/dev/null; then	
+				PRV_IPv4="$(ip addr show eth0 | awk '/inet / {sub(/\/.*/, "", $2); print $2}')"
+				PRV_IPv6="$(ip addr show eth0 | awk '/inet6 / {sub(/\/.*/, "", $2); print $2}')"
+			elif iscommand ifconfig 2>/dev/null; then
+				PRV_IPv4="$(ifconfig eth0 | awk -F: '/inet addr:/ {print $2}' | awk '{print $1}')"
+				PRV_IPv6="$(ifconfig eth0 | awk -F: '/inet6 addr:/ {print $0}' | awk '{print $3}')"
+			fi
+			;;
+		-- | *)
+			if echo "$devlist" | grep -iq "$dev"; then
+				if iscommand ip 2>/dev/null; then	
+					PRV_IPv4="$(ip addr show "$dev" | awk '/inet / {sub(/\/.*/, "", $2); print $2}')"
+					PRV_IPv6="$(ip addr show "$dev" | awk '/inet6 / {sub(/\/.*/, "", $2); print $2}')"
+				elif iscommand ifconfig 2>/dev/null; then
+					PRV_IPv4="$(ifconfig "$dev" | awk -F: '/inet addr:/ {print $2}' | awk '{print $1}')"
+					PRV_IPv6="$(ifconfig "$dev" | awk -F: '/inet6 addr:/ {print $0}' | awk '{print $3}')"
+				fi
+			fi
+			;;
+	esac
+
+	PRV_IP4="$PRV_IPv4"
+	PRV_IP6="$PRV_IPv6"
+	PRVIP="$PRV_IPv4"
+	PRVIPv4="$PRV_IPv4"
+}
+
+
+
+_check_prvip eth0
+
+if [ $# -lt 1 ]; then
+	export PRV_IPv4
+	export PRV_IP4
+	export PRV_IPv6
+	export PRV_IP6
+	if [ -n "$PRV_IPv4" ]; then
+		echo "$PRV_IPv4"
+	fi
+else
+	for _vx in "$@"; do
+		if [ -n "${!_vx}" ]; then
+			echo "${!_vx}"
+		else
+			_check_prvip "${_vx}"
+		fi
+	done
+fi
+
+unset -f _check_prvip
+unset _vx 
+exit 0
