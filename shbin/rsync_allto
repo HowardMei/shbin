@@ -39,47 +39,47 @@ _rsync_allto() {
     fi
    local srcpath=""
    for srcpath in $srcall; do
-        local srcfn="$(basename "$srcpath" 2>/dev/null)"
-        echo "Copying $srcpath to $dst/$srcfn ... ..."
-        if [ -f "$srcpath" ]; then
-            if [ "$forcetag" -lt 512 ] && [ -f "$dst/$srcfn" ]; then
-                local answer=""
-                read -r -p "This may overwrite existing file: $dst/$srcfn. Are you sure? (y/n) " answer
-                case "$answer" in
-                    [yY][eE][sS]|[yY])
-                        ## --exclude ".git/" --exclude ".hg/" --exclude ".svn/" --exclude ".bzr/"
-                        rsync -rW --no-perms "$srcpath" "$dst"
-                    ;;
-                    -- | *)
-                        continue
-                    ;;
-                esac
-            else
-                ## --exclude ".git/" --exclude ".hg/" --exclude ".svn/" --exclude ".bzr/"
-                rsync -rW --no-perms "$srcpath" "$dst"
-            fi
-        elif [ -d "$srcpath" ]; then
-            for srcfod in $(find $srcpath -mindepth 1 -maxdepth 1);do
-                local srcfn="$(basename "$srcfod" 2>/dev/null)"
-                echo "Copying $srcfod to $dst/$srcfn ... ..."
-                if [ "$forcetag" -lt 512 ] && [ -e "$dst/$srcfn" ]; then
-                    local answer=""
-                    read -r -p "This may overwrite existing file/dir: $dst/$srcfn. Are you sure? (y/n) " answer
-                    case "$answer" in
-                        [yY][eE][sS]|[yY])
-                            ## --exclude ".git/" --exclude ".hg/" --exclude ".svn/" --exclude ".bzr/"
-                            rsync -rW --no-perms "$srcfod" "$dst"
-                        ;;
-                        -- | *)
-                            continue
-                        ;;
-                    esac
-                else
-                    ## --exclude ".git/" --exclude ".hg/" --exclude ".svn/" --exclude ".bzr/"
-                    rsync -rW --no-perms "$srcfod" "$dst"
-                fi
-            done
-        fi
+		local srcfn="$(basename "$srcpath" 2>/dev/null)"
+		echo "Copying $srcpath to $dst/$srcfn ... ..."
+		if [ -f "$srcpath" ]; then
+			if [ "$forcetag" -lt 512 ] && [ -f "$dst/$srcfn" ]; then
+				local answer=""
+				read -r -p "This may overwrite existing file: $dst/$srcfn. Are you sure? (y/n) " answer
+				case "$answer" in
+					[yY][eE][sS]|[yY])
+						## --exclude ".git/" --exclude ".hg/" --exclude ".svn/" --exclude ".bzr/"
+						rsync -rW --no-perms "$srcpath" "$dst"
+					;;
+					-- | *)
+						continue
+					;;
+				esac
+			else
+				## --exclude ".git/" --exclude ".hg/" --exclude ".svn/" --exclude ".bzr/"
+				rsync -rW --no-perms "$srcpath" "$dst"
+			fi
+		elif [ -d "$srcpath" ]; then
+			for srcfod in $(find $srcpath -mindepth 1 -maxdepth 1);do
+				local srcfn="$(basename "$srcfod" 2>/dev/null)"
+				echo "Copying $srcfod to $dst/$srcfn ... ..."
+				if [ "$forcetag" -lt 512 ] && [ -e "$dst/$srcfn" ]; then
+					local answer=""
+					read -r -p "This may overwrite existing file/dir: $dst/$srcfn. Are you sure? (y/n) " answer
+					case "$answer" in
+						[yY][eE][sS]|[yY])
+							## --exclude ".git/" --exclude ".hg/" --exclude ".svn/" --exclude ".bzr/"
+							rsync -rW --no-perms "$srcfod" "$dst"
+						;;
+						-- | *)
+							continue
+						;;
+					esac
+				else
+					## --exclude ".git/" --exclude ".hg/" --exclude ".svn/" --exclude ".bzr/"
+					rsync -rW --no-perms "$srcfod" "$dst"
+				fi
+			done
+		fi
    done
    shopt -u nullglob #Revert to normal state
 }

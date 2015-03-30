@@ -1,0 +1,25 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  doget
+#%   DESCRIPTION:  docker get essential images.
+#%   Usage: doget busybox:latest debian:jessie ubuntu:trusty centos:centos7
+#----------------------------------------------------------------------------------------------------------------------
+_doget() {
+    if [ $# -lt 1 ]; then
+        _doget busybox:latest ubuntu-debootstrap:14.04.1 debian:jessie ubuntu:14.04.1 centos:centos7
+    else
+        for img in "$@"; do
+            docker run --rm "$img" echo "$img image is ready for use!" 2>/dev/null
+        done
+    fi
+}
+
+
+if [ $# -lt 1 ]; then
+    _doget
+else
+    _doget "$@"
+fi
+
+unset -f _doget
+exit 0

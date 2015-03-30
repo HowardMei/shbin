@@ -1,0 +1,23 @@
+
+## requires shbin/urifile, shbin/urifileext, shbin/esubst
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#         NAME:  urifilename
+#%  DESCRIPTION:  Extract and echo the filename of the given file
+#%  Usage: urifilename sftp://user:pass@down.test.com:8080/files/test.0.1.3.tar.gz
+#----------------------------------------------------------------------------------------------------------------------
+_urifilename() {
+   if [ $# -lt 1 ] ; then
+      echo "Usage: urifilename sftp://user:pass@down.test.com:8080/files/test.0.1.3.tar.gz" >&2
+      echo "Result: test.0.1.3" >&2
+      return 1
+   fi
+   local tmp1="$(urifile "$@")"
+   local tmp2="$(urifileext "$@")"
+   esubst ".$tmp2" "" "$tmp1"
+}
+
+
+_urifilename "$@"
+
+unset -f _urifilename
+exit 0

@@ -1,0 +1,63 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  dormc
+#%   DESCRIPTION:  remove docker containers by keywords.
+#%   Usage: dormc [-a] | [imagename:tag | containerid]
+#----------------------------------------------------------------------------------------------------------------------
+_dormc() {
+    if [ $# -lt 1 ]; then
+        echo "No container name or id is provided." >&2
+        return 1
+    else
+        case "$1" in
+        -a | --all | allcontainers)
+                echo "[dormc]Killing all running containers and removing all the containers:" >&2
+                [ -n "$(dollc -r)" ] && dostc --all
+                [ -n "$(dollc -ri)" ] && dokic --all
+                sudo docker rm -f $(dollc --all | ecol 1) 2>/dev/null
+            ;;
+        -e | --exited | exitedcontainers)
+                echo "[dormc]Removing all the exited containers:" >&2
+                [ -n "$(dollc -e)" ] && sudo docker rm -f $(dollc -ei) 2>/dev/null
+            ;;
+        -- | *)
+                local cnt=""
+                for cnt in "$@"; do
+                    echo "[dormc]Prepare to remove docker containers matching <$cnt>" >&2
+                    local cntnames=$(dollc -n "$cnt")
+                    if [ -n "$cntnames" ]; then
+                        echo "[dormc]Found following docker containers matching <$cnt>:" >&2
+                        echo "$cntnames" >&2
+                        local thecntname=""
+                        for thecntname in $cntnames; do
+                            echo "[dormc]Killing and removing the docker container <$thecntname>:" >&2
+                            local thecntids=$(dollc -i "$thecntname")
+                            if [ -n "$thecntids" ]; then
+                                local thecntid=""
+                                for thecntid in $thecntids; do
+                                    dostc "$thecntid" && dokic "$thecntid"
+                                    sudo docker rm -f "$thecntid" 2>/dev/null
+                                done
+                            else
+                                echo "[dormc]Failed to fetch ids from the container name <$thecntname>, skipping."
+                                continue
+                            fi
+                        done
+                    else
+                        echo "[dormc]Cannot find any container matching $cnt" >&2
+                    fi
+                done
+            ;;
+        esac
+    fi
+}
+
+
+if [ $# -lt 1 ]; then
+    _dormc
+else
+    _dormc "$@"
+fi
+
+unset -f _dormc
+exit 0

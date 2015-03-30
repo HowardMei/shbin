@@ -1,0 +1,23 @@
+
+## require shbin/uripath, shbin/uriquery, shbin/esubst
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#         NAME:  uripathonly
+#%   DESCRIPTION:  Extract and echo the path of the given url
+#%	 uripathonly "sftp://user:pass@down.test.com:8080/files%20repo+new/testv2013.1.14.tar.gz#body-old#download?ver=1.0&reg=us-1"
+#----------------------------------------------------------------------------------------------------------------------
+_uripathonly() {
+   if [ $# -lt 1 ]; then
+      echo "Usage: uripathonly 'sftp://user:pass@down.test.com:8080/files%20repo+new/testv2013.1.14.tar.gz#body-old#download?ver=1.0&reg=us-1'" >&2
+      echo "Result: /files/test.tar.gz" >&2
+      return 1
+   fi
+ local tmp1="$(uripath "$@")"
+ local tmp2="$(uriquery "$@")"
+ esubst "$tmp2" "" "$tmp1"
+}
+
+
+_uripathonly "$@"
+
+unset -f _uripathonly
+exit 0
