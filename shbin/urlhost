@@ -1,0 +1,13 @@
+
+#%  DESCRIPTION:  Extract and echo the host name of the given url
+#%	Usage: urlhost "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
+#%		   echo "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1" | urlhost
+
+
+if [ $# -lt 1 ]; then
+	urihost "$(cat)"
+else
+	urihost "$@"
+fi
+
+exit 0

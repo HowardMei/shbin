@@ -1,0 +1,31 @@
+
+## require shbin/urionly
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#         NAME:  uripath
+#%  DESCRIPTION:  Extract and echo the path of the given url
+#%	Usage: uripath "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
+#----------------------------------------------------------------------------------------------------------------------
+_uripath() {
+   if [ $# -lt 1 ]; then
+      echo "Usage: uripath sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1" >&2
+      echo "Result: /files/test.tar.gz" >&2
+      return 1
+   fi
+ local tmp1="$(urionly "$@")"
+ if [ -n "$tmp1" ]; then
+    local tmp2="$(echo "$tmp1" | grep / 2>/dev/null | cut -d/ -f2-)"
+ else
+    local tmp2="$(echo $1 | grep / 2>/dev/null | cut -d/ -f2-)"
+ fi
+ if [ -z "$tmp2" ]; then
+	echo "/$tmp1"
+ else
+	echo "/$tmp2"
+ fi
+}
+
+
+_uripath "$@"
+
+unset -f _uripath
+exit 0

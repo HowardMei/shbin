@@ -1,0 +1,13 @@
+
+#%  DESCRIPTION:  Extract and echo the pure url of the given url stripping the proto and account
+#%	Usage: urlonly "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
+#%		   echo "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1" | urlonly
+
+
+if [ $# -lt 1 ]; then
+	urionly "$(cat)"
+else
+	urionly "$@"
+fi
+
+exit 0

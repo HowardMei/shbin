@@ -1,0 +1,29 @@
+
+## require shbin/urihost, shbin/uridomain
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#         NAME:  uriport
+#%  DESCRIPTION:  Extract and echo the port number of the given url
+#%	Usage: uriport "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
+#----------------------------------------------------------------------------------------------------------------------
+_uriport() {
+   if [ $# -lt 1 ]; then
+      echo "Usage: uriport sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1" >&2
+      echo "Result: 8080" >&2
+      return 1
+   fi
+  local tmp1="$(urihost "$@")"
+  local tmp2="$(uridomain "$@")"
+  local tmp3="$(echo "$tmp1" | sed -e "s^$tmp2:^^g" 2>/dev/null)"
+   if [ -n "$tmp3" ];then
+	  echo "$tmp3"
+	  return 0
+   else
+	  return 1
+   fi
+}
+
+
+_uriport "$@"
+
+unset -f _uriport
+exit 0
