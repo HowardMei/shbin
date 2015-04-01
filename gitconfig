@@ -1,0 +1,205 @@
+[alias]
+    aa = add -A
+    alias = !"git config -l | grep alias | cut -c 7-"
+    amend = commit --amend
+    au = !"git add -u && git add . && git status"
+    assume = update-index --assume-unchanged
+    assumed = !"git ls-files -v | grep ^h | cut -c 3-"
+    assumeall = !"git st -s | awk {'print $2'} | xargs git assume"
+
+    ba = branch -a
+    barebranch = !"sh -c 'git symbolic-ref HEAD refs/heads/$1 && git rm --cached -r . && git clean -xfd' -"
+    bd = branch -D
+    br = branch
+    branches = branch -a
+
+    # Commit all changes
+    ca = !"git add -A && git commit -av"
+    cb = checkout -b
+    cg = show --stat --oneline
+    changes = log -p -n 1
+    ci = commit
+    cl = clone
+    clrf = !"git clean -f -d"
+    clsrf = !"git stash; git clean -f -d"
+    cm = commit -am
+    co = checkout
+    conflicts = diff --name-only --diff-filter=U
+    cp = cherry-pick
+    # Clone a repository including all submodules
+    cr = clone --recursive
+    # Credit an author on the latest commit
+    credit = !"_f() { git commit --amend --author \"$1 <$2>\" -C HEAD;unset -f _f }; _f"
+
+    # Show the diff between the latest commit and the current state
+    dif = diff --
+    dif0 = diff --cached --
+    dif1 = diff HEAD --
+    dif2 = diff HEAD~1 HEAD --
+
+    # `git di $number` shows the diff between the state `$number` revisions ago and the current state
+    difn = !"_d() { git diff --patch-with-stat HEAD~$1;unset -f _d; }; git diff-index --quiet HEAD --; _d"
+    dump = cat-file -p
+
+    # search logs for a bugzilla like number
+    findbug = "!sh -c 'git log --grep=^$1:' -"
+    flat = clone --depth 1
+
+    grep = grep -Ii
+
+    human = name-rev --name-only --refs=refs/heads/*
+
+    ignore=!"([ ! -e .gitignore ] && touch .gitignore) | echo $1 >>.gitignore"
+
+    la = log --all --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(cyan)<%an>%Creset' --abbrev-commit --date=relative
+    lc = log --stat --oneline --abbrev-commit --no-merges
+    lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(cyan)<%an>%Creset' --abbrev-commit --date=relative
+    ll = log --graph --oneline --abbrev-commit --date=relative
+    ln = log --no-merges --oneline
+    lu = log -u
+    # List the files or the given file
+    ls = ls-files
+    lsf = !"git ls-files | grep -i"
+
+    merge = merge --no-edit
+    mg = merge --no-edit
+    mgs = merge --no-edit --squash
+
+    pickup = checkout --
+    pick = cherry-pick
+    pl = pull --no-edit
+    plre = pull --no-edit --rebase
+    pr = !"git pull; git submodule foreach git pull origin master"
+    prune = !"git gc --aggressive --prune=now"
+    # Pull in remote changes for the current repository and all its submodules
+    pull = pull --no-edit
+    pushf = push --force
+    pushuf = push -u --force
+    pusha = push --all
+    pushall = push --all
+    pusht = push --tags
+    pushtags = push --tags
+
+    # Interactive rebase with the given number of latest commits
+    rebi = !"r() { git rebase -i HEAD~$1; }; r"
+    remotes = remote -v
+    ra = remote add
+    rao = remote add origin
+    reurl = remote set-url
+    reurlo = remote set-url origin
+    reduce = !"git gc --aggressive --prune=now"
+
+    # View the current working tree status using the short format
+    s = status -s
+    sb = status -s -b
+    serve = !"git daemon --reuseaddr --verbose --base-path=. --export-all ./.git"
+    size = !"git count-objects -Hv"
+    snapshot = !"git stash save snapshot: $(date) && git stash apply stash@{0}"
+    svnpull = !"git-svn fetch && git-svn rebase -l"
+    svnpush = !"git-svn dcommit"
+    stat = status
+    st = status
+    subinit = submodule update --init --recursive
+    subpull = submodule update --recursive
+    subpull = !"git submodule foreach git pull --tags origin master"
+    subrepo = !"sh -c 'filter-branch --prune-empty --subdirectory-filter $1 master' -"
+
+    # Show verbose output about tags, branches or remotes
+    tags = tag -l
+    tgz = archive --format=tar.gz
+    this = !"git init && echo 'Initial Commit' >> readme.md && git add -A . && git commit -am 'Initial Commit' && git rm -f readme.md && git amend --allow-empty -m 'master:git repo init'"
+    tree = log --oneline --decorate --graph
+    type = cat-file -t
+
+    unassume = update-index --no-assume-unchanged
+    unassumeall = !"git assumed | xargs git update-index --no-assume-unchanged"
+    unstash = stash pop --index
+
+    # from https://git.wiki.kernel.org/index.php/Aliases
+    whois = !"sh -c 'git log -i -1 --pretty=\"format:%an <%ae>\n\" --author=\"$1\"' -"
+    whatis = show -s --pretty='tformat:%h (%s, %ad)' --date=short
+
+    zip = archive --format=zip
+
+[apply]
+    # Detect whitespace errors when applying a patch
+    whitespace = fix
+
+[core]
+    editor = vim
+    # Use custom `.gitignore` and `.gitattributes`
+    excludesfile = ~/.gitignore
+    attributesfile = ~/.gitattributes
+    # Treat spaces before tabs, lines that are indented with 8 or more spaces, and all kinds of trailing whitespace as an error
+    # whitespace = space-before-tab,indent-with-non-tab,trailing-space
+    whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
+    mergeoptions = --no-edit
+    pulloptions = --no-edit
+
+[color]
+    # Use colors in Git commands that are capable of colored output when outputting to the terminal
+    ui = auto
+[color "branch"]
+    current = yellow reverse
+    local = yellow
+    remote = green bold
+[color "diff"]
+    meta = yellow bold
+    frag = magenta bold
+    old = red bold
+    new = green bold
+    whitespace = red reverse
+[color "status"]
+    added = green
+    changed = yellow
+    untracked = cyan
+[merge]
+    # Include summaries of merged commits in newly created merge commit messages
+    log = true
+
+# Use `origin` as the default remote on the `master` branch in all cases
+[branch "master"]
+    remote = origin
+    merge = refs/heads/master
+[diff]
+   tool = diffuse
+   suppressBlankEmpty = true
+   mnemonicprefix = true
+   #noprefix = true
+
+[difftool]
+    prompt = false
+
+# convert po files to a less noisy
+# # variant for display in git log -p etc
+# # note that textconv does not affect
+# # git-format-patch output
+[diff "po"]
+    textconv=po_diff
+    cachetextconv = true
+
+[diff "pot"]
+    textconv=pot_diff
+    # the line's it was picking for the "funcname"
+    # context were kind of terrible for this case, so
+    # just match a blank line so it's empty
+    xfuncname = "^$"
+    cachetextconv = true
+
+# from http://stackoverflow.com/questions/2006351/gettext-po-files-under-version-control/11291001#11291001
+# more verbose than my minimal version
+[diff "msgcat"]
+    textconv=msgcat --no-location --no-wrap --sort-output
+[mergetool "vimdiff3"]
+   cmd = vim -f -d -c \"wincmd J\" \"$MERGED\" \"$LOCAL\" \"$BASE\" \"$REMOTE\"
+
+[difftool "vim"]
+    cmd = vim \"$MERGED\"
+    prompt = false
+
+[push]
+   default = tracking
+
+[user]
+    name =
+    email =
