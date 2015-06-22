@@ -1,0 +1,48 @@
+#!/bin/sh
+
+if [ -d "/opt/debonly" ]; then
+    chmod -R 0700 /opt/debonly
+else
+    mkdir -p /opt/debonly && chmod -R 0700 /opt/debonly
+fi
+
+if [ -z "$(command -v dpkg-scanpackages 2>/dev/null)" ]; then
+    echo "Install dpkg-scanpackages@dpkg-dev as debonly local package scanner ..."
+    if [ -z "$(command -v apt-install-min 2>/dev/null)" ]; then
+        apt-get-min update -y -q
+        apt-install-min dpkg-dev
+    else
+        apt-get update -y -q
+        apt-get install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" \
+        --fix-missing --no-install-recommends --force-yes -y -q dpkg-dev
+    fi
+fi
+
+if [ -n "$(command -v dpkg-scanpackages 2>/dev/null)" ]; then
+    echo "Scan local *deb packages in /opt/debonly and generate Packages.gz for apt-get update"
+    wrkpath=$(pwd)
+    cd /opt/debonly && dpkg-scanpackages . /dev/null | gzip -c9 > Packages.gz && cd ${wrkpath}
+    unset wrkpath
+fi
+
+if [ -f "/opt/debonly/Packages.gz" ]; then
+     echo 'deb file:/opt/debonly ./' > /etc/apt/sources.list.d/debonly.list
+     chmod 0644 /etc/apt/sources.list /etc/apt/sources.list.d/debonly.list
+     apt-get update -y -q
+else
+     echo "No valid Packages.gz is found in /opt/debonly ..."
+     rm -f /etc/apt/sources.list.d/debonly.list
+fi
+
+if [ -n "$(command -v dpkg-scanpackages 2>/dev/null)" ]; then
+    echo "Remove dpkg-scanpackages@dpkg-dev because it's too large ..."
+    if [ -z "$(command -v apt-remove-min 2>/dev/null)" ]; then
+        apt-remove-min dpkg-dev
+        apt-get-min autoremove -y -q
+        apt-get-min autoclean -y -q
+    else
+        apt-get remove --force-yes -y -q --purge dpkg-dev
+        apt-get autoremove -y -q
+        apt-get autoclean -y -q
+    fi
+fi

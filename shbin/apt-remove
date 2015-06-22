@@ -1,0 +1,4 @@
+#!/bin/sh
+
+apt-get remove --force-yes -y -q --purge $@
+apt-get clean -y -q && rm -f /opt/debonly/${@}*

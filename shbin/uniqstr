@@ -2,21 +2,21 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  uniqstr
 #%   DESCRIPTION:  Unify the given strings by removing duplicated words, Not lines [estrip -u]
-#%	 Usage: echo "hello hello world" | uniqstr OR uniqstr "hello world world"
+#%   Usage: echo "hello hello world" | uniqstr OR uniqstr "hello world world"
 #----------------------------------------------------------------------------------------------------------------------
 _uniqstr() {
-	if [ $# -lt 1 ]; then
-		echo "$(cat)" | awk '!x[$0]++';echo
-	else
-		echo "$@" | awk '!x[$0]++';echo
-	fi
+    if [ $# -lt 1 ]; then
+        echo "$(cat)" | awk '!x[$0]++'
+    else
+        echo "$@" | awk '!x[$0]++'
+    fi
 }
 
 
 if [ $# -lt 1 ]; then
-	echo "$(cat)" | _uniqstr
+        echo "$(cat)" | _uniqstr
 else
-	echo "$*" | _uniqstr
+        echo "$*" | _uniqstr
 fi
 
 

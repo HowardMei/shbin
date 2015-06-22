@@ -236,7 +236,7 @@ _estrip() {
             fi
             ;;
         -ub | --uniqblock | --repeatblock)
-            ## strip the redundant lines
+            ## strip the redundant blocks
             shift
             if [ $# -lt 1 ]; then
                 echo "$(cat)" | sed '$!N; /^\(.*\)\n\1$/!P; D' 2>/dev/null

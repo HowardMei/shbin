@@ -3,37 +3,31 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  funpack & fpack
 #%   DESCRIPTION:  Quick archiving of multiple files and folders
-#%	 Usage: fpack packname.zip fpath1 dpath1 fpath2 ... dpathn
+#%   Usage: fpack packname.tar.gz fpath1 dpath1 fpath2 ... dpathn
 #----------------------------------------------------------------------------------------------------------------------
 _fpack() {
   if [ $# -lt 2 ] ; then
-     echo "Usage: fpack testpack.zip ./test ./sing.sh"
+     echo "Usage: fpack testpack.tar.gz ./test ./sing.sh"
      return 0
   else
      local packname=$1
      shift
   fi
   case $packname in
-	   *.tar)       tar cvf "$packname" "$@"  ;;
-	   *.tar.gz)    tar cvzf "$packname" "$@" ;;
-	   *.rar)
-			##pinstall rar 2>/dev/null
-			rar a -r "$packname" "$@"     	  ;;
-	   *.zip)
-			##pinstall zip 2>/dev/null
-			zip -r -9 "$packname" "$@"        ;;
-	   *.7z)
-			##pinstall p7zip-full 2>/dev/null
-			7z a -r  "$packname" "$@" ;;
-	   *) echo "File $packname format is not supported..." ;;
+       *.tar)       tar cvf "$packname" "$@"    ;;
+       *.tar.gz)    tar cvzf "$packname" "$@"   ;;
+       *.rar)       rar a -r "$packname" "$@"   ;;
+       *.zip)       zip -r -9 "$packname" "$@"  ;;
+       *.7z)        7z a -r  "$packname" "$@"   ;;
+       *) echo "File $packname format is not supported..." ;;
    esac
 }
 
 
 if [ $# -lt 1 ]; then
-	echo "Usage: fpack packname.zip fpath1 dpath1 fpath2 ... dpathn" >&2
+    echo "Usage: fpack packname.tar.gz fpath1 dpath1 fpath2 ... dpathn" >&2
 else
-	_fpack "$@"
+    _fpack "$@"
 fi
 
 unset -f _fpack

@@ -1,0 +1,4 @@
+#!/bin/sh
+
+apt-get clean -yq && rm -rf /opt/debonly/*
+rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/* /usr/share/man/* /usr/share/info/* /usr/share/lintian/*
