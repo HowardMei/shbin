@@ -1,7 +1,6 @@
 # Set the default behavior, in case people don't have core.autocrlf set.
 termcap -lf
-* text eol=lf
-.* text eol=lf
+* text=auto
 
 # Explicitly declare source files you want to always be normalized and converted
 # to native line endings on checkout. Enforce Unix newlines for all environment.
