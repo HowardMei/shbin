@@ -10,6 +10,7 @@ _doclr() {
         for cnt in "$cnts"; do
             dormc "$cnt"
         done
+        dormi "<none>:<none>"
         dormc "<none>:<none>"
         sudo docker rmi -f $(sudo docker images -f "dangling=true" -q) 2>/dev/null
         dormi "<none>:<none>"
