@@ -82,6 +82,7 @@ alias pstop='__psls() { local p="$1"; watch -n 0.1 "ps -e -o pid,uname,comm,cmd,
 alias psa='__pslsa() { local p="$1"; ps -e -o pid,uname,comm,pcpu,pmem,etime,cmd --sort=-pcpu,-pmem | head -n ${p:=101}; unset -f __pslsa; }; __pslsa'
 alias psp='__pslsp() { local p="$@"; local ptot="$(ps -e -o pid,uname,comm,pcpu,pmem,etime,cmd --sort=-pcpu,-pmem)";local phead="$(echo "$ptot" | head -1)";local pbody="$(echo "$ptot" | sed '1d' | grep -i ${p:-""} | grep -v grep)";echo "$phead";echo "$pbody";unset -f __pslsp; }; __pslsp'
 alias vex='__vex() { [ $# -eq 1 ] && [ "$1" == "-q" ] && [ -r "bin/activate" ] && deactivate && return 0;[ -r "${!#}/bin/activate" ] && cd "${!#}" && . bin/activate || virtualenv "$@";[ -d "${!#}" ] && cd "${!#}";[ -r "bin/activate" ] && . bin/activate; unset -f __vex; }; __vex'
+alias resharevb='killall VBoxClient && VBoxClient-all'
 
 
 # If not running interactively, don't do anything

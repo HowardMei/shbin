@@ -117,6 +117,8 @@ __pycache__/
 /.hg/*
 */.hg/*
 .vagrant/
+.vagrant
+*.vagrant
 .mr.developer.cfg
 .project
 .pydevproject
@@ -141,13 +143,16 @@ packer_cache/
 # Big Packages #
 #############################
 *.7z
-*.dmg
-*.gz
+*.pdf
+##*.gz
 *.iso
 *.jar
 *.rar
-*.tar
+##*.tar
 *.zip
+*.deb
+*.rpm
+*.dmg
 
 # WP user files #
 ##############################
