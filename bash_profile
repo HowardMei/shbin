@@ -56,16 +56,16 @@ alias unsetall='unset all;set +o nounset'
 alias cls='clear;set +o nounset'
 alias clr='reset;clear;set +o nounset'
 # List all files colorized in long format
-alias ll="ls -lph --color --group-directories-first"
+alias ll="ls -lph --color"
 alias lt='ll -t'
 # List all files colorized in long format, including dot files
-alias la="ls -lpha --color --group-directories-first"
+alias la="ls -lpha --color"
 alias ld='__lsdir() { local p="$1";ls --almost-all -lhd $(realpath ${p:-$(pwd)})/*/ 2>/dev/null; unset -f __lsdir; }; __lsdir'
 alias lf='__lsf() { local p="$1";ls --almost-all -lha $(realpath ${p:-$(pwd)}) 2>/dev/null | grep -v ^d | grep -v ^l; unset -f __lsf; }; __lsf'
 alias lh='__lshidden() { local p="$1";ls --almost-all -d $(realpath ${p:-$(pwd)})/.??* 2>/dev/null; unset -f __lshidden; }; __lshidden'
 alias lhf='__lsfhidden() { local p="$1";ls --almost-all -lhd $(realpath ${p:-$(pwd)})/.??* 2>/dev/null | grep -v ^d; unset -f __lsfhidden; }; __lsfhidden'
 alias lhd='__lsdirhidden() { local p="$1";ls --almost-all -lhd $(realpath ${p:-$(pwd)})/.??*/ 2>/dev/null; unset -f __lsdirhidden; }; __lsdirhidden'
-alias ls="command ls --color --group-directories-first"
+alias ls="command ls --color"
 alias lu='du -ach --time --max-depth=1'
 alias reload=". $HOME/.bash_profile"
 alias reloadx='dotload'
