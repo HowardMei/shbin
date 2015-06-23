@@ -93,6 +93,14 @@ alias vex='__vex() { [ $# -eq 1 ] && [ "$1" == "-q" ] && [ -r "bin/activate" ] &
 # If possible, add tab completion for many more commands
 [ -r "/etc/bash_completion" ] && . "/etc/bash_completion"
 
+# Load shbin extra functions if possible
+[ -r "$HOME/.shbin_extrafuncs" ] && . "$HOME/.shbin_extrafuncs"
+
+# Add tab completion for SSH hostnames based on ~/.ssh/config, ignoring wildcards
+[ -r "$HOME/.ssh/config" ] && complete -o "default" -o "nospace" -W "$(grep "^Host" ~/.ssh/config | grep -v "[?*]" | cut -d " " -f2 | tr ' ' '\n')" scp sftp ssh
+
+[ -n "$(shbin -v 2>/dev/null)" ] && print_sysinfo
+
 ###############################################################################################
 set +o nounset     # Don't mess up the auto completion
 set +o errexit     # Don't mess up the interactive shell
