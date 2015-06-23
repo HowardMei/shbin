@@ -3,6 +3,7 @@ export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 [ -d "/opt/bin" ] && export PATH="/opt/bin:$PATH"
 [ -d "/opt/sbin" ] && export PATH="/opt/sbin:$PATH"
 [ -d "/opt/shbin" ] && export PATH="/opt/shbin:$PATH"
+[ -d "${HOME}/.shbin" ] && export PATH="${HOME}/.shbin:$PATH"
 ## Prefer US English and use UTF-8
 export LANG="en_US"
 export LC_ALL="en_US.UTF-8"
@@ -83,6 +84,7 @@ alias psa='__pslsa() { local p="$1"; ps -e -o pid,uname,comm,pcpu,pmem,etime,cmd
 alias psp='__pslsp() { local p="$@"; local ptot="$(ps -e -o pid,uname,comm,pcpu,pmem,etime,cmd --sort=-pcpu,-pmem)";local phead="$(echo "$ptot" | head -1)";local pbody="$(echo "$ptot" | sed '1d' | grep -i ${p:-""} | grep -v grep)";echo "$phead";echo "$pbody";unset -f __pslsp; }; __pslsp'
 alias vex='__vex() { [ $# -eq 1 ] && [ "$1" == "-q" ] && [ -r "bin/activate" ] && deactivate && return 0;[ -r "${!#}/bin/activate" ] && cd "${!#}" && . bin/activate || virtualenv "$@";[ -d "${!#}" ] && cd "${!#}";[ -r "bin/activate" ] && . bin/activate; unset -f __vex; }; __vex'
 alias resharevb='killall VBoxClient && VBoxClient-all'
+alias folder='__folder() { local p=$(pwd); nautilus ${p} >/dev/null 2>&1; unset -f __folder; }; __folder'
 
 
 # If not running interactively, don't do anything
@@ -98,11 +100,13 @@ shopt -s checkwinsize
 # If possible, add tab completion for many more commands
 [ -r "/etc/bash_completion" ] && . "/etc/bash_completion"
 
+# Load shbin extra functions if possible
+[ -r "$HOME/.shbin_extrafuncs" ] && . "$HOME/.shbin_extrafuncs"
+
 # Add tab completion for SSH hostnames based on ~/.ssh/config, ignoring wildcards
 [ -r "$HOME/.ssh/config" ] && complete -o "default" -o "nospace" -W "$(grep "^Host" ~/.ssh/config | grep -v "[?*]" | cut -d " " -f2 | tr ' ' '\n')" scp sftp ssh
 
-
-[ -n "$(shbin -v 2>/dev/null)" ] && print_system_info
+[ -n "$(shbin -v 2>/dev/null)" ] && print_sysinfo
 
 ###############################################################################################
 set +o nounset     # Don't mess up the auto completion
