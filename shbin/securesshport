@@ -3,46 +3,47 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  securesshdport
 #%   DESCRIPTION:  Harden the security rules of SSHD port
-#%	 Usage: securesshdport [sshport]
+#%   USAGE: securesshdport [sshport]
+#%   REQUIRES: getrndaport, tr, /etc/ssh/sshd_config, grep, tr, cecho, ufwacceptport, fsubsts, pservice
 #----------------------------------------------------------------------------------------------------------------------
 _securesshdport() {
-	if [ $# -lt 1 ] ; then
-		local aport="$(getrndaport)"
-	else
-		local pn="$(echo $1 | tr -cd '[[:digit:]]')"
-		if [ -z "$pn" ]; then
-			local aport="$(getrndaport)"
-		else
-			local aport="$pn"
-		fi
-	fi
-	if [ -f "/etc/ssh/sshd_config" ]; then
-		cecho "Hardening the security policies for SSH Daemon Server Listening to Port $aport ..."
-		changesshport -y "$aport"
-		local sshport="$(cat /etc/ssh/sshd_config | grep Port | tr -cd '[[:digit:]]')"
-		if [ "$aport" -ne "$sshport" ]; then
-			cecho -r "The given port $aport is out of bound. Use $sshport instead."
-		fi
-		if [ -n "$sshport" ]; then
-			ufwacceptport --log "$sshport/tcp"
-		else
-			cecho "Cannot detect the SSHD listening port."
-			cecho "Let's return back to default port 22."
-			fsubsts -l "/etc/ssh/sshd_config" "Port" "Port 22"
-			ufwacceptport --log "22/tcp"
-		fi
-		fsubsts -l "/etc/ssh/sshd_config" "Protocol" "Protocol 2"
-		fsubsts -l "/etc/ssh/sshd_config" "PasswordAuthentication" "PasswordAuthentication no"
-		fsubsts -l "/etc/ssh/sshd_config" "PubkeyAuthentication" "PubkeyAuthentication yes"
-		fsubsts -l "/etc/ssh/sshd_config" "PermitEmptyPasswords" "PermitEmptyPasswords no"
-		fsubsts -l "/etc/ssh/sshd_config" "ChallengeResponseAuthentication" "ChallengeResponseAuthentication no"
-		pservice restart ssh
-		pservice restart sshd
-		cecho "SSH Daemon Server has been restarted to listening to the new port: $sshport"
-	else
-		cecho "/etc/ssh/sshd_config is not found: Please ensure SSH Daemon Server has been installed."
-		return 1
-	fi
+    if [ $# -lt 1 ] ; then
+        local aport="$(getrndaport)"
+    else
+        local pn="$(echo $1 | tr -cd '[[:digit:]]')"
+        if [ -z "$pn" ]; then
+            local aport="$(getrndaport)"
+        else
+            local aport="$pn"
+        fi
+    fi
+    if [ -f "/etc/ssh/sshd_config" ]; then
+        cecho "Hardening the security policies for SSH Daemon Server Listening to Port $aport ..."
+        changesshport -y "$aport"
+        local sshport="$(cat /etc/ssh/sshd_config | grep Port | tr -cd '[[:digit:]]')"
+        if [ "$aport" -ne "$sshport" ]; then
+            cecho -r "The given port $aport is out of bound. Use $sshport instead."
+        fi
+        if [ -n "$sshport" ]; then
+            ufwacceptport --log "$sshport/tcp"
+        else
+            cecho "Cannot detect the SSHD listening port."
+            cecho "Let's return back to default port 22."
+            fsubsts -l "/etc/ssh/sshd_config" "Port" "Port 22"
+            ufwacceptport --log "22/tcp"
+        fi
+        fsubsts -l "/etc/ssh/sshd_config" "Protocol" "Protocol 2"
+        fsubsts -l "/etc/ssh/sshd_config" "PasswordAuthentication" "PasswordAuthentication no"
+        fsubsts -l "/etc/ssh/sshd_config" "PubkeyAuthentication" "PubkeyAuthentication yes"
+        fsubsts -l "/etc/ssh/sshd_config" "PermitEmptyPasswords" "PermitEmptyPasswords no"
+        fsubsts -l "/etc/ssh/sshd_config" "ChallengeResponseAuthentication" "ChallengeResponseAuthentication no"
+        pservice restart ssh
+        pservice restart sshd
+        cecho "SSH Daemon Server has been restarted to listening to the new port: $sshport"
+    else
+        cecho "/etc/ssh/sshd_config is not found: Please ensure SSH Daemon Server has been installed."
+        return 1
+    fi
 }
 
 _securesshdport "$@"

@@ -1,11 +1,12 @@
 
 #%   DESCRIPTION:  Get the length of the given strings
-#%	 Usage: echo "strings" | strlens OR strlens "strings"
+#%   USAGE: echo "strings" | strlens OR strlens "strings"
+#%   REQUIRES: strlen
 
 if [ $# -lt 1 ]; then
-	echo "$(cat)" | strlen 
+    echo "$(cat)" | strlen
 else
-	echo "$*" | strlen 
+    echo "$*" | strlen
 fi
 
 exit 0

@@ -1,5 +1,4 @@
 
-
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  win2posix or posix2win
 #   DESCRIPTION:  Change the slash according to OS for the given path
@@ -16,26 +15,27 @@ _posix2win() {
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  normpath
 #%   DESCRIPTION:  Normalize the path to linux for the given path
-#%   Usage: normpath "/file\\cloud drive/\file.ext"
+#%   USAGE: normpath "/file\\cloud drive/\file.ext"
+#%   REQUIRES: sed
 #----------------------------------------------------------------------------------------------------------------------
 _normpath() {
-	_win2posix "$(_posix2win $@)"
+    _win2posix "$(_posix2win $@)"
 }
 
 
 if [ $# -lt 1 ]; then
-	echo 'Usage: normpath [windows|linux|-l|-w] "/file\path/in\//chaos.ext"'
-else 
-	case "$1" in
-		-w | --win | win | windows)
-			shift
-			_posix2win "$@";;
-		-l | --lin | lin | posix | linux)
-			shift
-			_win2posix "$@";;
-		"" | -- | *)
-			_normpath "$@";;
-	esac
+    echo 'Usage: normpath [windows|linux|-l|-w] "/file\path/in\//chaos.ext"'
+else
+    case "$1" in
+        -w | --win | win | windows)
+            shift
+            _posix2win "$@";;
+        -l | --lin | lin | posix | linux)
+            shift
+            _win2posix "$@";;
+        "" | -- | *)
+            _normpath "$@";;
+    esac
 fi
 
 exit 0

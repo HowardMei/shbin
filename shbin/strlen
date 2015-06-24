@@ -2,33 +2,34 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  strlen
 #%   DESCRIPTION:  Get the length of the given strings
-#%	 Usage: echo "strings" | strlen OR strlen "strings"
+#%   USAGE: echo "strings" | strlen OR strlen "strings"
+#%   REQUIRES: echo, printf, wc
 #----------------------------------------------------------------------------------------------------------------------
-_strlen() {  
+_strlen() {
    if [ $# -lt 1 ]; then
-	  local str="$(cat)"
-	  ##$(cat) from the pipe
+      local str="$(cat)"
+      ##$(cat) from the pipe
    else
-	  local str="$*"
+      local str="$*"
    fi
    echo "${#str}"
 }
 
 
 if [ $# -lt 1 ]; then
-	if iscommand wc 2>/dev/null; then
-		printf "%s" "$(cat)" | wc -c 
-		## or echo -n, but printf is better in compatibility
-	else
-		echo "$(cat)" | _strlen 
-	fi
+    if iscommand wc 2>/dev/null; then
+        printf "%s" "$(cat)" | wc -c
+        ## or echo -n, but printf is better in compatibility
+    else
+        echo "$(cat)" | _strlen
+    fi
 else
-	if iscommand wc 2>/dev/null; then
-		printf "%s" "$*" | wc -c 
-	else
-		echo "$*" | _strlen 
-	fi
+    if iscommand wc 2>/dev/null; then
+        printf "%s" "$*" | wc -c
+    else
+        echo "$*" | _strlen
+    fi
 fi
 
-unset -f _strlen 
+unset -f _strlen
 exit 0

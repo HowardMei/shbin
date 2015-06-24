@@ -2,21 +2,22 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  name_gitbranch
 #%   DESCRIPTION:  Show the given git repo branch name
-#%	 Usage: namegitbranch
+#%   USAGE: namegitbranch
+#%   REQUIRES: git
 #----------------------------------------------------------------------------------------------------------------------
 _namegitbranch() {
    if ! iscommand git 2>/dev/null; then
-	  echo "git is not installed yet." >&2
-	  return 1
+      echo "git is not installed yet." >&2
+      return 1
    fi
    local branchname="$(git symbolic-ref HEAD | sed -e 's,.*/\(.*\),\1,')"
-   echo "$branchname" 
+   echo "$branchname"
 }
 
 if isgitrepo "$(pwd)" 2>/dev/null; then
-	_namegitbranch 
+    _namegitbranch
 else
-	echo "$(pwd) is not a valid git repo." >&2 
+    echo "$(pwd) is not a valid git repo." >&2
 fi
 
 exit 0

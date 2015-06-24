@@ -2,7 +2,8 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  so
 #%   DESCRIPTION:  Quick filename search using locate
-#%	 Usage: so my.cnf
+#%   USAGE: so my.cnf
+#%   REQUIRES: uname, shc, sed
 #----------------------------------------------------------------------------------------------------------------------
 _so() {
   if [ $# -lt 1 ] ; then
@@ -15,8 +16,8 @@ _so() {
      local display_divider=0
   fi
   if ! iscommand "locate" 2>/dev/null; then
-	 pinstall locate
-	 shc 'updatedb'
+     pcapt -S locate
+     shc 'updatedb'
   fi
   local current_argument=0
   local total_arguments=$#
@@ -34,7 +35,7 @@ _so() {
   done
 }
 
-_so "$@" 
+_so "$@"
 
-unset -f _so 
+unset -f _so
 exit 0

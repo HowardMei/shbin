@@ -1,12 +1,13 @@
 
 #%   DESCRIPTION:  Filter wanted chars from the given string.
-#%	 Usage: echo "the string" | efilters [-a|-an|-cl|-d|-h|-lo|-m|-ml|-r|-rl|-sp|-up] 
-#%			efilters [-a|-an|-cl|-d|-h|-lo|-m|-ml|-r|-rl|-sp|-up] "the string"
+#%   USAGE: echo "the string" | efilters [-a|-an|-cl|-d|-h|-lo|-m|-ml|-r|-rl|-sp|-up]
+#%          efilters [-a|-an|-cl|-d|-h|-lo|-m|-ml|-r|-rl|-sp|-up] "the string"
+#%   REQUIRES: efilter
 
 if [ $# -lt 1 ]; then
-	efilter "$(cat)" 
+    efilter "$(cat)"
 else
-	efilter "$@" 
+    efilter "$@"
 fi
 
 exit 0

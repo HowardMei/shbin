@@ -1,17 +1,17 @@
 
-## require shbin/abspath, shbin/shc
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  load_allfr
 #%   DESCRIPTION:  Load all files/subdirs from the src file or dir
-#%	 Usage: load_allfr funcdir/enabled
+#%   USAGE: load_allfr funcdir/enabled
+#%   REQUIRES: abspath, shc, dotload
 #----------------------------------------------------------------------------------------------------------------------
 _load_allfr() {
     # usage: load_allfr aliases/enabled
     # exp1:  load_allfr envar/enabled functions/enabled
     for src in "$@";do
-	   local srcpath="$(abspath $src)"
+       local srcpath="$(abspath $src)"
        if [ -n "$srcpath" ] && [ -d "$srcpath" ];then
-		 local srcfs="$(find "$srcpath" -mindepth 0 -maxdepth 1 -type f)"
+         local srcfs="$(find "$srcpath" -mindepth 0 -maxdepth 1 -type f)"
          for srcfile in $srcfs; do
             [ -r "$srcfile" ] && dotload "$srcfile"
          done

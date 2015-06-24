@@ -1,27 +1,27 @@
 
 #%   DESCRIPTION:  Substitute all matched string with new string in the given file
-#%	 Usage [All in One]: fsubsts [-a | -n | --nth 3] [-l] '/etc/default/grub' 'GRUB_CMDLINE_LINUX=' 'GRUB_CMDLINE_LINUX=\"cgroup_enable=memory swapaccount=1\"'
-#%	 Usage [Replace All]: fsubst [-l] '/etc/default/grub' 'GRUB_CMDLINE_LINUX=' 'GRUB_CMDLINE_LINUX=\"cgroup_enable=memory swapaccount=1\"'
-#%	 Usage [Replace nth]: fsubstn [-n | --nth 3] [-l] '/etc/default/grub' 'GRUB_CMDLINE_LINUX=' 'GRUB_CMDLINE_LINUX=\"cgroup_enable=memory swapaccount=1\"'
-
+#%   USAGE [All in One]: fsubsts [-a | -n | --nth 3] [-l] '/etc/default/grub' 'GRUB_CMDLINE_LINUX=' 'GRUB_CMDLINE_LINUX=\"cgroup_enable=memory swapaccount=1\"'
+#%   USAGE [Replace All]: fsubst [-l] '/etc/default/grub' 'GRUB_CMDLINE_LINUX=' 'GRUB_CMDLINE_LINUX=\"cgroup_enable=memory swapaccount=1\"'
+#%   USAGE [Replace nth]: fsubstn [-n | --nth 3] [-l] '/etc/default/grub' 'GRUB_CMDLINE_LINUX=' 'GRUB_CMDLINE_LINUX=\"cgroup_enable=memory swapaccount=1\"'
+#%   REQUIRES: fsubst, fsubstn
 
 if [ $# -lt 1 ]; then
-	echo "Usage [All in One]: fsubsts [-a | -n | --nth 3] [-l] '/etc/default/grub' 'GRUB_CMDLINE_LINUX=' 'GRUB_CMDLINE_LINUX=\"cgroup_enable=memory swapaccount=1\"'" >&2
-	echo "Usage [Replace All]: fsubst '/etc/default/grub' 'GRUB_CMDLINE_LINUX=' 'GRUB_CMDLINE_LINUX=\"cgroup_enable=memory swapaccount=1\"'" >&2
-	echo "Usage [Replace nth]: fsubstn [-n | --nth 3] [-l] '/etc/default/grub' 'GRUB_CMDLINE_LINUX=' 'GRUB_CMDLINE_LINUX=\"cgroup_enable=memory swapaccount=1\"'" >&2
+    echo "USAGE [All in One]: fsubsts [-a | -n | --nth 3] [-l] '/etc/default/grub' 'GRUB_CMDLINE_LINUX=' 'GRUB_CMDLINE_LINUX=\"cgroup_enable=memory swapaccount=1\"'" >&2
+    echo "USAGE [Replace All]: fsubst '/etc/default/grub' 'GRUB_CMDLINE_LINUX=' 'GRUB_CMDLINE_LINUX=\"cgroup_enable=memory swapaccount=1\"'" >&2
+    echo "USAGE [Replace nth]: fsubstn [-n | --nth 3] [-l] '/etc/default/grub' 'GRUB_CMDLINE_LINUX=' 'GRUB_CMDLINE_LINUX=\"cgroup_enable=memory swapaccount=1\"'" >&2
 else
     case "$1" in
-		-n | --nth | --num | number)
-			fsubstn "$@"
-			;;
-		-a | --all | --glob | global)
-			shift
-			fsubst "$@"
-			;;
-		-- | *)
-			fsubstn "$@"
-			;;
-	esac
+        -n | --nth | --num | number)
+            fsubstn "$@"
+            ;;
+        -a | --all | --glob | global)
+            shift
+            fsubst "$@"
+            ;;
+        -- | *)
+            fsubstn "$@"
+            ;;
+    esac
 fi
 
 exit 0

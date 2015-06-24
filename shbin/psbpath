@@ -3,19 +3,20 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  psbpath
 #%   DESCRIPTION:  Get the possible absolute path of the given path create it if not exists
-#%   Usage: psbpath [possible path name]
+#%   USAGE: psbpath [possible path name]
+#%   REQUIRES: abspath, dirname, basename, tr
 #----------------------------------------------------------------------------------------------------------------------
-unset CDPATH 
-unset -f psbpath 
+unset CDPATH
+unset -f psbpath
 psbpath() {
     #Possible absolute path, always return a valid file/dir
     if [ $# -lt 1 ];then
-		return 1
-	fi
+        return 1
+    fi
     local relpath="$(echo "$1" | tr -d '[:blank:]')"
-	if [ -z "$relpath" ]; then
-		return 1
-	fi
+    if [ -z "$relpath" ]; then
+        return 1
+    fi
     if [ -d "$relpath" ];then
        local PSB_PATH="$(abspath "$relpath")"
     else
@@ -25,22 +26,22 @@ psbpath() {
           mkdir -p "$(abspath $(dirname "$relpath" 2>/dev/null))"
           local PSB_PATH="$(abspath $(dirname "$relpath" 2>/dev/null))/$(basename "$relpath" 2>/dev/null)"
        else
-		  return 1
+          return 1
        fi
     fi
     if [ -z "$PSB_PATH" ]; then
-		return 1
-	else
-		echo "$PSB_PATH"
-	fi
+        return 1
+    else
+        echo "$PSB_PATH"
+    fi
 }
 
 
 if [ $# -lt 1 ]; then
-	export -f psbpath 2>/dev/null
+    export -f psbpath 2>/dev/null
 else
-	psbpath "$@"
-	unset -f psbpath
+    psbpath "$@"
+    unset -f psbpath
 fi
 
 exit 0

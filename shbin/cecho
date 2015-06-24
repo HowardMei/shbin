@@ -2,7 +2,8 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __detect_color_support
 #%   DESCRIPTION:  Try to detect color support.
-#%   Usage: cecho [-d] [-r|-g|-o|-b|-p|-c|-w] "test phrase"
+#%   USAGE: cecho [-d] [-r|-g|-o|-b|-p|-c|-w] "test phrase"
+#%   REQUIRES: printf, [date]
 #----------------------------------------------------------------------------------------------------------------------
 _COLORS=${BS_COLORS:-$(tput colors 2>/dev/null || echo 0)}
 __detect_color_support() {

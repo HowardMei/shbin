@@ -1,4 +1,8 @@
-#!/bin/sh
+#---  PROGRAM  -------------------------------------------------------------------------------------------------------
+#%   DESCRIPTION:  Clean up the apt/dpkg cache residues and share/doc and share/man
+#%   USAGE: apt-cleanup
+#%   REQUIRES: apt-get
+#----------------------------------------------------------------------------------------------------------------------
 
-apt-get clean -yq && rm -rf /opt/debonly/*
-rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/* /usr/share/man/* /usr/share/info/* /usr/share/lintian/*
+apt-get clean -yq && \rm -rf /opt/debonly/*
+\rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/* /usr/share/man/* /usr/share/info/* /usr/share/lintian/*

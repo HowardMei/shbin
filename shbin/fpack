@@ -1,31 +1,127 @@
 
-## require shbin/abspath
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  funpack & fpack
 #%   DESCRIPTION:  Quick archiving of multiple files and folders
-#%   Usage: fpack packname.tar.gz fpath1 dpath1 fpath2 ... dpathn
+#%   USAGE: fpack packname.tar.gz fpath1 dpath1 fpath2 ... dpathn
+#%   REQUIRES: psbpath, abspath, basename, dirname, mktemp, pushd, popd, tar, rar, zip, 7z, xz, lzma, bzip2
 #----------------------------------------------------------------------------------------------------------------------
 _fpack() {
-  if [ $# -lt 2 ] ; then
-     echo "Usage: fpack testpack.tar.gz ./test ./sing.sh"
+  if [ $# -lt 3 ] ; then
+     echo "Usage: fpack [ -r | --relative | -f | --fullpath ] testpack.tar.gz ./test ./sing.sh"
      return 0
   else
-     local packname=$1
-     shift
+      local archivemode=0
+      case "$1" in
+        -r | --relative)
+            shift
+        ;;
+        -f | --fullpath)
+            shift
+            archivemode=1024
+        ;;
+        -- | *)
+        ;;
+      esac
+      if [ ! -f "$1" ]; then
+          local packname="$(psbpath "$1")"
+          shift
+      else
+          echo "$1 is already present. Please change a name." >&2
+          exit 0
+      fi
+      local item=""
+      for item in $@; do
+        if [ -r "$(abspath ${item})" ]; then
+            local packpaths="$(abspath ${item}) ${packpaths}"
+        else
+            echo "Omitting non-readable item ${item}"
+        fi
+      done
   fi
-  case $packname in
-       *.tar)       tar cvf "$packname" "$@"    ;;
-       *.tar.gz)    tar cvzf "$packname" "$@"   ;;
-       *.rar)       rar a -r "$packname" "$@"   ;;
-       *.zip)       zip -r -9 "$packname" "$@"  ;;
-       *.7z)        7z a -r  "$packname" "$@"   ;;
-       *) echo "File $packname format is not supported..." ;;
-   esac
+  if [ "$archivemode" -lt 512 ]; then
+        case ${packname} in
+           *.tar.bz2 | *.tbz2)
+                local itempath=""
+                local tarpaths=""
+                for itempath in ${packpaths}; do
+                    tarpaths="-C $(dirname ${itempath}) $(basename ${itempath}) ${tarpaths}"
+                done
+                tar cvjf ${packname} ${tarpaths}
+            ;;
+           *.tar.gz | *.tgz)
+                local itempath=""
+                local tarpaths=""
+                for itempath in ${packpaths}; do
+                    tarpaths="-C $(dirname ${itempath}) $(basename ${itempath}) ${tarpaths}"
+                done
+                tar cvzf ${packname} ${tarpaths}
+            ;;
+           *.tar.xz | *.txz)
+                local itempath=""
+                local tarpaths=""
+                for itempath in ${packpaths}; do
+                    tarpaths="-C $(dirname ${itempath}) $(basename ${itempath}) ${tarpaths}"
+                done
+                XZ_OPT=-9e && tar cvJf ${packname} ${tarpaths}
+            ;;
+           *.tar.7z | *.t7z)
+                local itempath=""
+                local tarpaths=""
+                for itempath in ${packpaths}; do
+                    tarpaths="-C $(dirname ${itempath}) $(basename ${itempath}) ${tarpaths}"
+                done
+                local tmpdir="$(mktemp -d)"
+                local tmptar="$(echo $(basename ${packname}) | sed -e 's/\.tar\.7z//g;s/\.t7z//g').tar"
+                pushd ${tmpdir} >/dev/null && tar cvf ${tmptar} ${tarpaths} 2>/dev/null && 7z a -t7z -y  ${packname} ${tmptar} && popd >/dev/null
+                rm -rf "${tmpdir}"
+            ;;
+           *.tar)
+                local itempath=""
+                local tarpaths=""
+                for itempath in ${packpaths}; do
+                    tarpaths="-C $(dirname ${itempath}) $(basename ${itempath}) ${tarpaths}"
+                done
+                tar cvf ${packname} ${tarpaths}
+            ;;
+           *.7z)  7z a -t7z -y  ${packname} ${packpaths}         ;;
+           *.rar)       rar a -ep1 ${packname} ${packpaths}   ;;
+           *.zip)
+                local itempath=""
+                for itempath in ${packpaths}; do
+                    pushd $(dirname ${itempath}) >/dev/null && zip -ru -9 ${packname} $(basename ${itempath}) 2>/dev/null && popd >/dev/null
+                done
+            ;;
+           *) echo "File $packname format is not supported..." ;;
+       esac
+   else
+      case ${packname} in
+           *.tar.bz2 | *.tbz2)  tar cvjf ${packname} ${packpaths}   ;;
+           *.tar.gz | *.tgz)    tar cvzf ${packname} ${packpaths}   ;;
+           *.tar.xz | *.txz) XZ_OPT=-9e tar cvJf ${packname} ${packpaths}   ;;
+           *.tar.7z | *.t7z)
+                local tmpdir="$(mktemp -d)"
+                local tmptar="$(echo $(basename ${packname}) | sed -e 's/\.tar\.7z//g;s/\.t7z//g').tar"
+                pushd ${tmpdir} >/dev/null && tar cvf ${tmptar} ${packpaths} 2>/dev/null && 7z a -t7z -y  ${packname} ${tmptar} && popd >/dev/null
+                rm -rf "${tmpdir}"
+            ;;
+           *.tar)       tar cvf ${packname} ${packpaths}    ;;
+           *.7z)
+                local itempath=""
+                for itempath in ${packpaths}; do
+                    local relpath="$(echo ${itempath} | cut -d/ -f2-)"
+                    pushd / >/dev/null && 7z u -t7z -y ${packname} ${relpath} 2>/dev/null && popd >/dev/null
+                done
+            ;;
+           *.rar)       rar a -ep3 ${packname} ${packpaths}   ;;
+           *.zip)       zip -r -9 ${packname} ${packpaths}  ;;
+           *) echo "File $packname format is not supported..." ;;
+       esac
+   fi
 }
 
 
 if [ $# -lt 1 ]; then
-    echo "Usage: fpack packname.tar.gz fpath1 dpath1 fpath2 ... dpathn" >&2
+    echo "Usage: fpack [ -r | --relative | -f | --fullpath ] packname.tar.gz fpath1 dpath1 fpath2 ... dpathn" >&2
 else
     _fpack "$@"
 fi

@@ -3,40 +3,41 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  getpos
 #%   DESCRIPTION:  Get the given position from the file
-#%	 Usage: getpos rownum colnum filepath
+#%   USAGE: getpos rownum colnum filepath
+#%   REQUIRES: abspath, tr, getcol, erow
 #----------------------------------------------------------------------------------------------------------------------
 _getpos() {
     if [ $# -ne 3 ];then
-	   echo "Usage: getpos rownum colnum filename" >&2
-	   return 1
-	else
+       echo "Usage: getpos rownum colnum filename" >&2
+       return 1
+    else
        local nrow="$(echo $1 | tr -cd '[:digit:]')"
        local ncol="$(echo $2 | tr -cd '[:digit:]')"
        local fn="$(abspath "$3")"
     fi
-	if [ -z "$nrow" ];then
-	   echo "$nrow is not a valid row number!" >&2
-	   return 1
-	fi
+    if [ -z "$nrow" ];then
+       echo "$nrow is not a valid row number!" >&2
+       return 1
+    fi
     if [ -z "$ncol" ];then
        echo "$ncol is not a valid column number!" >&2
-	   return 1
+       return 1
     fi
     if [ ! -r "$fn" ];then
-	   echo "$fn is not a valid file or cannot be read!" >&2
-	   return 2
-	fi
+       echo "$fn is not a valid file or cannot be read!" >&2
+       return 2
+    fi
     getcol "$ncol" "$fn" | erow "$nrow"
 }
 
 
 if [ $# -lt 1 ]; then
-	echo "Usage: getpos rownum colnum filename" >&2
+    echo "Usage: getpos rownum colnum filename" >&2
 elif [ $# -eq 2 ]; then
-	_getpos "$1" "$2" "$(cat)"
+    _getpos "$1" "$2" "$(cat)"
 else
-	_getpos "$@"
-fi	
+    _getpos "$@"
+fi
 
 unset -f _getpos
 exit 0

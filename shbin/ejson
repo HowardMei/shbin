@@ -2,7 +2,8 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  ejson
 #%   DESCRIPTION:  Parse and extract key value pairs from json string/file.
-#%   Usage: echo "json_string" | ejson [-k|-v|--keys|--values]  OR  ejson [-k|-v|--keys|--values] jsonfile
+#%   USAGE: echo "json_string" | ejson [-k|-v|--keys|--values]  OR  ejson [-k|-v|--keys|--values] jsonfile
+#%   REQUIRES: jqx, uniq, sed, ecalc, ncols, efilters, ecol
 #----------------------------------------------------------------------------------------------------------------------
 
 _ejson() {

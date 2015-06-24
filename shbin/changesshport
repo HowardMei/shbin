@@ -3,64 +3,65 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  changesshport
 #%   DESCRIPTION:  Change the SSHD listening port
-#%	 Usage: changesshport [-y] [portnum]
+#%   USAGE: changesshport [-y] [portnum]
+#%   REQUIRES: netstat, grep, getrndaport, fsubsts, cecho, /etc/ssh/sshd_config
 #----------------------------------------------------------------------------------------------------------------------
 _changesshport() {
    local fch=""
    local sshport="6099"
    if [ $# -lt 1 ] ; then
-		echo 'Usage: changesshport [-y "$aport"]' >&2
-	   (netstat -nltu | grep ":$sshport" | grep -iq "LISTEN") && sshport="$(getrndaport)" || sshport="6099"
+        echo 'Usage: changesshport [-y "$aport"]' >&2
+       (netstat -nltu | grep ":$sshport" | grep -iq "LISTEN") && sshport="$(getrndaport)" || sshport="6099"
    else
-	   local opt1="$(echo $1 | tr -cd '[[:digit:]]')"
-	   ## opt1 will be empty if no digits are contained in $1
-	   if [ -z "$opt1" ]; then
-			case "$1" in
-				-y | --yes | yes | -f | --force | force)
-					fch="force"
-					shift
-					;;
-				-- | *)
-					fch="ask"
-					shift
-					;;
-			esac
-	   fi
-	   if [  $# -lt 1  ]; then
-		   (netstat -nltu | grep ":$sshport" | grep -iq "LISTEN") && sshport="$(getrndaport)" || sshport="6099"
-	   else
-		   case "$1" in
-				[0-9][0-9] | [0-9][0-9][0-9] | [0-9][0-9][0-9][0-9] | [0-4][0-8][0-9][0-9][0-9])
-					(netstat -nltu | grep ":$1" | grep -iq "LISTEN") &&	sshport="$(getrndaport)" || sshport="$1"
-					;;
-				-- | *)
-					sshport="$(getrndaport)"
-					;;
-		   esac
-	   fi
+       local opt1="$(echo $1 | tr -cd '[[:digit:]]')"
+       ## opt1 will be empty if no digits are contained in $1
+       if [ -z "$opt1" ]; then
+            case "$1" in
+                -y | --yes | yes | -f | --force | force)
+                    fch="force"
+                    shift
+                    ;;
+                -- | *)
+                    fch="ask"
+                    shift
+                    ;;
+            esac
+       fi
+       if [  $# -lt 1  ]; then
+           (netstat -nltu | grep ":$sshport" | grep -iq "LISTEN") && sshport="$(getrndaport)" || sshport="6099"
+       else
+           case "$1" in
+                [0-9][0-9] | [0-9][0-9][0-9] | [0-9][0-9][0-9][0-9] | [0-4][0-8][0-9][0-9][0-9])
+                    (netstat -nltu | grep ":$1" | grep -iq "LISTEN") && sshport="$(getrndaport)" || sshport="$1"
+                    ;;
+                -- | *)
+                    sshport="$(getrndaport)"
+                    ;;
+           esac
+       fi
    fi
    if [ -f "/etc/ssh/sshd_config" ]; then
-		if [ "force" = "$fch" ]; then
-			fsubsts -l "/etc/ssh/sshd_config" "Port" "Port $sshport"
-			cecho -g "Changed SSH Daemon Service Port to: $sshport"
-			cecho -r "Please take note or else you'll be locked out of the gate!"
-	    else
-	        cecho "Current SSH Daemon Service Port is: $(getsshport)"
-			read -r -p "Are you sure to change the SSHD Port to $sshport? [yes/no] " optch
-			case "$optch" in
-				[yY][eE][sS]|[yY])
-					fsubsts -l "/etc/ssh/sshd_config" "Port" "Port $sshport"
-					cecho -g "Changed SSH Daemon Service Port to: $sshport"
-					cecho -r "Please take note or else you'll be locked out at future logins!"
-					;;
-				*)
-					return 1
-					;;
-			esac
-	    fi
+        if [ "force" = "$fch" ]; then
+            fsubsts -l "/etc/ssh/sshd_config" "Port" "Port $sshport"
+            cecho -g "Changed SSH Daemon Service Port to: $sshport"
+            cecho -r "Please take note or else you'll be locked out of the gate!"
+        else
+            cecho "Current SSH Daemon Service Port is: $(getsshport)"
+            read -r -p "Are you sure to change the SSHD Port to $sshport? [yes/no] " optch
+            case "$optch" in
+                [yY][eE][sS]|[yY])
+                    fsubsts -l "/etc/ssh/sshd_config" "Port" "Port $sshport"
+                    cecho -g "Changed SSH Daemon Service Port to: $sshport"
+                    cecho -r "Please take note or else you'll be locked out at future logins!"
+                    ;;
+                *)
+                    return 1
+                    ;;
+            esac
+        fi
    else
-		cecho -r "/etc/ssh/sshd_config is not found: Please ensure SSH Server has been installed."
-		return 1
+        cecho -r "/etc/ssh/sshd_config is not found: Please ensure SSH Server has been installed."
+        return 1
    fi
 }
 

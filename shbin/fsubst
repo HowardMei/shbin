@@ -1,58 +1,55 @@
 
-##require shbin/abspath, shbin/escape
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  fsubst
 #%   DESCRIPTION:  Substitute all matched string with new string in the given file
-#%	 Usage: fsubst [-l] '/etc/default/grub' 'GRUB_CMDLINE_LINUX=' 'GRUB_CMDLINE_LINUX=\"cgroup_enable=memory swapaccount=1\"'
+#%   USAGE: fsubst [-l] '/etc/default/grub' 'GRUB_CMDLINE_LINUX=' 'GRUB_CMDLINE_LINUX=\"cgroup_enable=memory swapaccount=1\"'
+#%   REQUIRES: abspath, escape, sed
 #----------------------------------------------------------------------------------------------------------------------
 _fsubst() {
     if [ $# -lt 3 ];then
-	   echo 'Usage:  fsubst [-l] "$WP_CONFIG_FILE" ".*SALT_BLOCK.*" "$Alternative_Text"'
+       echo 'Usage:  fsubst [-l] "$WP_CONFIG_FILE" ".*SALT_BLOCK.*" "$Alternative_Text"'
        return 1
     fi
     local line=0
     case "$1" in
-		-l | --line | --change | --replace)
-			local line=1024
-			shift
-			;;
-		-- | *)
-			;;
-	esac
-	local fn="$(abspath "$1")"
+        -l | --line | --change | --replace)
+            local line=1024
+            shift
+            ;;
+        -- | *)
+            ;;
+    esac
+    local fn="$(abspath "$1")"
     if [ ! -r "$fn" ];then
-	   echo "$fn is not a valid file or cannot be read!" >&2
-	   return 1
-	else
-	   shift
-	fi
+       echo "$fn is not a valid file or cannot be read!" >&2
+       return 1
+    else
+       shift
+    fi
     ## Wrong: local pat=$(escape "$1")
-	local pat="$(echo "$1" | sed -e 's/[]\/$*.^|[]/\\&/g')"
-	shift
-	## Wrong: local txt=$(escape "$2")
-	##local txt="$(escape "$2")"
-	local txt="$(echo "$@" | sed -e 's/[\/&]/\\&/g')"
-	local suf="bk$(date +%s)"
-	if [ "$line" -lt 512 ]; then
-		echo "Replacing all [$pat] with [$txt] in $fn ..."
-		##$sh_c "sed -i.${suf} s/${pat}/${txt}/${num} ${fn}"
-		##sudo sed -i."$suf" "s/${pat}/${txt}/${num}" "$fn"
-		## prevent unwanted damage by not using sudo, chmod $fn explicitly
-		sed -i."$suf" "s/${pat}/${txt}/g" "$fn"
-	else
-		echo "Replacing all lines containing the [$pat] with [$txt] in $fn ..."
-		## http://stackoverflow.com/questions/18342674/sed-replace-a-line-containing-a-pattern
-		##$sh_c "sed -i.${suf} s/^.*${pat}.*$/${txt}/${num} ${fn}"
-		##sudo sed -i."$suf" "s/^.*${pat}.*$/${txt}/${num}" "$fn"
-		sed -i."$suf" "s/^.*${pat}.*$/${txt}/g" "$fn"
-	fi
+    local pat="$(echo "$1" | sed -e 's/[]\/$*.^|[]/\\&/g')"
+    shift
+    ## Wrong: local txt=$(escape "$2")
+    ##local txt="$(escape "$2")"
+    local txt="$(echo "$@" | sed -e 's/[\/&]/\\&/g')"
+    local suf="bk$(date +%s)"
+    if [ "$line" -lt 512 ]; then
+        echo "Replacing all [$pat] with [$txt] in $fn ..."
+        ##$sh_c "sed -i.${suf} s/${pat}/${txt}/${num} ${fn}"
+        ##sudo sed -i."$suf" "s/${pat}/${txt}/${num}" "$fn"
+        ## prevent unwanted damage by not using sudo, chmod $fn explicitly
+        sed -i."$suf" "s/${pat}/${txt}/g" "$fn"
+    else
+        echo "Replacing all lines containing the [$pat] with [$txt] in $fn ..."
+        ## http://stackoverflow.com/questions/18342674/sed-replace-a-line-containing-a-pattern
+        ##$sh_c "sed -i.${suf} s/^.*${pat}.*$/${txt}/${num} ${fn}"
+        ##sudo sed -i."$suf" "s/^.*${pat}.*$/${txt}/${num}" "$fn"
+        sed -i."$suf" "s/^.*${pat}.*$/${txt}/g" "$fn"
+    fi
 }
 
 
-if [ $# -lt 1 ]; then
-	echo "Usage: fsubst [-l] '/etc/default/grub' 'GRUB_CMDLINE_LINUX=' 'GRUB_CMDLINE_LINUX=\"cgroup_enable=memory swapaccount=1\"'" >&2
-else
-	_fsubst "$@"
-fi
+_fsubst "$@"
 
+unset -f _fsubst
 exit 0

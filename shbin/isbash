@@ -1,0 +1,10 @@
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  isbash
+#%   DESCRIPTION:  Check if running under bash environment
+#%   USAGE: if [ -n "$(isbash)" ]; then
+#%   REQUIRES: ps, grep
+#----------------------------------------------------------------------------------------------------------------------
+##echo "$_ $0 $BASH_SOURCE $(ps -p $$ 2>/dev/null)" >&2
+if echo "$_ $0 $BASH_SOURCE $(ps -p $$ 2>/dev/null)" | grep -v isbash 2>/dev/null | grep -iq bash 2>/dev/null; then
+    echo "bash"
+fi

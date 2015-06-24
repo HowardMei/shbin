@@ -3,7 +3,8 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  pcmdupkgt
 #%   DESCRIPTION:  List the cmds of a package or get the package name of a cmd
-#%   Usage: pcmdupkg [--listcmd | --showpack] cmdname | pkgname" >&2
+#%   USAGE: pcmdupkg [--listcmd | --showpack] cmdname | pkgname" >&2
+#%   REQUIRES: pacapt, grep
 #----------------------------------------------------------------------------------------------------------------------
 if [ $# -lt 1 ]; then
     echo "Usage: pcmdupkg [--listcmd | --showpack] cmdname | pkgname" >&2

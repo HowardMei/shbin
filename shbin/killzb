@@ -1,13 +1,13 @@
 
-## require shbin/shc
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  killzb
 #%   DESCRIPTION:  Kill all zombie proesses
-#%	 Usage: killzb
+#%   USAGE: killzb
+#%   REQUIRES: ps, shc, grep, awk, kill
 #----------------------------------------------------------------------------------------------------------------------
 _killzb() {
     echo "Plan to kill defunct and zombie processes:"
-    ##ps -ef | grep defunct | grep -v grep | awk 'NR>1{print buf}{buf = $0}' 
+    ##ps -ef | grep defunct | grep -v grep | awk 'NR>1{print buf}{buf = $0}'
     ## Only kill parent pids>100 for safty reason:
     local defunct=""
     defunct="$(ps afx | grep defunct -B 1 | grep -v grep | grep -v ps | grep -Eo "[0-9]{3,}")"
@@ -15,23 +15,23 @@ _killzb() {
     zombie="$(ps -xaw -o state -o ppid | grep Z | grep -v PID | awk '{print $2}' | grep -Eo "[0-9]{3,}")"
     local x=0;
     if [ -n "$defunct" ]; then
-    	for x in "$(ps afx | grep defunct -B 1 | grep -v grep | grep -v ps | grep -Eo "[0-9]{3,}")"; do
-			shc "kill -9 $x"
-		done
-	else
-		echo "No defunct processes are found."
-	fi
-	if [ -n "$zombie" ]; then
-		for x in "$(ps -xaw -o state -o ppid | grep Z | grep -v PID | awk '{print $2}' | grep -Eo "[0-9]{3,}")"; do
-			shc "kill -9 $x"
-		done
-	else
-		echo "No zombie processes are found."
-	fi
+        for x in "$(ps afx | grep defunct -B 1 | grep -v grep | grep -v ps | grep -Eo "[0-9]{3,}")"; do
+            shc "kill -9 $x"
+        done
+    else
+        echo "No defunct processes are found."
+    fi
+    if [ -n "$zombie" ]; then
+        for x in "$(ps -xaw -o state -o ppid | grep Z | grep -v PID | awk '{print $2}' | grep -Eo "[0-9]{3,}")"; do
+            shc "kill -9 $x"
+        done
+    else
+        echo "No zombie processes are found."
+    fi
 }
 
 
-_killzb 
+_killzb
 
-unset -f _killzb 
+unset -f _killzb
 exit 0

@@ -6,6 +6,13 @@
 # Version: 2.0.5
 # Authors: Anh K. Huynh et al.
 
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  pacapt
+#%   DESCRIPTION:  Universal package manager written in bash
+#%   USAGE: pacapt -syu OR pacapt -h
+#%   REQUIRES: bash, apk, apt-get, cave, dpkg, homebrew, pkg_ng, port, portage, yum, zypper etc
+#----------------------------------------------------------------------------------------------------------------------
+
 # Copyright (C) 2010 - 2015 \
 #                           | 10sr
 #                           | Alexander Dupuy

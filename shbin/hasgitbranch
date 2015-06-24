@@ -2,7 +2,8 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  has_gitbranch
 #%   DESCRIPTION:  Check if the given git repo has a certain branch
-#%	 Usage: hasgitbranch release
+#%   USAGE: hasgitbranch release
+#%   REQUIRES: iscommand, abspath, git
 #----------------------------------------------------------------------------------------------------------------------
 hasgitbranch() {
    if [ $# -lt 1 ] ; then
@@ -12,8 +13,8 @@ hasgitbranch() {
       local branchname="$1"
    fi
    if ! iscommand git 2>/dev/null; then
-	  echo "git is not installed yet." >&2
-	  return 1
+      echo "git is not installed yet." >&2
+      return 1
    fi
    local hisdir="$(pwd)"
    if [ -n "$2" ] && [ -d "$(abspath "$2")" ]; then
@@ -30,8 +31,8 @@ hasgitbranch() {
    fi
    cd "$hisdir" >/dev/null
    if [ -n "$testres" ];then
-      echo "git repo $gitdir has a branch $branchname" 
-      return 0 
+      echo "git repo $gitdir has a branch $branchname"
+      return 0
    else
       echo "$branchname is NOT a branch of git repo $gitdir" >&2
       return 1
@@ -40,10 +41,10 @@ hasgitbranch() {
 
 
 if [ $# -lt 1 ]; then
-	echo "Usage: hasgitbranch branch_name repo_path" >&2
-	export -f hasgitbranch 2>/dev/null
+    echo "Usage: hasgitbranch branch_name repo_path" >&2
+    export -f hasgitbranch 2>/dev/null
 else
-	hasgitbranch "$@" >/dev/null 
+    hasgitbranch "$@" >/dev/null
 fi
 
 exit 0

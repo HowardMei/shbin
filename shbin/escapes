@@ -1,12 +1,13 @@
 
 
 #%   DESCRIPTION:  Escape special chars of the given string.
-#%	 Usage: escapes "the string" or "$(escapes "the string")" or echo "the string" | escapes
+#%   USAGE: escapes "the string" or "$(escapes "the string")" or echo "the string" | escapes
+#%   REQUIRES: escape
 
 if [ $# -lt 1 ]; then
-	escape "$(cat)" 
+    escape "$(cat)"
 else
-	escape "$@" 
+    escape "$@"
 fi
 
 exit 0

@@ -1,9 +1,9 @@
 
-## requires shbin/abspath, shbin/lr
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  chmods
 #%   DESCRIPTION:  Chmod all files/dirs in the given path
-#%   Usage: chmodf [-a | all | f | file | d | dir | l | link | h | hidden | hf | hiddenfile | hd | hiddendir | hl | hiddenlink[0-9]:[0-9]] path 750
+#%   USAGE: chmodf [-a | all | f | file | d | dir | l | link | h | hidden | hf | hiddenfile | hd | hiddendir | hl | hiddenlink[0-9]:[0-9]] path 750
+#%   REQUIRES: tr, abspath, lr
 #----------------------------------------------------------------------------------------------------------------------
 _chmodf() {
    local opt=""

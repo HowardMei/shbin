@@ -1,9 +1,9 @@
 
-## require shbin/escape
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  efilter [efilter -a|-an|...|-x "$(genpasswd -sp 128)" OR genpasswd -an 128 | efilter -d]
 #%   DESCRIPTION:  Filter wanted chars from the given string.
-#%   Usage: efilter [-a|-an|-cl|-d|-h|-lo|-m|-ml|-r|-rl|-sp|-up] "the string"
+#%   USAGE: efilter [-a|-an|-cl|-d|-h|-lo|-m|-ml|-r|-rl|-sp|-up] "the string"
+#%   REQUIRES: tr, sed, escape
 #----------------------------------------------------------------------------------------------------------------------
 _efilter() {
     case "$1" in

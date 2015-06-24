@@ -1,38 +1,38 @@
 
-## require shbin/abspath, shbin/erow
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  getrow
 #%   DESCRIPTION:  Get the given row from the file
-#%   Usage: getrow rownum filepath
+#%   USAGE: getrow rownum filepath
+#%   REQUIRES: tr, abspath, erow
 #----------------------------------------------------------------------------------------------------------------------
 _getrow() {
     if [ $# -ne 2 ];then
-	   echo "Usage: getrow rownum filename" >&2
-	   return 1
-	else
-       local nrow="$(echo $1 | tr -cd '[:digit:]')"
+       echo "Usage: getrow rownum filename" >&2
+       return 1
+    else
+       local nrow="$(echo "$1" | tr -cd '[:digit:]')"
        local fn="$(abspath "$2")"
     fi
 
-	if [ -z "$nrow" ];then
-	   echo "$nrow is not a valid row number!" >&2
-	   return 1
-	fi
+    if [ -z "$nrow" ];then
+       echo "$nrow is not a valid row number!" >&2
+       return 1
+    fi
     if [ ! -r "$fn" ];then
-	   echo "$fn is not a valid file or cannot be read!" >&2
-	   return 2
-	fi
-	cat "$fn" | erow "$nrow"
+       echo "$fn is not a valid file or cannot be read!" >&2
+       return 2
+    fi
+    cat "$fn" | erow "$nrow"
 }
 
 
 if [ $# -lt 1 ]; then
-	echo "Usage: getrow rownum filename" >&2
+    echo "Usage: getrow rownum filename" >&2
 elif [ $# -eq 1 ]; then
-	_getrow "$1" "$(cat)"
+    _getrow "$1" "$(cat)"
 else
-	_getrow "$@"
-fi	
+    _getrow "$@"
+fi
 
 unset -f _getrow
 exit 0

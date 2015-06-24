@@ -1,25 +1,26 @@
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
-#          NAME:  erev
+#    NAME:  erev
 #%   DESCRIPTION:  Reverse the order of chars of the given string.
-#%	 Usage: erev "the string" 
+#%   USAGE: erev "the string"
+#%   REQUIRES: [rev], sed
 #----------------------------------------------------------------------------------------------------------------------
 
 unset -f _erev
 unset -f erev
 _erev() {
-	if [ $# -lt 1 ]; then
-		echo "$(cat)" | sed '/\n/!G;s/\(.\)\(.*\n\)/&\2\1/;//D;s/.//' 2>/dev/null
-	else
-		echo "$*" | sed '/\n/!G;s/\(.\)\(.*\n\)/&\2\1/;//D;s/.//' 2>/dev/null
-	fi
+    if [ $# -lt 1 ]; then
+        echo "$(cat)" | sed '/\n/!G;s/\(.\)\(.*\n\)/&\2\1/;//D;s/.//' 2>/dev/null
+    else
+        echo "$*" | sed '/\n/!G;s/\(.\)\(.*\n\)/&\2\1/;//D;s/.//' 2>/dev/null
+    fi
 }
 
 
 if iscommand rev; then
-	echo "$*" | rev
+    echo "$*" | rev
 else
-	echo "$*" | _erev
+    echo "$*" | _erev
 fi
 
 unset -f _erev

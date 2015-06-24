@@ -3,25 +3,26 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  getprocsbyglob [ the same as alias psp]
 #%   DESCRIPTION:  Get the process list by glob matching the given name, path etc
-#%	 Usage: getprocsbyglob salt-master
+#%   USAGE: getprocsbyglob salt-master
+#%   REQUIRES: ps, erow, grep
 #----------------------------------------------------------------------------------------------------------------------
 _getprocsbyglob() {
-	if [ $# -ne 1 ]; then
-		echo "Usage: getprocsbyglob [process_name | process_path]" >&2
-		return 1
-	fi
-	local plist="$(ps axwww -o pid,uname,comm,pcpu,pmem,etime,cmd --sort=-pcpu,-pmem)"
-	if [ -z "$plist" ]; then
-		return 1
-	else
-		local phead="$(erow 1 "$plist")"
-		local pbody="$(echo "$plist" | grep "$1" 2>/dev/null | grep -v grep | grep -v ps)"
-		echo "$phead"
-		echo "$pbody"
-	fi
+    if [ $# -ne 1 ]; then
+        echo "Usage: getprocsbyglob [process_name | process_path]" >&2
+        return 1
+    fi
+    local plist="$(ps axwww -o pid,uname,comm,pcpu,pmem,etime,cmd --sort=-pcpu,-pmem)"
+    if [ -z "$plist" ]; then
+        return 1
+    else
+        local phead="$(erow 1 "$plist")"
+        local pbody="$(echo "$plist" | grep "$1" 2>/dev/null | grep -v grep | grep -v ps)"
+        echo "$phead"
+        echo "$pbody"
+    fi
 }
 
-_getprocsbyglob "$@" 
+_getprocsbyglob "$@"
 
-unset -f _getprocsbyglob 
+unset -f _getprocsbyglob
 exit 0

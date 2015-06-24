@@ -1,9 +1,9 @@
 
-## require shbin/psbpath, shbin/bktohome
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  symln_allto
 #%   DESCRIPTION:  Soft symlink all files/subdirs to dst from src dir
-#%	 Usage: symln_allto [-f] dstdir srcfile/srcdir/srcfilelist
+#%   USAGE: symln_allto [-f] dstdir srcfile/srcdir/srcfilelist
+#%   REQUIRES: psbpath, abspath, ln, find
 #----------------------------------------------------------------------------------------------------------------------
 _symln_allto() {
         if [ $# -lt 2 ];then
@@ -12,79 +12,79 @@ _symln_allto() {
            echo 'symln_allto ~ ./scriptsrc' >&2
            return 1
         fi
-		local forcetag=0
-		case "$1" in
-			-f | --force | --overwrite)
+        local forcetag=0
+        case "$1" in
+            -f | --force | --overwrite)
                shift
-			   forcetag=1024
-			   ;;
-			-- | *)
-			   ;;
-		esac
+               forcetag=1024
+               ;;
+            -- | *)
+               ;;
+        esac
         local dst="$(psbpath $1)"
         if [ ! -d "$dst" ];then
            echo 'symlink_allto destination should be a directory, not anything else!' >&2
            return 1
         fi
         shift
-		if [ $# -lt 1 ];then
-			local srcall="$(abspath $(pwd))"
-		else
-			local srcall="$@"
-		fi
+        if [ $# -lt 1 ];then
+            local srcall="$(abspath $(pwd))"
+        else
+            local srcall="$@"
+        fi
         shopt -s nullglob   #Avoid none file chaos
            for osrc in $srcall;do
               local src="$(abspath $osrc)"
               if [ -d "$src" ];then
                   ## symlinking dirs to the destination; remove the "" from "$()" to decouple file paths
                   for srcdir in $(find $src -mindepth 1 -maxdepth 1 -xdev -type d);do
-					  if [ -n "$srcdir" ]; then
-						  local dstdir="$(psbpath "$dst/$(basename $srcdir)")"
-						  if [ -n "$srcdir" ] && [ -n "$dstdir" ]; then
-							  if [ "$forcetag" -lt 512 ]; then
-								\ln -si "$srcdir" "$dstdir"
-							  else
-								\ln -sf "$srcdir" "$dstdir"
-							  fi
-						  fi
-					  fi
+                      if [ -n "$srcdir" ]; then
+                          local dstdir="$(psbpath "$dst/$(basename $srcdir)")"
+                          if [ -n "$srcdir" ] && [ -n "$dstdir" ]; then
+                              if [ "$forcetag" -lt 512 ]; then
+                                \ln -si "$srcdir" "$dstdir"
+                              else
+                                \ln -sf "$srcdir" "$dstdir"
+                              fi
+                          fi
+                      fi
                   done
                   ## symlinking files to the destination
                   for srcfile in $(find $src -mindepth 1 -maxdepth 1 -xdev -type f);do
-					  if [ -n "$srcfile" ]; then
-						  local dstfile="$(psbpath "$dst/$(basename $srcfile)")"
-						  if [ -n "$dstfile" ]; then
-							  if [ "$forcetag" -lt 512 ]; then
-								\ln -si "$srcfile" "$dstfile"
-							  else
-								\ln -sf "$srcfile" "$dstfile"
-							  fi
-						  fi
+                      if [ -n "$srcfile" ]; then
+                          local dstfile="$(psbpath "$dst/$(basename $srcfile)")"
+                          if [ -n "$dstfile" ]; then
+                              if [ "$forcetag" -lt 512 ]; then
+                                \ln -si "$srcfile" "$dstfile"
+                              else
+                                \ln -sf "$srcfile" "$dstfile"
+                              fi
+                          fi
                       fi
                   done
                   ## copy symlinks to the destination
                   for srclink in $(find $src -mindepth 1 -maxdepth 1 -xdev -type l);do
                       if [ -n "$srclink" ]; then
-						  local dstlink="$(psbpath "$dst/$(basename $srclink)")"
-						  if [ -n "$dstlink" ]; then
-							  if [ "$forcetag" -lt 512 ]; then
-								\cp -nPri "$srclink" "$dstlink"
-							  else
-								\cp -nPrf "$srclink" "$dstlink"
-							  fi
-						  fi
-					  fi
+                          local dstlink="$(psbpath "$dst/$(basename $srclink)")"
+                          if [ -n "$dstlink" ]; then
+                              if [ "$forcetag" -lt 512 ]; then
+                                \cp -nPri "$srclink" "$dstlink"
+                              else
+                                \cp -nPrf "$srclink" "$dstlink"
+                              fi
+                          fi
+                      fi
                   done
-			  elif [ -f "$src" ]; then
-				  local dstfile="$(psbpath "$dst/$(basename $src)")"
-				  if [ -n "$dstfile" ]; then
-					if [ "$forcetag" -lt 512 ]; then
-						\ln -si "$src" "$dstfile"
-					else
-						\ln -sf "$src" "$dstfile"
-					fi
-				  fi
-			  fi
+              elif [ -f "$src" ]; then
+                  local dstfile="$(psbpath "$dst/$(basename $src)")"
+                  if [ -n "$dstfile" ]; then
+                    if [ "$forcetag" -lt 512 ]; then
+                        \ln -si "$src" "$dstfile"
+                    else
+                        \ln -sf "$src" "$dstfile"
+                    fi
+                  fi
+              fi
            done
         shopt -u nullglob #Revert to normal state
 }

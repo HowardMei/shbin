@@ -1,47 +1,47 @@
 
-## require shbin/abspath
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
-#          NAME:  fprepend
+#    NAME:  fprepend
 #%   DESCRIPTION: Prepend the content to the tail of the given file
-#%	 Usage: fprepend 'file.name' 'new_content' OR echo 'new_content' | fprepend 'file.name'
+#%   USAGE: fprepend 'file.name' 'new_content' OR echo 'new_content' | fprepend 'file.name'
+#%   REQUIRES: abspath, date, cat, mv, [bktohome]
 #----------------------------------------------------------------------------------------------------------------------
 __ScriptTmp="$(mktemp -d)"
 _fprepend() {
     if [ $# -lt 1 ];then
-	   echo "Usage: fprepend 'file.name' 'new_content' OR echo 'new_content' | fprepend 'file.name'" >&2
+       echo "Usage: fprepend 'file.name' 'new_content' OR echo 'new_content' | fprepend 'file.name'" >&2
        return 1
     else
        local fn="$(abspath "$1")"
     fi
     if [ ! -r "$fn" ];then
-	   echo "$fn is not a valid file or cannot be read!" >&2
-	   return 1
-	else
-	   shift
-	fi
-	local tmpfn="tpf$(date +%s)"
-	bktohome "$fn"
+       echo "$fn is not a valid file or cannot be read!" >&2
+       return 1
+    else
+       shift
+    fi
+    local tmpfn="tpf$(date +%s)"
+    [ -x $(which bktohome) ] && bktohome "$fn"
     ##echo "$@" | cat - "$fn" > "$__ScriptTmp/$tmpfn" && \mv -f "$__ScriptTmp/$tmpfn" "$fn"
-	if [ $# -lt 1 ];then
+    if [ $# -lt 1 ];then
     cat > "$__ScriptTmp/$tmpfn" <<EOF
 $(cat)
 EOF
-	else
+    else
     cat > "$__ScriptTmp/$tmpfn" <<EOF
 $@
 EOF
-	fi
+    fi
     cat "$fn" >> "$__ScriptTmp/$tmpfn"
     \mv -f "$__ScriptTmp/$tmpfn" "$fn"
 }
 
 
 if [ $# -lt 1 ]; then
-	echo "Usage: fprepend filename newcontent" >&2
+    echo "Usage: fprepend filename newcontent" >&2
 elif [ $# -eq 1 ]; then
-	_fprepend "$1" "$(cat)"
+    _fprepend "$1" "$(cat)"
 else
-	_fprepend "$@"
+    _fprepend "$@"
 fi
 
 unset -f _fprepend

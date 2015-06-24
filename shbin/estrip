@@ -3,7 +3,8 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  estrip [estrip -em "$(cat /etc/apt/sources.list)" OR cat /etc/apt/sources.list | estrip -cm | estrip -e]
 #%   DESCRIPTION:  Strip special chars from the given string.
-#%   Usage: estrip [-a|-an|-b|-ct|-cm|-cl|-d|-e|-em|-f|-h|-lo|-m|-ml|-n|-p|-q|-r|-rl|-sp|-u|-ub|-up] "string"
+#%   USAGE: estrip [-a|-an|-b|-ct|-cm|-cl|-d|-e|-em|-f|-h|-lo|-m|-ml|-n|-p|-q|-r|-rl|-sp|-u|-ub|-up] "string"
+#%   REQUIRES: escape, tr, sed, awk
 #----------------------------------------------------------------------------------------------------------------------
 _estrip() {
     case "$1" in

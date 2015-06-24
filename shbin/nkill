@@ -3,27 +3,28 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  nkill
 #%   DESCRIPTION:  Kill all pid reffering to the given process name
-#%	 Usage: nkill processname
+#%   USAGE: nkill processname
+#%   REQUIRES: getprocsbyglob, getpidsbyname, kill
 #----------------------------------------------------------------------------------------------------------------------
 _nkill() {
    # $1 - name of process to be killed
    if [ -z "$1" ];then
       echo "Usage: nkill processname <Better than pkill and killall>" >&2
-	  return 0
+      return 0
    else
       local nname="$1"
       echo "There're following processes with name similar to \"$nname\":" >&2
       getprocsbyglob "$nname"
       local npids="$(getpidsbyname $nname)"
       for pid in $npids; do
-		shc "kill -9 $pid"
+        shc "kill -9 $pid"
       done
       echo "$nname processes status after killing and cleaning up:"
       getprocsbyglob "$nname"
    fi
 }
 
-_nkill "$@" 
+_nkill "$@"
 
-unset -f _nkill 
+unset -f _nkill
 exit 0

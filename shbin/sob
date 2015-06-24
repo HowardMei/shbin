@@ -3,7 +3,8 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  sob
 #%   DESCRIPTION:  Quick binary search using whereis
-#%	 Usage: sob docker
+#%   USAGE: sob docker
+#%   REQUIRES: whereis, tr
 #----------------------------------------------------------------------------------------------------------------------
 _sob() {
   if [ $# -lt 1 ] ; then
@@ -13,7 +14,7 @@ _sob() {
   whereis "$@" 2>/dev/null | tr ' ' '\n'
 }
 
-_sob "$@" 
+_sob "$@"
 
-unset -f _sob 
+unset -f _sob
 exit 0

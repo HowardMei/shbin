@@ -2,28 +2,29 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  getpidsbyglob
 #%   DESCRIPTION:  Get the pids list by glob matching the given name, path etc
-#%   Usage: getpidsbyglob process_name | process_path
+#%   USAGE: getpidsbyglob process_name | process_path
+#%   REQUIRES: pgrep, ps, grep, awk
 #----------------------------------------------------------------------------------------------------------------------
 _getpidsbyglob() {
-	if [ $# -ne 1 ]; then
-		echo "Usage: getpidsbyglob process_name | process_path" >&2
-		return 1
-	fi
-	local plist=""
+    if [ $# -ne 1 ]; then
+        echo "Usage: getpidsbyglob process_name | process_path" >&2
+        return 1
+    fi
+    local plist=""
     plist="$(pgrep "$1" 2>/dev/null)"
 
-	if [ -z "$plist" ]; then
-		##plist="$(ps auxww | grep $1 | grep -v grep | awk '{print $2}')
-		plist="$(ps axwww -o pid,comm,command | grep -i "$1" 2>/dev/null | grep -v grep | grep -v ps | awk '{print $1}')"
-	fi
-	if [ -z "$plist" ]; then
-		return 1
-	else
-		echo "$plist"
-	fi
+    if [ -z "$plist" ]; then
+        ##plist="$(ps auxww | grep $1 | grep -v grep | awk '{print $2}')
+        plist="$(ps axwww -o pid,comm,command | grep -i "$1" 2>/dev/null | grep -v grep | grep -v ps | awk '{print $1}')"
+    fi
+    if [ -z "$plist" ]; then
+        return 1
+    else
+        echo "$plist"
+    fi
 }
 
-_getpidsbyglob "$@" 
+_getpidsbyglob "$@"
 
-unset -f _getpidsbyglob 
+unset -f _getpidsbyglob
 exit 0

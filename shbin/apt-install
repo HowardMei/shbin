@@ -1,4 +1,8 @@
-#!/bin/sh
+#---  PROGRAM  -------------------------------------------------------------------------------------------------------
+#%   DESCRIPTION:  Perform apt-get install in a clean, noninteractive and force-yes way
+#%   USAGE: apt-install package1 package2 ... packageN
+#%   REQUIRES: apt-get
+#----------------------------------------------------------------------------------------------------------------------
 
 apt-get install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" \
 --fix-missing --no-install-recommends --force-yes -y -q $@

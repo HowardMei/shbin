@@ -3,7 +3,8 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  lr
 #%   DESCRIPTION:  Alternative to ls showing the permission numbers
-#%   Usage: lr [-s|-S|-t|-T|-r|-R|-i|-u|-U|-g|-G|-*[0-9]:[0-9]] [dirorfilepath]
+#%   USAGE: lr [-s|-S|-t|-T|-r|-R|-i|-u|-U|-g|-G|-*[0-9]:[0-9]] [dirorfilepath]
+#%   REQUIRES: find, cut, tr, abspath, du, sort, awk, ecalc, stat
 #----------------------------------------------------------------------------------------------------------------------
 unset -f _ls _lu _lr
 _ls() {

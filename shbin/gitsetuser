@@ -3,7 +3,8 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  gitsetuser
 #%   DESCRIPTION:  Git config global user and email
-#%	 Usage: gitsetuser "Howard Mei" "howardmei@mubiic.com"
+#%   USAGE: gitsetuser "Howard Mei" "howardmei@mubiic.com"
+#%   REQUIRES: shuser, hostname, git
 #----------------------------------------------------------------------------------------------------------------------
 _gitsetuser() {
    if [ $# -lt 1 ] ; then
@@ -26,7 +27,7 @@ _gitsetuser() {
    git config --global user.email "$gitemail"
 }
 
-_gitsetuser "$@" 
+_gitsetuser "$@"
 
-unset -f _gitsetuser 
+unset -f _gitsetuser
 exit 0

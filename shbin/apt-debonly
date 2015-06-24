@@ -1,4 +1,8 @@
-#!/bin/sh
+#---  PROGRAM  -------------------------------------------------------------------------------------------------------
+#%   DESCRIPTION:  Add /opt/debonly offline deb files scanning ability to apt-get update
+#%   USAGE: apt-debonly
+#%   REQUIRES: chmod, mkdir, apt-get, [apt-install], gzip, unset, apt-remove, dpkg-dev<dpkg-scanpackages>
+#----------------------------------------------------------------------------------------------------------------------
 
 if [ -d "/opt/debonly" ]; then
     chmod -R 0700 /opt/debonly
@@ -8,9 +12,9 @@ fi
 
 if [ -z "$(command -v dpkg-scanpackages 2>/dev/null)" ]; then
     echo "Install dpkg-scanpackages@dpkg-dev as debonly local package scanner ..."
-    if [ -z "$(command -v apt-install-min 2>/dev/null)" ]; then
-        apt-get-min update -y -q
-        apt-install-min dpkg-dev
+    if [ -z "$(command -v apt-install 2>/dev/null)" ]; then
+        apt-get update -y -q
+        apt-install dpkg-dev
     else
         apt-get update -y -q
         apt-get install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" \
@@ -31,15 +35,15 @@ if [ -f "/opt/debonly/Packages.gz" ]; then
      apt-get update -y -q
 else
      echo "No valid Packages.gz is found in /opt/debonly ..."
-     rm -f /etc/apt/sources.list.d/debonly.list
+     \rm -f /etc/apt/sources.list.d/debonly.list
 fi
 
 if [ -n "$(command -v dpkg-scanpackages 2>/dev/null)" ]; then
     echo "Remove dpkg-scanpackages@dpkg-dev because it's too large ..."
-    if [ -z "$(command -v apt-remove-min 2>/dev/null)" ]; then
-        apt-remove-min dpkg-dev
-        apt-get-min autoremove -y -q
-        apt-get-min autoclean -y -q
+    if [ -z "$(command -v apt-remove 2>/dev/null)" ]; then
+        apt-remove dpkg-dev
+        apt-get autoremove -y -q
+        apt-get autoclean -y -q
     else
         apt-get remove --force-yes -y -q --purge dpkg-dev
         apt-get autoremove -y -q
