@@ -1,9 +1,9 @@
-## Example: [ -r "$shbinpath/.extrafuncs/bashmenot/src" ] && source "$shbinpath/.extrafuncs/bashmenot/src"
+## Example: [ -r "$shbinpath/.extrafuncs/bashmenot/src" ] && source "$shbinpath/.extrafuncs/bashmenot/src.sh"
 shbinpath="$(dirname $(shsrc "shbin" "$_" "$0" "$BASH_SOURCE") 2>/dev/null)"
 if [ -n $(isbash 2>/dev/null) ] && [ -d "$shbinpath" ]; then
     echo | tr -d '\n' 2>/dev/null
     ## Put loading lines below
-
+    source ${shbinpath}/.extrafuncs/bashmenot/src.sh
 
 
 
