@@ -2,8 +2,9 @@
 ## require shbin/uripath, shbin/urifile, shbin/esubst
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #         NAME:  urlquery
-#%  DESCRIPTION:  Extract and echo the query string of the given url
-#%	Usage: uriquery "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
+#%   DESCRIPTION:  Extract and echo the query string of the given url
+#%   USAGE: uriquery "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
+#%   REQUIRES: uripath, urifile
 #----------------------------------------------------------------------------------------------------------------------
 _uriquery() {
    if [ $# -lt 1 ] ; then

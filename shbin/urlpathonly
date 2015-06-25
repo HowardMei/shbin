@@ -1,13 +1,13 @@
 
-#%  DESCRIPTION:  Extract and echo the pure path of the given url stripping off query string
-#%	Usage: urlpath "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
-#%		   echo "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1" | urlpath
-
+#%   DESCRIPTION:  Extract and echo the pure path of the given url stripping off query string
+#%   USAGE: urlpath "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
+#%         echo "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1" | urlpath
+#%   REQUIRES: uripathonly
 
 if [ $# -lt 1 ]; then
-	uripathonly "$(cat)"
+    uripathonly "$(cat)"
 else
-	uripathonly "$@"
+    uripathonly "$@"
 fi
 
 exit 0

@@ -3,7 +3,8 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  gensslkey
 #%   DESCRIPTION:  Generate a SSL private key to sign your certificate
-#%	 Usage: gensslkey keyname [2048]
+#%   USAGE: gensslkey keyname [2048]
+#%   REQUIRES: psbpath, dirname, basename, tr, [pacapt], openssl, cecho
 #----------------------------------------------------------------------------------------------------------------------
 _gensslkey() {
    if [ $# -lt 1 ] ; then
@@ -14,16 +15,16 @@ _gensslkey() {
    local dname="$(psbpath $1)"
    local kname="$(dirname $dname)/$(basename $1)"
    if [ -f "${kname}.key" ]; then
-	  cecho -r "${kname}.key already exists, please change the name."
-	  return 1
+      cecho -r "${kname}.key already exists, please change the name."
+      return 1
    fi
    if [ -n "$2" ]; then
-	  local kleng="$(echo $2 | tr -cd '[[:digit:]]')"
+      local kleng="$(echo $2 | tr -cd '[[:digit:]]')"
    else
-	  local kleng=2048
+      local kleng=2048
    fi
    if ! iscommand openssl 2>/dev/null; then
-		pinstall openssl
+        pacapt -S openssl
    fi
    cecho "Generating a SSL private key to sign your certificate..."
    openssl genrsa -des3 -out "${kname}.key" "$kleng"

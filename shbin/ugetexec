@@ -1,44 +1,44 @@
 
-
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  ugetexec
 #%   DESCRIPTION:  Curl/fetch down a remote tar ball, extract it to the destination dir and execute the given scripts within
-#%	 Usage: ugetexec [-d|--down|downonly] srcurl scriptfile [-sopt1 -sopt2 ... -soptn]
+#%   USAGE: ugetexec [-d|--down|downonly] srcurl scriptfile [-sopt1 -sopt2 ... -soptn]
+#%   REQUIRES: abspath, shbin, dirname, ugetloc, chmod
 #----------------------------------------------------------------------------------------------------------------------
 _ugetexec() {
-	if [ $# -lt 2 ]; then
-		echo "Usage: ugetexec [-d|downonly] srcurl scriptfile [-sopt1 -sopt2 ... -soptn]"
-		return 1
-	else
-		local downonly=0
-		case "$1" in
-			-d | --down | --downonly | down | predown | downonly)
-				downonly=1024
-				shift
-			;;
-			*)
-			;;
-		esac
-		local srcurl="$1"
-		local scriptfile="$2"
-		shift 2
-	fi
-	if [ -f "$(abspath $(shbin list "$scriptfile"))" ];then
-		local ScriptLoc="$(dirname $(abspath $(shbin list "$scriptfile")))"
-	else
-		local ScriptLoc="$(ugetloc "$srcurl" "$scriptfile")"
-	fi
-	if [ -f "$ScriptLoc/$scriptfile" ];then
-		if [ "$downonly" -gt 512 ];then
-			echo "$ScriptLoc/$scriptfile is ready for use." >&2
-		else
-			shc "chmod a+x $ScriptLoc/$scriptfile"
-			shc "$ScriptLoc/$scriptfile" "$@"
-		fi
-	else
-		echo "$ScriptLoc/$scriptfile is not found after download." >&2
-		return 1
-	fi
+    if [ $# -lt 2 ]; then
+        echo "Usage: ugetexec [-d|downonly] srcurl scriptfile [-sopt1 -sopt2 ... -soptn]"
+        return 1
+    else
+        local downonly=0
+        case "$1" in
+            -d | --down | --downonly | down | predown | downonly)
+                downonly=1024
+                shift
+            ;;
+            *)
+            ;;
+        esac
+        local srcurl="$1"
+        local scriptfile="$2"
+        shift 2
+    fi
+    if [ -f "$(abspath $(shbin list "$scriptfile"))" ];then
+        local ScriptLoc="$(dirname $(abspath $(shbin list "$scriptfile")))"
+    else
+        local ScriptLoc="$(ugetloc "$srcurl" "$scriptfile")"
+    fi
+    if [ -f "$ScriptLoc/$scriptfile" ];then
+        if [ "$downonly" -gt 512 ];then
+            echo "$ScriptLoc/$scriptfile is ready for use." >&2
+        else
+            shc "chmod a+x $ScriptLoc/$scriptfile"
+            shc "$ScriptLoc/$scriptfile" "$@"
+        fi
+    else
+        echo "$ScriptLoc/$scriptfile is not found after download." >&2
+        return 1
+    fi
 }
 
 _ugetexec "$@"

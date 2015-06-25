@@ -2,7 +2,8 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  dokic
 #%   DESCRIPTION:  docker kill the given container
-#%   Usage: dokic -a | imagename:tag | containerid
+#%   USAGE: dokic -a | imagename:tag | containerid
+#%   REQUIRES: docker
 #----------------------------------------------------------------------------------------------------------------------
 _dokic() {
     if [ $# -lt 1 ]; then

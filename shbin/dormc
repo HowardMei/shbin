@@ -2,7 +2,8 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  dormc
 #%   DESCRIPTION:  remove docker containers by keywords.
-#%   Usage: dormc [-a] | [imagename:tag | containerid]
+#%   USAGE: dormc [-a] | [imagename:tag | containerid]
+#%   REQUIRES: dollc, dostc, dokic, docker, estrip
 #----------------------------------------------------------------------------------------------------------------------
 _dormc() {
     if [ $# -lt 1 ]; then
@@ -24,14 +25,14 @@ _dormc() {
                 local cnt=""
                 for cnt in "$@"; do
                     echo "[dormc]Prepare to remove docker containers matching <$cnt>" >&2
-                    local cntnames=$(dollc -n "$cnt" | estrips -u)
+                    local cntnames=$(dollc -n "$cnt" | estrip -u)
                     if [ -n "$cntnames" ]; then
                         echo "[dormc]Found following docker containers matching <$cnt>:" >&2
                         echo "$cntnames" >&2
                         local thecntname=""
                         for thecntname in $cntnames; do
                             echo "[dormc]Killing and removing the docker container <$thecntname>:" >&2
-                            local thecntids=$(dollc -i "$thecntname" | estrips -u)
+                            local thecntids=$(dollc -i "$thecntname" | estrip -u)
                             dostc "$thecntids" && dokic "$thecntids"
                             sudo docker rm -f "$thecntids" 2>/dev/null
                             echo "Idle containers of $thecntname are removed." >&2

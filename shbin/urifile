@@ -2,8 +2,9 @@
 ## require shbin/uripath
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #         NAME:  urifile
-#%  DESCRIPTION:  Extract and echo the filename of the given url
-#%	Usage: urifile "sftp://user:pass@down.test.com:8080/files%20repo+new/test-v1.0.12.tar.gz#body-old#download?ver=1.0&reg=us-1"
+#%   DESCRIPTION:  Extract and echo the filename of the given url
+#%   USAGE: urifile "sftp://user:pass@down.test.com:8080/files%20repo+new/test-v1.0.12.tar.gz#body-old#download?ver=1.0&reg=us-1"
+#%   REQUIRES: uripath, basename, cut
 #----------------------------------------------------------------------------------------------------------------------
 _urifile() {
    if [ $# -lt 1 ] ; then
@@ -18,10 +19,10 @@ _urifile() {
     local tmp2="$(basename "$(echo "$tmp1" | cut -d? -f1 | cut -d# -f1 | cut -d "&" -f1)" 2>/dev/null)"
  fi
    if [ -n "$tmp2" ];then
-	  echo "$tmp2"
-	  return 0
+      echo "$tmp2"
+      return 0
    else
-	  return 1
+      return 1
    fi
 }
 

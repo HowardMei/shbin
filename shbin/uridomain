@@ -2,8 +2,9 @@
 ## require shbin/urihost
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #         NAME:  uridomain
-#%  DESCRIPTION:  Extract and echo the domain name of the given url
-#%	Usage: uridomain "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
+#%   DESCRIPTION:  Extract and echo the domain name of the given url
+#%   USAGE: uridomain "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
+#%   REQUIRES: urihost, grep, cut
 #----------------------------------------------------------------------------------------------------------------------
 _uridomain() {
    if [ $# -lt 1 ]; then

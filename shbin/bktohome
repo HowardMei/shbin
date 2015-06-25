@@ -3,34 +3,35 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  bktohome
 #%   DESCRIPTION:  Back up the file to home .backup folder
-#%	 Usage: bktohome "howardmei" ./scripts/
+#%   USAGE: bktohome "howardmei" ./scripts/
+#%   REQUIRES: userhome, copy_allto
 #----------------------------------------------------------------------------------------------------------------------
 _bktohome () {
-	if [ $# -lt 1 ];then
-		echo "Usage: bktohome username file1 file2 dir1 dir2" >&2
-		return 1
-	fi
-	local shhome="$(userhome "$1")"
-	if [ -n "$shhome" ] && [ -d "$shhome" ]; then
-		shift
-	else
-		shhome="$(userhome $(shuser))"
-	fi
-	if [ $# -lt 1 ];then
-		echo "bktohome needs at least one file/dir to back up" >&2
-		return 1
-	fi
-	mkdir -p "$shhome/.backup"
-	for ftobk in "$@"; do
-		if [ -f "$ftobk" ]; then
-			local bkf="$shhome/.backup/$(basename $ftobk)_bk$(date +%s)"
-			\cp -f "$ftobk" "$bkf"
-		elif [ -d "$ftobk" ]; then
-			local bkf="$shhome/.backup/$(basename $ftobk)_bk$(date +%s)"
-			copy_allto "$bkf" "$ftobk"
-		fi
-	done
-	##echo "$1 has been backed up to "$(abspath $pbk)"
+    if [ $# -lt 1 ];then
+        echo "Usage: bktohome username file1 file2 dir1 dir2" >&2
+        return 1
+    fi
+    local shhome="$(userhome "$1")"
+    if [ -n "$shhome" ] && [ -d "$shhome" ]; then
+        shift
+    else
+        shhome="$(userhome $(shuser))"
+    fi
+    if [ $# -lt 1 ];then
+        echo "bktohome needs at least one file/dir to back up" >&2
+        return 1
+    fi
+    mkdir -p "$shhome/.backup"
+    for ftobk in "$@"; do
+        if [ -f "$ftobk" ]; then
+            local bkf="$shhome/.backup/$(basename $ftobk)_bk$(date +%s)"
+            \cp -f "$ftobk" "$bkf"
+        elif [ -d "$ftobk" ]; then
+            local bkf="$shhome/.backup/$(basename $ftobk)_bk$(date +%s)"
+            copy_allto "$bkf" "$ftobk"
+        fi
+    done
+    ##echo "$1 has been backed up to "$(abspath $pbk)"
 }
 
 
