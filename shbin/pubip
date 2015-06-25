@@ -1,5 +1,3 @@
-
-
 PUB_IPv4=""
 PUB_IP4=""
 PUB_IPv6=""
@@ -20,7 +18,7 @@ _check_pubip() {
         local chk='busybox wget -qO-'
     fi
     PUB_IPv4="$($chk http://ip.appspot.com/ 2>/dev/null)"
-    ## sh cannot recognize '==' and '=' is error prone, use '!=' instead
+    ## sh cannot recognize '==' and '=' is error prone, use ' != ' with spaces instead
     if ! isipv4 "$PUB_IPv4" 2>/dev/null;then
         ##echo "Checking public ip over checkip.dyndns.org"
         PUB_IPv4="$($chk http://checkip.dyndns.org 2>/dev/null | grep -o "[[:digit:].]\+" 2>/dev/null)"
