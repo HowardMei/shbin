@@ -2,7 +2,8 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  dormi
 #%   DESCRIPTION:  remove docker images by keywords.
-#%   Usage: dormi [-a] | [imagename:tag | imageid]
+#%   USAGE: dormi [-a] | [imagename:tag | imageid]
+#%   REQUIRES: dollc, docker, dolsi, estrip
 #----------------------------------------------------------------------------------------------------------------------
 _dormi() {
     if [ $# -lt 1 ]; then

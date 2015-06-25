@@ -2,7 +2,8 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  doget
 #%   DESCRIPTION:  docker get essential images.
-#%   Usage: doget busybox:latest debian:jessie ubuntu:trusty centos:centos7
+#%   USAGE: doget busybox:latest debian:jessie ubuntu:trusty centos:centos7
+#%   REQUIRES: docker
 #----------------------------------------------------------------------------------------------------------------------
 _doget() {
     if [ $# -lt 1 ]; then

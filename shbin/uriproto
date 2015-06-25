@@ -1,15 +1,9 @@
 
-# grep alternative for SunOS
-if [ -f /usr/xpg4/bin/grep ]; then
-	grep='/usr/xpg4/bin/grep'
-else
-	grep='grep'
-fi
-
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #         NAME:  uriproto
-#%  DESCRIPTION:  Extract and echo the protocol of the given url
-#%	Usage: uriproto "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
+#%   DESCRIPTION:  Extract and echo the protocol of the given url
+#%   USAGE: uriproto "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
+#%   REQUIRES: grep, sed
 #----------------------------------------------------------------------------------------------------------------------
 _uriproto() {
    if [ $# -lt 1 ]; then
@@ -20,10 +14,10 @@ _uriproto() {
    local tmp1="$(echo "$@" | grep "://" 2>/dev/null | sed -e 's,^\(.*://\).*,\1,g' 2>/dev/null)"
    local tmp2="$(echo "$tmp1" | sed -e 's/\:\/\///g' 2>/dev/null)"
    if [ -n "$tmp2" ];then
-	  echo "$tmp2"
-	  return 0
+      echo "$tmp2"
+      return 0
    else
-	  return 1
+      return 1
    fi
 }
 

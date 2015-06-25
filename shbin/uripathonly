@@ -3,7 +3,8 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #         NAME:  uripathonly
 #%   DESCRIPTION:  Extract and echo the path of the given url
-#%	 uripathonly "sftp://user:pass@down.test.com:8080/files%20repo+new/testv2013.1.14.tar.gz#body-old#download?ver=1.0&reg=us-1"
+#%   USAGE: uripathonly "sftp://user:pass@down.test.com:8080/files%20repo+new/testv2013.1.14.tar.gz#body-old#download?ver=1.0&reg=us-1"
+#%   REQUIRES: uripath, uriquery
 #----------------------------------------------------------------------------------------------------------------------
 _uripathonly() {
    if [ $# -lt 1 ]; then

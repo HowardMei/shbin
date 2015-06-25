@@ -2,7 +2,8 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  dormi
 #%   DESCRIPTION:  remove unused docker volumes.
-#%   Usage: dormv [--dry-run | --force]
+#%   USAGE: dormv [--dry-run | --force]
+#%   REQUIRES: ls, basename, which, rm, docker, grep ,xargs
 #----------------------------------------------------------------------------------------------------------------------
 set -eo pipefail
 

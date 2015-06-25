@@ -2,7 +2,8 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  docls
 #%   DESCRIPTION:  remove multiple docker images by keywords.
-#%   Usage: docls imagename1:tag imagename2:tag ... imagenameN:tag
+#%   USAGE: docls imagename1:tag imagename2:tag ... imagenameN:tag
+#%   REQUIRES: doclr
 #----------------------------------------------------------------------------------------------------------------------
 
 if [ $# -lt 1 ]; then

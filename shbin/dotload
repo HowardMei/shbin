@@ -3,7 +3,7 @@
 #          NAME:  userhome
 #%   DESCRIPTION:  Return the home dir path of the given user
 #%   USAGE: dotload howardmei or dotload  ~/.bash_profile
-#%   REQUIRES: abspath, which, userhome
+#%   REQUIRES: abspath, userhome, which
 #----------------------------------------------------------------------------------------------------------------------
 unset -f dotload
 _dotload() {

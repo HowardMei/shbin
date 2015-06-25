@@ -2,8 +2,9 @@
 ## requires shbin/urifile, shbin/urifileext, shbin/esubst
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #         NAME:  urifilename
-#%  DESCRIPTION:  Extract and echo the filename of the given file
-#%  Usage: urifilename sftp://user:pass@down.test.com:8080/files/test.0.1.3.tar.gz
+#%   DESCRIPTION:  Extract and echo the filename of the given file
+#%   USAGE: urifilename sftp://user:pass@down.test.com:8080/files/test.0.1.3.tar.gz
+#%   REQUIRES: urifile, urifileext
 #----------------------------------------------------------------------------------------------------------------------
 _urifilename() {
    if [ $# -lt 1 ] ; then
