@@ -15,11 +15,14 @@ termcap -lf
 *.ebuild binary
 *.sln binary
 *.vcproj binary
+*.vc* binary
+*.vbs binary
 
 *.png binary
 *.jpg binary
 *.gif binary
 *.bmp binary
+*.svg binary
 *.wav binary
 *.pdf binary
 *.tar binary
