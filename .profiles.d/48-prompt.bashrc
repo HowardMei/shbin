@@ -1,3 +1,4 @@
+[ -z "$(which git)" ] && return
 
 if [ "$COLORTERM" = "gnome-*" ] && [ "$TERM" = "xterm" ] && infocmp "gnome-256color" >/dev/null 2>&1; then
     export TERM="gnome-256color"
@@ -51,6 +52,8 @@ parse_git_branch () {
   git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e "s/* \(.*\)/\1$(parse_git_dirty)/"
 }
 
+
 export PS1="\s-\$"
-export PS1="\[$_BOLD\]\[$_ORANGE\]\u@\H:\[$_GREEN\]\w\[$_MAGENTA\] \$([[ -n \$(git branch 2>/dev/null) ]] && echo \"[\")\$(parse_git_branch)\$([[ -n \$(git branch 2>/dev/null) ]] && echo \"]\")\nλ\[$_ENDCL\]"
+export PS1="\[$_BOLD\]\[$_ORANGE\]\u@\H:\[$_GREEN\]\w\[$_MAGENTA\] \$([[ -n \$(git branch 2>/dev/null) ]] && echo \"[\")\$(parse_git_branch)\$([[ -n \$(git branch 2>/dev/null) ]] && echo \"]\")\n$\[$_ENDCL\]"
 export PS2="\[$_ORANGE\]$ \[$_ENDCL\]"
+
