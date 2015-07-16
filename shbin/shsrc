@@ -1,0 +1,45 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  shsrc
+#%   DESCRIPTION:  Get the real path of the script file being executed, sourced or called.
+#%   USAGE: shsrc "\$_" "\$0" "\$-" "FilePath/FileName"
+#%   REQUIRES: which, find, head, abspath
+#----------------------------------------------------------------------------------------------------------------------
+CHKA="$_"
+CHKB="$0"
+CHKC="$-"
+CHKD="$@"
+if [ -n "${CHKD}" ]; then
+	CHKA="$1"
+	CHKB="$2"
+	CHKC="$3"
+	CHKF="$4"
+fi
+##echo "\$_:${CHKA}   \$0:${CHKB}   \$-:${CHKC}   \$@:${CHKD}   \FN:${CHKF}"
+case ${CHKA} in
+	*bin/${CHKB})
+		if [ -n "${CHKF}" ]; then
+			if [ -r "${CHKF}" ]; then
+				abspath "${CHKF}"
+			else
+				abspath "$(find $(pwd) -mindepth 0 -maxdepth 1 -type f -name ${CHKF} 2>/dev/null | head -1 2>/dev/null)"
+			fi
+		fi
+		;;
+	*bin/sh | *bin/?sh | *bin/??sh)
+		[ -r "${CHKB}" ] && abspath "${CHKB}"
+		;;
+	-- | *)
+		case ${CHKC} in
+			*im* | *mi* | *i*)
+				[ -r "${CHKA}" ] && abspath "${CHKA}"
+			;;
+			-- | *)
+				[ -x "${CHKB}" ] && abspath "${CHKB}"
+			;;
+		esac
+		;;
+esac
+
+unset CHKA CHKB CHKC CHKD CHKF
+

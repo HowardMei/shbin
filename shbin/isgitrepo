@@ -1,0 +1,37 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  isgitrepo
+#%   DESCRIPTION:  Check if the given directory is a git managed repo
+#%   USAGE: if isgitrepo gitrepo 2>/dev/null; or source "$(which isgitrepo)" && if [ -n "$(isgitrepo [gitrepo])" ]; then
+#%   REQUIRES: abspath, pwd, git
+#----------------------------------------------------------------------------------------------------------------------
+unset -f _isgitrepo
+_isgitrepo() {
+   if [ $# -lt 1 ] ; then
+      local gitdir="$(abspath .)"
+   else
+      local gitdir="$(abspath "$1")"
+   fi
+   pushd "$gitdir" >/dev/null
+   local gitrepo="$(abspath $(git rev-parse --git-dir 2>/dev/null))"
+   popd >/dev/null
+   if [ -n "$gitrepo" ] && [ -d "$gitrepo" ] ; then
+      if [ "${gitdir}/.git" == "${gitrepo}" ]; then
+		echo "${gitdir} is a git repo."
+	  else
+		echo "${gitdir} is a subdir under git repo ${gitrepo}."
+	  fi
+      return 0
+   else
+      echo "$gitdir is NOT a git repo." >&2
+      return 1
+   fi
+}
+
+if ! iscommand git 2>/dev/null; then
+	echo "git is not installed yet." >&2
+else
+	_isgitrepo "$@"
+fi
+exit $?
+

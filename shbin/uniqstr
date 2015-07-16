@@ -1,0 +1,25 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  uniqstr
+#%   DESCRIPTION:  Unify the given strings by removing duplicated words, Not lines [estrip -u]
+#%   USAGE: echo "hello hello world" | uniqstr OR uniqstr "hello world world"
+#%   REQUIRES: awk
+#----------------------------------------------------------------------------------------------------------------------
+_uniqstr() {
+    if [ $# -lt 1 ]; then
+        echo "$(cat)" | awk '!x[$0]++'
+    else
+        echo "$@" | awk '!x[$0]++'
+    fi
+}
+
+
+if [ $# -lt 1 ]; then
+        echo "$(cat)" | _uniqstr
+else
+        echo "$*" | _uniqstr
+fi
+
+
+unset -f _uniqstr
+exit 0

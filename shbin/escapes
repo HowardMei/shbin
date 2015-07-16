@@ -1,0 +1,13 @@
+
+
+#%   DESCRIPTION:  Escape special chars of the given string.
+#%   USAGE: escapes "the string" or "$(escapes "the string")" or echo "the string" | escapes
+#%   REQUIRES: escape
+
+if [ $# -lt 1 ]; then
+    escape "$(cat)"
+else
+    escape "$@"
+fi
+
+exit 0

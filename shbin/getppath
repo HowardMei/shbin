@@ -1,0 +1,48 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  getppath
+#%   DESCRIPTION:  Get the process path of the given pid
+#%   USAGE: getppath process_id | process_name
+#%   REQUIRES: tr, getpnamebyid, getpidsbyname, head, ps ,grep, abspath
+#----------------------------------------------------------------------------------------------------------------------
+_getppath() {
+    if [ $# -ne 1 ]; then
+        echo "Usage: getppath process_id | process_name" >&2
+        return 1
+    elif isdigit "$1" 2>/dev/null; then
+        local pid=$(echo "$1" | tr -cd '[[:digit:]]')
+        local pname="$(getpnamebyid "$pid" 2>/dev/null)"
+        if [ -z "$pname" ]; then
+            echo "Cannot find any running process with id $1" >&2
+            return 1
+        fi
+    else
+        pname="$1"
+        pid=$(getpidsbyname "$1" 2>/dev/null | tr ' ' '\n' | head -n 1)
+        if [ -z "$pid" ]; then
+            echo "Cannot find any running process with name $1" >&2
+            return 1
+        fi
+    fi
+    local ppath=""
+    if [ -e "/proc/$pid" ]; then
+        local pcmdline="$(ps axwww -o pid,command | grep -i "${pname}" 2>/dev/null | grep -v grep | grep -v ps | head -n 1)"
+        ppath="$(echo "$pcmdline" | tr ' ' '\n' | grep -iE "${pname}$" 2>/dev/null)"
+        if [ -x "$ppath" ]; then
+            ppath="$(abspath "$ppath")"
+        else
+            ppath="$(abspath $(which "$ppath"))"
+        fi
+    fi
+    if [ -x "$ppath" ]; then
+        echo "$ppath"
+    else
+        return 1
+    fi
+}
+
+
+_getppath "$@"
+
+unset -f _getppath
+exit 0

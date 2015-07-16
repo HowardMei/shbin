@@ -1,0 +1,40 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  userhome
+#%   DESCRIPTION:  Return the home dir path of the given user
+#%   USAGE: dotload howardmei or dotload  ~/.bash_profile
+#%   REQUIRES: abspath, which, userhome
+#----------------------------------------------------------------------------------------------------------------------
+unset -f dotload
+_dotload() {
+    if [ -n "$1" ]; then
+        if [ -r "$(abspath -f "$1")" ]; then
+            echo "Loading $(abspath "$1")"
+            . "$(abspath -f "$1")"
+            return 0
+        elif [ -r "$(abspath -f $(which "$1"))" ]; then
+            echo "Loading $1 [$(abspath $(which "$1"))] as source"
+            . "$(abspath -f $(which "$1"))"
+            return 0
+        else
+            local ud="$(userhome "$1")"
+        fi
+    else
+        local ud="$(userhome)"
+    fi
+    local uf="${ud:=$(userhome)}/.bash_profile"
+    if [ -r "$uf" ]; then
+        echo "Loading $uf"
+        . "$uf"
+        return 0
+    else
+        echo "$uf is not a valid file"
+        return 1
+    fi
+}
+
+
+_dotload "$@"
+
+unset -f _dotload
+exit 0

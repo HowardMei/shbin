@@ -1,0 +1,102 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __detect_color_support
+#%   DESCRIPTION:  Try to detect color support.
+#%   USAGE: cecho [-d] [-r|-g|-o|-b|-p|-c|-w] "test phrase"
+#%   REQUIRES: printf, [date]
+#----------------------------------------------------------------------------------------------------------------------
+_COLORS=${BS_COLORS:-$(tput colors 2>/dev/null || echo 0)}
+__detect_color_support() {
+    if [ $? -eq 0 ] && [ "$_COLORS" -gt 2 ]; then
+    __RED_COLOR="\033[1;31m"
+    __GREEN_COLOR="\033[1;32m"
+    __ORANGE_COLOR="\033[00;33m"
+    __BLUE_COLOR="\033[1;34m"
+    __PURPLE_COLOR="\033[01;35m"
+    __CYAN_COLOR="\033[01;36m"
+    __WHITE_COLOR="\033[01;37m"
+    __ENDOF_COLOR="\033[0m"
+    else
+    __RED_COLOR=""
+    __GREEN_COLOR=""
+    __ORANGE_COLOR=""
+    __BLUE_COLOR=""
+    __PURPLE_COLOR=""
+    __CYAN_COLOR=""
+    __WHITE_COLOR=""
+    __ENDOF_COLOR=""
+    fi
+}
+__detect_color_support
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  cecho
+#   DESCRIPTION:  Custom Echo functiion with color and date support for general usage.
+#----------------------------------------------------------------------------------------------------------------------
+_cecho() {
+   if [ -n "$__RED_COLOR" ] && [ -n "$__ENDOF_COLOR" ]; then
+     case "$1" in
+     -r)shift
+    printf "${__RED_COLOR}%s${__ENDOF_COLOR}\\n" "$@"
+    ;;
+     -g)shift
+    printf "${__GREEN_COLOR}%s${__ENDOF_COLOR}\\n" "$@"
+    ;;
+     -o)shift
+    printf "${__ORANGE_COLOR}%s${__ENDOF_COLOR}\\n" "$@"
+    ;;
+     -b)shift
+    printf "${__BLUE_COLOR}%s${__ENDOF_COLOR}\\n" "$@"
+    ;;
+     -p)shift
+    printf "${__PURPLE_COLOR}%s${__ENDOF_COLOR}\\n" "$@"
+    ;;
+     -c)shift
+    printf "${__CYAN_COLOR}%s${__ENDOF_COLOR}\\n" "$@"
+    ;;
+     -w)shift
+    printf "${__WHITE_COLOR}%s${__ENDOF_COLOR}\\n" "$@"
+    ;;
+     -d)shift
+        _cecho "$@          $(date '+%D %T')"
+    ;;
+     -*)shift
+        printf "${__BLUE_COLOR}%s${__ENDOF_COLOR}\\n" "$@"
+    ;;
+      *)printf "${__BLUE_COLOR}%s${__ENDOF_COLOR}\\n" "$@"
+    ;;
+      esac
+   else
+     case "$1" in
+     -r)shift
+    ;;
+     -o)shift
+    ;;
+     -g)shift
+    ;;
+     -b)shift
+    ;;
+     -p)shift
+    ;;
+     -c)shift
+    ;;
+     -w)shift
+    ;;
+     -d)shift
+        _cecho "$@         $(date '+%D %T')"
+    ;;
+     -*)printf "%s\\n" "$@"
+    ;;
+      *)printf "%s\\n" "$@"
+    ;;
+      esac
+   fi
+}
+
+
+_cecho "$@"
+
+
+unset -f _cecho
+exit 0

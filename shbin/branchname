@@ -1,0 +1,35 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  branchname
+#%   DESCRIPTION:  Show the given git repo branch name
+#%   USAGE: branchname [gitdir]
+#%   REQUIRES: git
+#----------------------------------------------------------------------------------------------------------------------
+_namegitbranch() {
+if [ $# -lt 1 ]; then
+	local gitdir="$(pwd)"
+else
+	local gitdir="$(abspath $1)"
+fi
+if [ -n "${gitdir}" ]; then
+	if isgitrepo "${gitdir}" 2>/dev/null; then
+		##git symbolic-ref HEAD 2>/dev/null | sed -e 's,.*/\(.*\),\1,' 2>/dev/null
+		basename "$(git symbolic-ref HEAD 2>/dev/null)" 2>/dev/null
+	else
+		echo "${gitdir} is NOT a valid git repo." >&2
+	fi
+else
+	echo "${gitdir} is NOT a valid dir path." >&2
+fi
+
+}
+
+
+if ! iscommand git 2>/dev/null; then
+	echo "git is not installed yet." >&2
+else
+	_namegitbranch $@
+fi
+
+unset -f _namegitbranch
+exit 0

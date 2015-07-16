@@ -1,0 +1,32 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  getsshport
+#%   DESCRIPTION:  output the SSHD listening port
+#%   USAGE: getsshport
+#%   REQUIRES: /etc/ssh/sshd_config, grep, tr
+#----------------------------------------------------------------------------------------------------------------------
+_getsshport() {
+	if [ $# -lt 1 ]; then
+		local ssh_cfg="/etc/ssh/sshd_config"
+	else
+		[ -f "$1" ] && local ssh_cfg="$(abspath $1)"
+	fi
+    if [ -r "${ssh_cfg}" ]; then
+        local sshport="$(cat ${ssh_cfg} | grep Port | tr -cd '[[:digit:]]')"
+        if [ -z "$sshport" ]; then
+            echo "Failed to grep Port number in ${ssh_cfg}" >&2
+            return 1
+        else
+            echo "$sshport"
+            return 0
+        fi
+    else
+        echo "Cannot read /etc/ssh/sshd_config" >&2
+        return 1
+    fi
+}
+
+_getsshport
+
+unset -f _getsshport
+exit 0

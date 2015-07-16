@@ -1,0 +1,56 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  shshell
+#%   DESCRIPTION:  Check the shell type of the environment.
+#%   USAGE: shshell "$_" "$0" "$-" ==> [RUN<./srcatrun>, EXECUTE<bash ./srcatrun>, SOURCE<. ./srcatrun>, CAT<cat ./srcatrun | sh>]
+#%   REQUIRES: which
+#----------------------------------------------------------------------------------------------------------------------
+##echo "\$_:$_" 
+##echo "\$0:$0" 
+##echo "\$BASH_SOURCE:$BASH_SOURCE"
+##echo "\$-:$-" 
+##echo "\$*:$*"
+##echo "\$#:$#"
+
+CHKA="$_"
+CHKB="$0"
+CHKC="$-"
+CHKD="$@"
+if [ -n "${CHKD}" ]; then
+	CHKA="$1"
+	CHKB="$2"
+	CHKC="$3"
+fi
+##echo "\$_:${CHKA}   \$0:${CHKB}   \$-:${CHKC}   \$@:${CHKD}"
+case ${CHKA} in
+	*bin/${CHKB} | *bin/sh | *bin/?sh | *bin/??sh)
+		[ -x "${CHKA}" ] && echo "${CHKA}"
+		;;
+	*bin/busybox)
+		if [ -x "$(which busybox)" ]; then
+			 case ${CHKC} in
+				hB | h*B*)
+					echo "${CHKA} bash"
+				;;
+				-- | *)
+					echo "${CHKA} sh"
+				;;
+			 esac
+		fi
+		;;
+	-- | *)
+		case ${CHKC} in
+			hB | h*B*)
+				echo "$(which bash)"
+			;;
+			s | s*)
+				echo "$(which sh)"
+			;;
+			-- | *)
+				[ -x "${CHKB}" ] && echo "${CHKB}"
+			;;
+		esac
+		;;
+esac
+
+unset CHKA CHKB CHKC CHKD

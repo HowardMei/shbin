@@ -1,0 +1,39 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  esubst
+#%   DESCRIPTION:  Subsitute certain chars with other chars from the given string.
+#%   USAGE: esubst 'hello' 'hi' 'hello world'
+#%   REQUIRES: escape, sed
+#----------------------------------------------------------------------------------------------------------------------
+_esubst() {
+       ## Escaping everything is a bad idea:
+       ## http://stackoverflow.com/questions/407523/escape-a-string-for-a-sed-replace-pattern
+       ## Wrong: local _kw=$(escapes $1)   No double quotes outside may cause truncate over spaces
+       ##local _kw="$(echo $1 | sed -e 's/[]\/$*.^|[]/\\&/g')"
+       if [ $# -lt 2 ]; then
+            echo "Too few arguments, usage: esubst substr newsubstr targetstring" >&2
+            return 1
+       fi
+       local _kw="$1"
+       if [ -n "$_kw" ]; then
+            _kw="$(escape $_kw)"
+       fi
+       ## Wrong: local _rp=$(escape $2)
+       ##local _rp="$(echo $2 | sed -e 's/[]\/$*.^|[]/\\&/g')"
+       local _rp="$2"
+       if [ -n "$_rp" ]; then
+            _rp="$(escape $_rp)"
+       fi
+       shift 2
+       if [ $# -lt 1 ]; then
+            echo "$(echo $(cat) | sed -e "s/$_kw/$_rp/g" 2>/dev/null)"
+       else
+            echo "$(echo $@ | sed -e "s/$_kw/$_rp/g" 2>/dev/null)"
+       fi
+}
+
+
+_esubst "$@"
+
+unset -f _esubst
+exit 0

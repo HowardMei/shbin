@@ -1,0 +1,45 @@
+
+## require shbin/abspath
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  fappend
+#%   DESCRIPTION:  Append the content to the tail of the given file
+#%   USAGE: fappend 'file.name' 'new_content' OR echo 'new_content' | fappend 'file.name'
+#%   REQUIRES: abspath, [bktohome], cat
+#----------------------------------------------------------------------------------------------------------------------
+_fappend() {
+    if [ $# -lt 1 ];then
+       echo "Usage: fappend 'file.name' 'new_content' OR echo 'new_content' | fprepend 'file.name'" >&2
+       return 1
+    else
+       local fn="$(abspath "$1")"
+    fi
+    if [ ! -r "$fn" ];then
+       echo "$fn is not a valid file or cannot be read!" >&2
+       return 1
+    else
+       shift
+    fi
+    [ -x "$(which bktohome)" ] && bktohome "$fn"
+    ##echo "$@" >> "$fn"
+    if [ $# -lt 1 ];then
+    cat >> "$fn" <<EOF
+$(cat)
+EOF
+    else
+    cat >> "$fn" <<EOF
+$@
+EOF
+    fi
+}
+
+
+if [ $# -lt 1 ]; then
+    echo "Usage: fappend filename newcontent" >&2
+elif [ $# -eq 1 ]; then
+    _fappend "$1" "$(cat)"
+else
+    _fappend "$@"
+fi
+
+unset -f _fappend
+exit 0

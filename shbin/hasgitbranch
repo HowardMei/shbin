@@ -1,0 +1,50 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  has_gitbranch
+#%   DESCRIPTION:  Check if the given git repo has a certain branch
+#%   USAGE: hasgitbranch release
+#%   REQUIRES: iscommand, abspath, git
+#----------------------------------------------------------------------------------------------------------------------
+hasgitbranch() {
+   if [ $# -lt 1 ] ; then
+      echo "Usage: hasgitbranch branch_name repo_path"
+      return 1
+   else
+      local branchname="$1"
+   fi
+   if ! iscommand git 2>/dev/null; then
+      echo "git is not installed yet." >&2
+      return 1
+   fi
+   local hisdir="$(pwd)"
+   if [ -n "$2" ] && [ -d "$(abspath "$2")" ]; then
+       local gitdir="$(abspath "$2")"
+   else
+       local gitdir="$(abspath .)"
+   fi
+   cd $gitdir
+   if isgitrepo "$gitdir" 2>/dev/null;then
+      local testres="$(git show-ref "refs/heads/$branchname")"
+   else
+      echo "$gitdir is NOT a valid git repo." >&2
+      return 1
+   fi
+   cd "$hisdir" >/dev/null
+   if [ -n "$testres" ];then
+      echo "git repo $gitdir has a branch $branchname"
+      return 0
+   else
+      echo "$branchname is NOT a branch of git repo $gitdir" >&2
+      return 1
+   fi
+}
+
+
+if [ $# -lt 1 ]; then
+    echo "Usage: hasgitbranch branch_name repo_path" >&2
+    export -f hasgitbranch 2>/dev/null
+else
+    hasgitbranch "$@" >/dev/null
+fi
+
+exit 0

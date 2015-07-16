@@ -1,0 +1,8 @@
+
+#%   DESCRIPTION:  Calculate the math expression
+#%   USAGE: ecalc "(12*53-5)/(7*24*3600)"
+#%   REQUIRES: awk
+
+awk "BEGIN{ print $* }" 2>/dev/null
+
+exit 0

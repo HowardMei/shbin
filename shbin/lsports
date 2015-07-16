@@ -1,0 +1,17 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  lsports
+#%   DESCRIPTION:  List the active TCP/UDP ports and their listening processes
+#%   USAGE: lsports [ COMMAND|PID|USER|LINKTYPE|PORT ], example: lsports TCP.*:22, lsports postgres
+#%   REQUIRES: lsof, iscommand
+#----------------------------------------------------------------------------------------------------------------------
+
+if iscommand lsof 2>/dev/null; then
+	lsof -n -P -i +c 15 | awk '{print $1,$2,$3,$5,$6,$8,$9}' | awk 'NR == 1 || /'${@}'/'
+else
+	echo "lsof is NOT found. Please install it." >&2
+	exit 0
+fi
+
+unset -f _lsports
+exit 0

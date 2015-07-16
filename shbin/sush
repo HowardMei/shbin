@@ -1,0 +1,20 @@
+
+#%   DESCRIPTION:  Super sh shell [ sudo sh -c for sh called scriptfile/sh console ]
+#%   USAGE:     sush 'echo "Current shell is $SHELL"' OR sush "echo 'Current shell is $SHELL'"
+#%              OR  sush shcmd | shfile
+#%   REQUIRES: shuser, sudo, su
+##----------------------------------------------------  Super SH Shell ------------------------------------------------
+sush='sh -c'
+if [ "$(shuser)" != 'root' ]; then
+    if iscommand "sudo" 2>/dev/null; then
+        sush='sudo sh -c'
+    elif iscommand "su" 2>/dev/null; then
+        sush='su -c'
+    else
+        echo >&2 'Error: this script needs the priviledge to run commands as root.'
+        echo >&2 'We are unable to find either "sudo" or "su" available to make this happen.'
+        exit 1
+    fi
+fi
+
+$sush "$@"

@@ -1,0 +1,25 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  isfunction
+#%   DESCRIPTION:  Check if a function is defined
+#%   USAGE: if [ -z $(isfunction psp) ]; then OR if isfunction psp 2>/dev/null; then
+#%   REQUIRES: type, grep
+#----------------------------------------------------------------------------------------------------------------------
+unset -f isfunction
+isfunction() {
+    type "$@" 2>/dev/null | grep -iq "function"
+    if [ "$?" -eq 0 ]; then
+        echo "$@ is a function."
+        return 0
+    else
+        echo "$@ is NOT a function." >&2
+        return 1
+    fi
+}
+
+
+if [ $# -lt 1 ]; then
+    export -f isfunction 2>/dev/null
+else
+    isfunction "$@" >/dev/null
+fi

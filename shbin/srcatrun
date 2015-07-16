@@ -1,0 +1,42 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  srcatrun
+#%   DESCRIPTION:  Check if a script is being sourced/doted OR run OR cat to run.
+#%   USAGE: srcatrun "$_" "$0" "$-" ==> [RUN<./srcatrun>, EXECUTE<bash ./srcatrun>, SOURCE<. ./srcatrun>, CAT<cat ./srcatrun | sh>]
+#%   REQUIRES: which
+#----------------------------------------------------------------------------------------------------------------------
+##echo "\$_:$_" 
+##echo "\$0:$0" 
+##echo "\$BASH_SOURCE:$BASH_SOURCE"
+##echo "\$-:$-" 
+##echo "\$*:$*"
+##echo "\$#:$#"
+
+CHKA="$_"
+CHKB="$0"
+CHKC="$-"
+CHKD="$@"
+if [ -n "${CHKD}" ]; then
+	CHKA="$1"
+	CHKB="$2"
+	CHKC="$3"
+fi
+##echo "${CHKA}   ${CHKB}   ${CHKC}"
+case ${CHKA} in
+	*bin/${CHKB})
+		echo "CAT"
+		;;
+	*bin/sh | *bin/?sh | *bin/??sh)
+		[ -r "${CHKB}" ] && echo "EXECUTE"
+		;;
+	-- | *)
+		case ${CHKC} in
+			*im* | *mi* | *i*)
+				echo "SOURCE"
+			;;
+			-- | *)
+				[ -x "${CHKB}" ] && echo "RUN"
+			;;
+		esac
+		;;
+esac

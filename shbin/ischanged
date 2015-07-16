@@ -1,0 +1,35 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  ischanged
+#%   DESCRIPTION:  Check if a git repo branch contents changed
+#%   USAGE: if ischanged [gitrepo] 2>/dev/null; or source "$(which ischanged)" && if [ -n "$(fischanged [gitrepo])" ]; then
+#%   REQUIRES: git, isgitrepo
+#----------------------------------------------------------------------------------------------------------------------
+unset -f fischanged
+fischanged() {
+	if [ $# -lt 1 ]; then
+		local gitrepo="$(pwd)"
+	else
+		local gitrepo="$(abspath $1)"
+	fi
+	if isgitrepo ${gitrepo} 2>/dev/null; then
+		if [ "$(git status 2> /dev/null | tail -n1 | cut -c 1-17)" != "nothing to commit" ]; then
+			echo "${gitrepo} is changed. Run git status to check modified file list."
+			return 0
+		else
+			echo "${gitrepo} is NOT changed." >&2
+			return 1
+		fi
+	else
+		echo "${gitrepo} is NOT a git repo. We don't know if it has been changed." >&2
+		return 1
+    fi
+}
+
+
+if ! iscommand git 2>/dev/null; then
+	echo "git is not installed yet." >&2
+else
+	fischanged $@
+fi
+export -f fischanged 2>/dev/null

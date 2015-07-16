@@ -1,0 +1,66 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  copy_allto
+#%   DESCRIPTION:  Copy all files/subdirs to the dst dir from the given src dir
+#%   USAGE: copy_allto dstpath srcpath1 srcpath2 ... srcpathn
+#%   REQUIRES: abspath, psbpath, rsync_allto, shopt
+#----------------------------------------------------------------------------------------------------------------------
+_copy_allto() {
+    if [ $# -lt 2 ];then
+       echo 'Usage: copy_allto -f $HOME' >&2
+       echo 'copy_allto [-f] /home/howardmei "$(dirname $0)"' >&2
+       echo 'copy_allto [-f] /home/howardmei dir1 file1 dir2 file3 file4' >&2
+       return 1
+    fi
+    if iscommand rsync 2>/dev/null;then
+        rsync_allto "$@"
+        return 0
+    fi
+    local forcetag=0
+    case "$1" in
+        -f | --force | --overwrite)
+           shift
+           forcetag=1024
+           ;;
+        -- | *)
+           ;;
+    esac
+    local dst="$(abspath "$1")"
+    [ -z "$dst" ] && mkdir -p "$1" && dst="$(abspath "$1")"
+    if [ ! -d "$dst" ];then
+       echo 'copy_allto destination should be a directory, not anything else!' >&2
+       return 1
+    fi
+    shopt -s nullglob   #Avoid none file chaos,remove the "" from "$()" to decouple file paths
+    shift
+    if [ $# -lt 1 ];then
+        local srcall="$(abspath $(pwd))"
+    else
+        local srcall="$@"
+    fi
+   local srcpath=""
+   for srcpath in $srcall; do
+        if [ -f "$srcpath" ]; then
+            if [ "$forcetag" -lt 512 ]; then
+                \cp -i "$srcpath" "$dst/"
+            else
+                \cp -f "$srcpath" "$dst/"
+            fi
+        elif [ -d "$srcpath" ]; then
+            for srcfod in $(find $srcpath -mindepth 1 -maxdepth 1);do
+                echo "Copying $srcfod to $dst ... ..."
+                if [ "$forcetag" -lt 512 ]; then
+                    \cp -ri "$srcfod" "$dst/"
+                else
+                    \cp -rf "$srcfod" "$dst/"
+                fi
+            done
+        fi
+   done
+   shopt -u nullglob #Revert to normal state
+}
+
+_copy_allto "$@"
+
+unset -f _copy_allto
+exit 0

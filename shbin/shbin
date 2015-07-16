@@ -1,0 +1,67 @@
+__ShbinVersion="1.0"
+__ShbinRelease="2015.07.12 for docker"
+
+#%   DESCRIPTION: Essential binary tools to enhance sh/bash environment.
+#%   USAGE: Usage: shbin list | show | help abspath
+#%   REQUIRES: dirname, shsrc, [cannotrun], efilters
+
+shbinpath="$(dirname $(shsrc "$_" "$0" "$-" "shbin") 2>/dev/null)"
+
+if [ $# -lt 1 ]; then
+    echo "Binary shell tools to enhance sh/bash environment."
+    echo "shbin location: ${shbinpath}"
+    echo "shbin version $__ShbinVersion release $__ShbinRelease"
+    echo "Usage: shbin list | show | help cmdname"
+else
+    case "$1" in
+        -l | --ls | ls | list)
+        shift
+        histpath="$(pwd)"
+        cd "$shbinpath" >/dev/null 2>&1
+        \ls -ph --color $@ 2>/dev/null
+        [ -x "./cannotrun" ] && ./cannotrun
+        cd "$histpath" >/dev/null 2>&1
+        ;;
+        -s | --cat | cat | show)
+        shift
+        filename="$1"
+        if [ -z "$filename" ]; then
+            echo 'Please provide a shbin cmd name. Run "shbin list" to show all commands.' >&2
+        else
+            shift
+        fi
+        if [ -n "$filename" ] && [ -r "$shbinpath/$filename" ]; then
+            cat "$shbinpath/$filename" "$@" 2>/dev/null
+        elif [ -n "$filename" ]; then
+            echo "$filename is NOT a valid shbin file. No content will be shown." >&2
+        fi
+        ;;
+        -h | --man | man | help)
+        shift
+        filename="$1"
+        if [ -z "$filename" ]; then
+            echo 'Please provide a shbin cmd name. Run "shbin list" to show all commands.' >&2
+        else
+            shift
+        fi
+        if [ -n "$filename" ] && [ -r "$shbinpath/$filename" ]; then
+            hlp="$(cat "$shbinpath/$filename" | efilters -rl "^#%.*")"
+            if [ -z "$hlp" ]; then
+                cat "$shbinpath/$filename" 2>/dev/null
+            else
+                echo "$hlp"
+            fi
+        elif [ -n "$filename" ]; then
+            echo "$filename is NOT a valid shbin file. No help will be presented." >&2
+        fi
+        ;;
+        -v | --version | version)
+            echo "shbin version ${__ShbinVersion} release ${__ShbinRelease}"
+        ;;
+        -- | *)
+            echo "$@ option is not supported. Usage: shbin list | show | help"
+        ;;
+    esac
+fi
+
+unset shbinpath histpath filename hlp

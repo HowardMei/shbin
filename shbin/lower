@@ -1,0 +1,24 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  lower
+#%   DESCRIPTION:  Lower case the letters of the given string
+#%   USAGE: lower "CAPstring" or echo "CAPstring" | lower
+#%   REQUIRES: tr
+#----------------------------------------------------------------------------------------------------------------------
+_lower() {
+    if [ $# -lt 1 ]; then
+        echo "$(cat)" | tr '[:upper:]' '[:lower:]'
+    else
+        echo "$@" | tr '[:upper:]' '[:lower:]'
+    fi
+}
+
+
+if [ $# -lt 1 ]; then
+    echo "$(cat)" | _lower
+else
+    echo "$*" | _lower
+fi
+
+unset -f _lower
+exit 0

@@ -1,0 +1,12 @@
+
+#%   DESCRIPTION:  Subsitute certain chars with other chars from the given string.
+#%   USAGE: esubsts 'hello' 'hi' 'hello world'
+#%   REQUIRES: esubst
+
+if [ $# -lt 1 ]; then
+    esubst "$(cat)"
+else
+    esubst "$@"
+fi
+
+exit 0

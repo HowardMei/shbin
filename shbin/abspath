@@ -1,0 +1,82 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  abspath/the same as 'abspath' in dfsop.sh except use
+#          single '[' for sh instead of '[[' for bash in if conditions.
+#%   DESCRIPTION:  Get the absolute path of the given path
+#%   USAGE: abspath [ -f | -fl | --follow ] .
+#%   REQUIRES: tr, command, [readlink], ls, tail, pwd, cd, dirname, basename
+#----------------------------------------------------------------------------------------------------------------------
+unset CDPATH
+unset -f abspath
+abspath() {
+    if [ $# -lt 1 ];then
+        return 1
+    fi
+    local follow=""
+    case "$1" in
+        -f | -fl | --follow | --followsymlink)
+            local follow="yes"
+            shift
+            local opt="$(echo "$1" | tr -d '[:blank:]')"
+            if [ -z "$opt" ];then
+                return 1
+            else
+                local relpath="$opt"
+            fi
+        ;;
+        *)
+            local opt="$(echo "$1" | tr -d '[:blank:]')"
+            if [ -z "$opt" ];then
+                return 1
+            else
+                local relpath="$opt"
+            fi
+        ;;
+    esac
+
+    if [ -z "$relpath" ]; then
+        return 1
+    fi
+
+    if [ "yes" = "$follow" ] && [ -n "$(command -v readlink 2>/dev/null)" ];then
+        local ABS_PATH="$(readlink -mf "$1" 2>/dev/null)"
+        if [ $? -ne 0 ]; then
+            local ABS_PATH="$(readlink "$1" 2>/dev/null)"
+        fi
+        if [ -n "$ABS_PATH" ] && [ $? -eq 0 ]; then
+            if [ -d "$ABS_PATH" ] || [ -f "$ABS_PATH" ];then
+                echo "$ABS_PATH"
+                return 0
+            fi
+        fi
+    fi
+
+    if [ "yes" = "$follow" ] && [ -f "$relpath" ]; then
+        local relpath="$(\ls -l $relpath | tr ' ' '\n' | tail -n 1)"
+    fi
+
+    local OLDPWD="$(pwd)"
+    if [ -d "$relpath" ]; then
+       local ABS_PATH="$(cd "$relpath"; pwd)"
+    elif [ -f "$relpath" ];then
+          local PARENT_DIR="$(dirname "$relpath" 2>/dev/null)"
+          cd "$PARENT_DIR" >/dev/null 2>&1
+          local ABS_PATH="$(pwd)/$(basename "$relpath" 2>/dev/null)"
+    fi
+    cd "$OLDPWD" >/dev/null
+    if [ -d "${ABS_PATH:-}" ] || [ -f "${ABS_PATH:-}" ] || [ -L "${ABS_PATH:-}" ];then
+        echo "$ABS_PATH"
+    else
+        return 1
+    fi
+}
+
+
+if [ $# -lt 1 ]; then
+    export -f abspath 2>/dev/null
+else
+    abspath "$@"
+    unset -f abspath
+fi
+
+exit 0

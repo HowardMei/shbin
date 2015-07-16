@@ -1,0 +1,36 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  print_system_info
+#%   DESCRIPTION:  Print system hardware/os information
+#%   USAGE: print_sysinfo
+#%   REQUIRES: stathw, statos, prvip, pubip
+#----------------------------------------------------------------------------------------------------------------------
+__print_system_info ()
+{
+    if ! iscommand stathw 2> /dev/null; then
+        echo "Cannot find stathw, please check the shbin installation." 1>&2;
+        return 1;
+    fi;
+    CPU_VENDOR_ID=$(stathw CPU_VENDOR_ID);
+    CPU_ARCH=$(stathw CPU_ARCH);
+    CPU_FREQ=$(stathw CPU_FREQ);
+    CPU_CORES=$(stathw CPU_CORES);
+    MEM_FREE=$(stathw MEM_FREE);
+    MEM_TOT=$(stathw MEM_TOT);
+    DISK_TYPE=$(stathw DISK_TYPE);
+    DISK_FREE=$(stathw DISK_FREE);
+    DISK_TOT=$(stathw DISK_TOT);
+    OS_NAME=$(statos OS_NAME);
+    OS_VERSION=$(statos OS_VERSION);
+    DISTRO_NAME=$(statos DISTRO_NAME);
+    DISTRO_VERSION=$(statos DISTRO_VERSION);
+    PRV_IPv4=$(prvip PRV_IPv4);
+    PUB_IPv4=$(pubip PUB_IPv4);
+    cecho "${CPU_VENDOR_ID} ${CPU_ARCH} [${CPU_FREQ}MHzx${CPU_CORES}],RAM ${MEM_FREE}MB/${MEM_TOT}MB,${DISK_TYPE} ${DISK_FREE}GB/${DISK_TOT}GB";
+    cecho "${OS_NAME} ${OS_VERSION} ${DISTRO_NAME} ${DISTRO_VERSION}";
+    cecho "PrvIP:${PRV_IPv4} PubIP:${PUB_IPv4}"
+}
+
+__print_system_info
+unset -f __print_system_info
+exit 0

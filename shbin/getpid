@@ -1,0 +1,34 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  getpid
+#%   DESCRIPTION:  Get the first pid by exactly matching the given process name, path etc
+#%   USAGE: getpid [nth] process_name | process_path
+#%   REQUIRES: tr, erow, getpidsbyglob
+#----------------------------------------------------------------------------------------------------------------------
+_getpid() {
+    if [ $# -lt 1 ]; then
+        echo "Usage: getpid [nth] [process_name | process_path]" >&2
+        return 1
+    elif [ $# -eq 2 ] && isdigit "$1"; then
+        local nth=$(echo "$1" | tr -cd '[[:digit:]]')
+        shift
+    else
+        local nth=1
+    fi
+    local spid=""
+    spid="$(getpidsbyglob "$*" 2>/dev/null)"
+
+    if [ -z "$spid" ]; then
+        echo "Cannot find any running process with name/path $1" >&2
+        return 1
+    else
+        echo "$spid" | erow "$nth"
+        return 0
+    fi
+
+}
+
+_getpid "$@"
+
+unset -f _getpid
+exit 0
