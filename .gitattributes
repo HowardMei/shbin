@@ -1,0 +1,49 @@
+# Set the default behavior, in case people don't have core.autocrlf set.
+termcap -lf
+* text=auto
+
+# Explicitly declare source files you want to always be normalized and converted
+# to native line endings on checkout. Enforce Unix newlines for all environment.
+*.sh text eol=lf
+*.bash text eol=lf
+
+# Declare files that will always have CRLF line endings on checkout.
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Denote all files that are truly binary and should not be modified.
+*.ebuild binary
+*.sln binary
+*.vcproj binary
+*.vc* binary
+*.vbs binary
+
+*.png binary
+*.jpg binary
+*.gif binary
+*.bmp binary
+*.svg binary
+*.wav binary
+*.pdf binary
+*.tar binary
+*.zip binary
+*.gz binary
+
+*.pyc binary
+*.pyo binary
+*.pyd binary
+*.a
+*.o binary
+*.so binary
+*.out binary
+*.obj binary
+*.lib binary
+*.x32 binary
+*.x64 binary
+*.cmd binary
+*.exe binary
+*.jar binary
+*.war binary
+*.ear binary
+*.dll binary
+*_ binary

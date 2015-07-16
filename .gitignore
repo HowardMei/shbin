@@ -1,0 +1,164 @@
+# Editor swap #
+#############################
+*~
+[._]*.s[a-w][a-z]
+[._]s[a-w][a-z]
+*.un~
+Session.vim
+.netrwhist
+*.tmp
+*.bak
+*.save
+
+
+# Private Credential Files #
+#############################
+*.pem
+*.ppk
+
+
+# OS generated #
+#############################
+# OS generated Fold view & Thumbnail & Runtime files
+pids
+*.pid
+*.seed
+*.lock
+.lock-wscript
+.DS_Store*
+Desktop.ini
+Icon?
+._*
+.directory
+Thumbs.db
+ehthumbs.db
+$RECYCLE.BIN/
+# Files that might appear on external disks
+.Spotlight-V100
+.Trashes
+
+
+# Compiled files #
+#############################
+# C++ Compiled Object files
+*.slo
+*.lo
+*.obj
+# C++ Compiled Dynamic libraries
+*.dylib
+*.dll
+# C++ Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+# C++ Executables
+*.exe
+*.out
+*.app
+# C Object files
+*.ko
+*.obj
+*.elf
+# C Libraries
+*.lib
+# C Shared objects (inc. Windows DLLs)
+*.dll
+*.dylib
+*.i*86
+*.x86_64
+*.hex
+
+# Unwanted compiled Erlang Files
+.eunit
+*.beam
+*.plt
+erl_crash.dump
+
+# Golang Compiled Object files, Static and Dynamic libs (Shared Objects)
+_obj
+_test
+# Golang Architecture specific extensions/prefixes
+*.[568vq]
+[568vq].out
+*.cgo1.go
+*.cgo2.c
+_cgo_defun.c
+_cgo_gotypes.go
+_cgo_export.*
+_testmain.go
+*.exe
+*.test
+*.prof
+
+# Unwanted compiled Java Files
+*.class
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+# Java Package Files #
+*.jar
+*.war
+*.ear
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+# Unwanted compiled Python Files
+*.py[cod]
+__pycache__/
+.Python
+.coverage
+.cache
+
+
+# IDE/Tools residue files
+#############################
+.svn/
+.hg/
+/.hg/*
+*/.hg/*
+.vagrant/
+.vagrant
+*.vagrant
+.mr.developer.cfg
+.project
+.pydevproject
+*.vcproj
+*.sln
+*.vcproj.*.user
+*.ncb
+*.suo
+*.gcno
+*.gcda
+*.kdev4
+/.kdev4
+*.sublime-workspace
+*.sublime-project
+sftp-config.json
+# Cache objects
+packer_cache/
+# Packer built boxes
+*.box
+*.ebuild
+
+# Big Packages #
+#############################
+*.7z
+*.pdf
+##*.gz
+*.iso
+*.jar
+*.rar
+##*.tar
+*.zip
+*.deb
+*.rpm
+*.dmg
+
+# WP user files #
+##############################
+wp-content/backup-db/
+wp-content/backups/
+wp-content/blogs.dir/
+wp-content/cache/
+wp-content/upgrade/
+wp-content/uploads/
