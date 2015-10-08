@@ -1,3 +1,5 @@
+set +o nounset     # Don't mess up the auto completion
+set +o errexit     # Don't mess up the interactive shell
 [ -z "$(which git)" ] && return
 
 if [ "$COLORTERM" = "gnome-*" ] && [ "$TERM" = "xterm" ] && infocmp "gnome-256color" >/dev/null 2>&1; then
