@@ -2,8 +2,8 @@
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  symln_allto
 #%   DESCRIPTION:  Soft symlink all files/subdirs to dst from src dir
-#%   USAGE: symln_allto [-f] dstdir srcfile/srcdir/srcfilelist
-#%   REQUIRES: psbpath, abspath, ln, find
+#%   USAGE: symln_allto [-f | -k | -fk] dstdir srcfile/srcdir/srcfilelist
+#%   REQUIRES: shbin/psbpath, shbin/abspath, ln, find
 #----------------------------------------------------------------------------------------------------------------------
 _symln_allto() {
         if [ $# -lt 2 ];then
@@ -37,18 +37,18 @@ _symln_allto() {
               local src="$(abspath $osrc)"
               if [ -d "$src" ];then
                   ## symlinking dirs to the destination; remove the "" from "$()" to decouple file paths
-                  for srcdir in $(find $src -mindepth 1 -maxdepth 1 -xdev -type d);do
-                      if [ -n "$srcdir" ]; then
-                          local dstdir="$(psbpath "$dst/$(basename $srcdir)")"
-                          if [ -n "$srcdir" ] && [ -n "$dstdir" ]; then
-                              if [ "$forcetag" -lt 512 ]; then
-                                \ln -si "$srcdir" "$dstdir"
-                              else
-                                \ln -sf "$srcdir" "$dstdir"
-                              fi
-                          fi
-                      fi
-                  done
+				  for srcdir in $(find $src -mindepth 1 -maxdepth 1 -xdev -type d);do
+					  if [ -d "$srcdir" ]; then
+						  local dstdir="$(psbpath "$dst/$(basename $srcdir)")"
+						  if [ -d "$srcdir" ] && [ -d "$dstdir" ]; then
+							  if [ "$forcetag" -lt 512 ]; then
+								\ln -si "$srcdir" "$dstdir"
+							  else
+								\ln -sf "$srcdir" "$dstdir"
+							  fi
+						  fi
+					  fi
+				  done
                   ## symlinking files to the destination
                   for srcfile in $(find $src -mindepth 1 -maxdepth 1 -xdev -type f);do
                       if [ -n "$srcfile" ]; then

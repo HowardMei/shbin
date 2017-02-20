@@ -1,0 +1,29 @@
+
+## require shbin/uriaccount
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#         NAME:  uripass
+#%   DESCRIPTION:  Extract and echo the password of the given url
+#%   USAGE: uripass "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
+#%   REQUIRES: uriaccount, grep, cut
+#----------------------------------------------------------------------------------------------------------------------
+_uripass() {
+   if [ $# -lt 1 ]; then
+      echo "Usage: uripass sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1" >&2
+      echo "Result: pass" >&2
+      return 1
+   fi
+  local tmp1="$(uriaccount "$@")"
+  local tmp2="$(echo "$tmp1" | grep : 2>/dev/null | cut -d: -f2)"
+   if [ -n "$tmp2" ];then
+      echo "$tmp2"
+      return 0
+   else
+      return 1
+   fi
+}
+
+
+_uripass "$@"
+
+unset -f _uripass
+exit 0

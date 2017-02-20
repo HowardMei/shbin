@@ -1,0 +1,52 @@
+#---  PROGRAM  -------------------------------------------------------------------------------------------------------
+#%   DESCRIPTION:  Add /opt/deboffline local deb files scanning ability to apt-get update
+#%   USAGE: apt-debonly
+#%   REQUIRES: chmod, mkdir, apt-get, [apt-install], gzip, unset, apt-remove, dpkg-dev<dpkg-scanpackages>
+#----------------------------------------------------------------------------------------------------------------------
+
+if [ -d "/opt/deboffline" ]; then
+    chmod -R 0700 /opt/debonly
+else
+    mkdir -p /opt/deboffline && chmod -R 0700 /opt/deboffline
+fi
+
+if [ -z "$(command -v dpkg-scanpackages 2>/dev/null)" ]; then
+    echo "Install dpkg-scanpackages@dpkg-dev as /opt/deboffline local package scanner ..."
+    if [ -z "$(command -v apt-install 2>/dev/null)" ]; then
+        apt-get update -y -q
+        apt-install dpkg-dev
+    else
+        apt-get update -y -q
+        apt-get install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" \
+        --fix-missing --no-install-recommends --force-yes -y -q dpkg-dev
+    fi
+fi
+
+if [ -n "$(command -v dpkg-scanpackages 2>/dev/null)" ]; then
+    echo "Scan local *deb packages in /opt/deboffline and generate Packages.gz for apt-get update"
+    wrkpath=$(pwd)
+    cd /opt/deboffline && dpkg-scanpackages . /dev/null | gzip -c9 > Packages.gz && cd ${wrkpath}
+    unset wrkpath
+fi
+
+if [ -f "/opt/deboffline/Packages.gz" ]; then
+     echo 'deb file:/opt/deboffline ./' > /etc/apt/sources.list.d/deboffline.list
+     chmod 0644 /etc/apt/sources.list /etc/apt/sources.list.d/deboffline.list
+     apt-get update -y -q
+else
+     echo "No valid Packages.gz is found in /opt/deboffline ..."
+     \rm -f /etc/apt/sources.list.d/debonly.list
+fi
+
+if [ -n "$(command -v dpkg-scanpackages 2>/dev/null)" ]; then
+    echo "Remove dpkg-scanpackages@dpkg-dev because it's too large ..."
+    if [ -z "$(command -v apt-remove 2>/dev/null)" ]; then
+        apt-remove dpkg-dev
+        apt-get autoremove -y -q
+        apt-get autoclean -y -q
+    else
+        apt-get remove --force-yes -y -q --purge dpkg-dev
+        apt-get autoremove -y -q
+        apt-get autoclean -y -q
+    fi
+fi

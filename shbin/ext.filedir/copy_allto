@@ -3,7 +3,7 @@
 #          NAME:  copy_allto
 #%   DESCRIPTION:  Copy all files/subdirs to the dst dir from the given src dir
 #%   USAGE: copy_allto dstpath srcpath1 srcpath2 ... srcpathn
-#%   REQUIRES: abspath, psbpath, rsync_allto, shopt
+#%   REQUIRES: shbin/abspath, shbin/psbpath, [shbin/rsync_allto], shopt
 #----------------------------------------------------------------------------------------------------------------------
 _copy_allto() {
     if [ $# -lt 2 ];then
@@ -12,7 +12,7 @@ _copy_allto() {
        echo 'copy_allto [-f] /home/howardmei dir1 file1 dir2 file3 file4' >&2
        return 1
     fi
-    if iscommand rsync 2>/dev/null;then
+    if iscommand rsync 2>/dev/null && iscommand rsync_allto >/dev/null 2>&1;then
         rsync_allto "$@"
         return 0
     fi

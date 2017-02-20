@@ -1,7 +1,7 @@
 
 #%   DESCRIPTION:  Run command as another user
 #%   USAGE:     runas howardmei 'echo "Run as $USER in $SHELL at $HOME";pwd;mkdir -p /root/temp'
-#%   REQUIRES: userhome, grep, sudo
+#%   REQUIRES:  shbin/userhome, grep, sudo
 
 unset SHE USER
 SHE="$_"

@@ -1,0 +1,91 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  rsync_allto
+#%   DESCRIPTION:  Copy all files/subdirs to the dst dir from the given src dir
+#%   USAGE: copy_allto dstpath srcpath1 srcpath2 ... srcpathn
+#%   REQUIRES: rsync, pacapt, abspath, psbpath, basename, read, shopt
+#----------------------------------------------------------------------------------------------------------------------
+_rsync_allto() {
+    if [ $# -lt 2 ];then
+       echo 'Usage: rsync_allto -f $HOME' >&2
+       echo 'rsync_allto [-f] /home/howardmei "$(dirname $0)"' >&2
+       echo 'rsync_allto [-f] /home/howardmei dir1 file1 dir2 file3 file4' >&2
+       return 1
+    fi
+    if ! iscommand rsync 2>/dev/null;then
+        pacapt -S rsync
+    fi
+    local forcetag=0
+    case "$1" in
+        -f | --force | --overwrite)
+           shift
+           forcetag=1024
+           ;;
+        -- | *)
+           ;;
+    esac
+    local dst="$(abspath "$1")"
+    [ -z "$dst" ] && mkdir -p "$1" && dst="$(abspath "$1")"
+    if [ ! -d "$dst" ];then
+       echo "rsync_allto destination $dst is not a dir path or cannot be accessed!" >&2
+       return 1
+    fi
+    shopt -s nullglob   #Avoid none file chaos,remove the "" from "$()" to decouple file paths
+    shift
+    if [ $# -lt 1 ];then
+        local srcall="$(abspath $(pwd))"
+    else
+        local srcall="$@"
+    fi
+   local srcpath=""
+   for srcpath in $srcall; do
+		local srcfn="$(basename "$srcpath" 2>/dev/null)"
+		echo "Copying $srcpath to $dst/$srcfn ... ..."
+		if [ -f "$srcpath" ]; then
+			if [ "$forcetag" -lt 512 ] && [ -f "$dst/$srcfn" ]; then
+				local answer=""
+				read -r -p "This may overwrite existing file: $dst/$srcfn. Are you sure? (y/n) " answer
+				case "$answer" in
+					[yY][eE][sS]|[yY])
+						## --exclude ".git/" --exclude ".hg/" --exclude ".svn/" --exclude ".bzr/"
+						rsync -rW --no-perms "$srcpath" "$dst"
+					;;
+					-- | *)
+						continue
+					;;
+				esac
+			else
+				## --exclude ".git/" --exclude ".hg/" --exclude ".svn/" --exclude ".bzr/"
+				rsync -rW --no-perms "$srcpath" "$dst"
+			fi
+		elif [ -d "$srcpath" ]; then
+			for srcfod in $(find $srcpath -mindepth 1 -maxdepth 1);do
+				local srcfn="$(basename "$srcfod" 2>/dev/null)"
+				echo "Copying $srcfod to $dst/$srcfn ... ..."
+				if [ "$forcetag" -lt 512 ] && [ -e "$dst/$srcfn" ]; then
+					local answer=""
+					read -r -p "This may overwrite existing file/dir: $dst/$srcfn. Are you sure? (y/n) " answer
+					case "$answer" in
+						[yY][eE][sS]|[yY])
+							## --exclude ".git/" --exclude ".hg/" --exclude ".svn/" --exclude ".bzr/"
+							rsync -rW --no-perms "$srcfod" "$dst"
+						;;
+						-- | *)
+							continue
+						;;
+					esac
+				else
+					## --exclude ".git/" --exclude ".hg/" --exclude ".svn/" --exclude ".bzr/"
+					rsync -rW --no-perms "$srcfod" "$dst"
+				fi
+			done
+		fi
+   done
+   shopt -u nullglob #Revert to normal state
+}
+
+
+_rsync_allto "$@"
+
+unset -f _rsync_allto
+exit 0

@@ -1,0 +1,28 @@
+
+## require shbin/urihost
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#         NAME:  uridomain
+#%   DESCRIPTION:  Extract and echo the domain name of the given url
+#%   USAGE: uridomain "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
+#%   REQUIRES: urihost, grep, cut
+#----------------------------------------------------------------------------------------------------------------------
+_uridomain() {
+   if [ $# -lt 1 ]; then
+      echo "Usage: uridomain sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1" >&2
+      echo "Result: down.test.com" >&2
+      return 1
+   fi
+  local tmp1="$(urihost "$@")"
+  local tmp2="$(echo "$tmp1" | grep : 2>/dev/null | cut -d: -f1)"
+  if [ -n "$tmp2" ]; then
+    echo "$tmp2"
+  else
+    echo "$tmp1"
+  fi
+}
+
+
+_uridomain "$@"
+
+unset -f _uridomain
+exit 0

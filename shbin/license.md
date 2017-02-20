@@ -1,4 +1,4 @@
-Copyright (c) 2012-2015, Howard Mei[howardmei@mubiic.com], Mubiic Technology Pte Ltd.
+Copyright (c) 2012-2017, Howard Mei[howardleomei@gmail.com].
 
 Redistribution and use of this software in source and binary forms, with or
 without modification, are permitted provided that the following conditions

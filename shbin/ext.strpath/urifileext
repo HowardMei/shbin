@@ -1,0 +1,29 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#         NAME:  urifileext
+#%   DESCRIPTION:  Extract and echo the filename of the given file
+#%   USAGE: urifileext "sftp://user:pass@down.test.com:8080/files%20repo+new/testv2013.1.14.tar.gz#body-old#download?ver=1.0&reg=us-1"
+#%   REQUIRES: urifile, erevs
+#----------------------------------------------------------------------------------------------------------------------
+_urifileext() {
+   if [ $# -lt 1 ] ; then
+      echo "Usage: urifileext 'sftp://user:pass@down.test.com:8080/files%20repo+new/testv2013.1.14.tar.gz#body-old#download?ver=1.0&reg=us-1'" >&2
+      echo "Result: tar.gz" >&2
+      return 1
+   fi
+   local tmp1="$(urifile "$@")"
+   case "$tmp1" in
+     *.tar.* | *.min.* | *.patch.*)
+        echo "$tmp1" | erevs | awk -F'.' '{print $1"."$2}' | erevs
+        ;;
+     *)
+        echo "$tmp1" | erevs | awk -F'.' '{print $1}' | erevs
+        ;;
+    esac
+}
+
+
+_urifileext "$@"
+
+unset -f _urifileext
+exit 0

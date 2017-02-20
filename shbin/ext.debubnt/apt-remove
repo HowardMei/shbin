@@ -1,0 +1,11 @@
+#---  PROGRAM  -------------------------------------------------------------------------------------------------------
+#%   DESCRIPTION:  Perform apt-get remove to purge packages and autoclean the cache
+#%   USAGE: apt-cleanup
+#%   REQUIRES: apt-get
+#----------------------------------------------------------------------------------------------------------------------
+
+apt-get remove --force-yes -y -q --purge $@
+apt-get autoclean -y -q 
+if [ -d "/opt/deboffline" ]; then
+	\rm -f /opt/debonly/${@}*
+fi

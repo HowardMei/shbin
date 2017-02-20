@@ -3,7 +3,7 @@
 #          NAME:  userhome
 #%   DESCRIPTION:  Return the home dir path of the given user
 #%   USAGE: userhome [howardmei]
-#%   REQUIRES: printf, shuser, getent, abspath, cut
+#%   REQUIRES: printf, shbin/shuser, getent, shbin/abspath, cut
 #----------------------------------------------------------------------------------------------------------------------
 
 _userhome() {

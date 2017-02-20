@@ -1,0 +1,33 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  dokic
+#%   DESCRIPTION:  docker kill the given container
+#%   USAGE: dokic -a | imagename:tag | containerid
+#%   REQUIRES: docker
+#----------------------------------------------------------------------------------------------------------------------
+_dokic() {
+    if [ $# -lt 1 ]; then
+        echo "At least one container name or id is required." >&2
+        return 1
+    elif [ "$1" == "-a" ] || [ "$1" == "all" ] || [ "$1" == "--all" ]; then
+        echo "[dokic]Killing all the running containers:" >&2
+        sudo docker kill $(dollc -r | ecol 1) 2>/dev/null
+    elif [ -n "$(dollc -r "$1")" ]; then
+        echo "[dokic]Killing the container exactly matching $@" >&2
+        sudo docker kill $(dollc -ri "$1") 2>/dev/null
+    else
+        echo "[dokic]No running containers matching $1 are found." >&2
+        echo "[dokic]Please run dollc -r to list all running containers." >&2
+        return 1
+    fi
+}
+
+
+if [ $# -lt 1 ]; then
+    _dokic
+else
+    _dokic "$1"
+fi
+
+unset -f _dostc
+exit 0

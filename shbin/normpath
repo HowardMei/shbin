@@ -1,41 +1,30 @@
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  win2posix or posix2win
-#   DESCRIPTION:  Change the slash according to OS for the given path
-#----------------------------------------------------------------------------------------------------------------------
-_win2posix() {
-    echo "$@" | sed -e 's_[\]_/_g' | sed -e 's_//_/_g'
-}
-
-_posix2win() {
-    echo "$@" | sed -e 's_/_\\_g' | sed -e 's_\\\\_\\_g' | sed -e 's_\\\\_\\_g'
-}
-
-
-#---  FUNCTION  -------------------------------------------------------------------------------------------------------
-#          NAME:  normpath
-#%   DESCRIPTION:  Normalize the path to linux for the given path
-#%   USAGE: normpath "/file\\cloud drive/\file.ext"
+#%   DESCRIPTION:  Change the slashes in the given path according to OS
+#%   USAGE: normpath [win|lin|-l|-w] "/file\path/in\//chaos.ext"
 #%   REQUIRES: sed
 #----------------------------------------------------------------------------------------------------------------------
-_normpath() {
-    _win2posix "$(_posix2win $@)"
+unset -f normpath
+_win2posix() {
+    echo "$@" | sed -e 's_\\/_/_g' | sed -e 's_[\]_/_g' | sed -e 's_//_/_g' | sed -e 's_\:/_\://_g'
 }
 
+normpath() {
+	if [ $# -lt 1 ]; then
+		echo 'Usage: normpath [windows|linux|-l|-w] "/file\path/in\//chaos.ext"'
+	else
+		case "$1" in
+			-w | --win | win | windows)
+				shift
+				_win2posix "$@" | sed -e 's_/_\\_g';;
+			-l | --lin | lin | posix | linux)
+				shift
+				_win2posix "$@";;
+			"" | -- | *)
+				_win2posix "$@";;
+		esac
+	fi
+}
 
-if [ $# -lt 1 ]; then
-    echo 'Usage: normpath [windows|linux|-l|-w] "/file\path/in\//chaos.ext"'
-else
-    case "$1" in
-        -w | --win | win | windows)
-            shift
-            _posix2win "$@";;
-        -l | --lin | lin | posix | linux)
-            shift
-            _win2posix "$@";;
-        "" | -- | *)
-            _normpath "$@";;
-    esac
-fi
-
-exit 0
+normpath $@

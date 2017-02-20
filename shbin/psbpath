@@ -3,7 +3,7 @@
 #          NAME:  psbpath
 #%   DESCRIPTION:  Get the possible absolute path of the given path create it if not exists
 #%   USAGE: psbpath [possible path name]
-#%   REQUIRES: abspath, dirname, basename, tr
+#%   REQUIRES: shbin/abspath, dirname, basename, tr
 #----------------------------------------------------------------------------------------------------------------------
 unset CDPATH
 unset -f psbpath

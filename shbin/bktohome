@@ -1,0 +1,43 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  bktohome
+#%   DESCRIPTION:  Back up the file to a backup folder like ~/.lost+found
+#%	 USAGE: bktohome "howardmei" ./file-dir-before-delete
+#%   REQUIRES: shbin/userhome, shbin/abspath
+#----------------------------------------------------------------------------------------------------------------------
+_bktohome () {
+	if [ $# -lt 1 ];then
+		echo "Usage: bktohome username file1 file2 dir1 dir2" >&2
+		return 1
+	fi
+	local shhome="$(userhome "$1")"
+	if [ -n "$shhome" ] && [ -d "$shhome" ]; then
+		shift
+	else
+		shhome="$(userhome $(shuser))"
+	fi
+	if [ $# -lt 1 ];then
+		echo "bktohome needs at least one file/dir to back up" >&2
+		return 1
+	fi
+	mkdir -p "$shhome/.lost+found"
+	for ftobk in "$@"; do
+		ftobk="$(abspath $ftobk)"
+		if [ -f "$ftobk" ]; then
+			local bkf="$shhome/.lost+found/$(basename $ftobk 2>/dev/null).bk$(date +%s)"
+			echo "Backing up file $ftobk to $bkf"
+			\cp -f "$ftobk" "$bkf"
+		elif [ -d "$ftobk" ]; then
+			local bkf="$shhome/.lost+found/$(basename $ftobk 2>/dev/null).bk$(date +%s)"
+			echo "Backing up dir $ftobk to $bkf"
+			\cp -rf "$ftobk" "$bkf"
+		fi
+	done
+	##echo "$1 has been backed up to "$(abspath $pbk)"
+}
+
+
+_bktohome "$@"
+
+unset -f _bktohome
+exit 0

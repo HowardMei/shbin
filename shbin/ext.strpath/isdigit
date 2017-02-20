@@ -1,0 +1,28 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  isdigit
+#%   DESCRIPTION:  Check if it is a digital number
+#%   USAGE: if [ -z $(isdigit 22345876abc) ]; then OR if isdigit 22345876abc 2>/dev/null; then
+#%   REQUIRES: printf
+#----------------------------------------------------------------------------------------------------------------------
+unset -f isdigit
+isdigit() {
+    if [ $# -lt 1 ]; then
+        return 1
+    fi
+    printf '%f' "$1" >/dev/null 2>&1
+    if [ "$?" -eq 0 ]; then
+        echo "$@ is a digital number."
+        return 0
+    else
+        echo "$@ is NOT a digital number." >&2
+        return 1
+    fi
+}
+
+
+if [ $# -lt 1 ]; then
+    export -f isdigit 2>/dev/null
+else
+    isdigit "$@" >/dev/null
+fi

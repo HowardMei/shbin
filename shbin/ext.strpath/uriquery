@@ -1,0 +1,24 @@
+
+## require shbin/uripath, shbin/urifile, shbin/esubst
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#         NAME:  urlquery
+#%   DESCRIPTION:  Extract and echo the query string of the given url
+#%   USAGE: uriquery "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
+#%   REQUIRES: uripath, urifile
+#----------------------------------------------------------------------------------------------------------------------
+_uriquery() {
+   if [ $# -lt 1 ] ; then
+      echo "Usage: uriquery sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1" >&2
+      echo "Result: #download?ver=1.01&region=asia" >&2
+      return 1
+   fi
+ local tmp1="$(basename "$(uripath "$@")" 2>/dev/null)"
+ local tmp2="$(urifile $1)"
+ esubst "$tmp2" "" "$tmp1"
+}
+
+
+_uriquery "$@"
+
+unset -f _uriquery
+exit 0

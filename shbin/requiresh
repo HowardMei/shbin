@@ -3,7 +3,7 @@
 #          NAME:  requiresh
 #%   DESCRIPTION:  Require one or a group of scripts
 #%   USAGE: requiresh script1 script2 ... scriptn
-#%   REQUIRES: abspath, shc
+#%   REQUIRES: shbin/abspath, shbin/shc
 #----------------------------------------------------------------------------------------------------------------------
 _requiresh() {
     local file="$1"

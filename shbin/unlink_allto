@@ -3,7 +3,7 @@
 #          NAME:  unlink_allto
 #%   DESCRIPTION:  Unlink the soft links to the dst dir judged by the src dir content
 #%   USAGE: unlink_allto [-f] $dstdir $src1 $src2 $src3
-#%   REQUIRES: find, rm, basename, abspath, bktohome, shopt
+#%   REQUIRES: find, rm, basename, shbin/abspath, shbin/bktohome, shopt
 #----------------------------------------------------------------------------------------------------------------------
 _unlink_allto() {
         # usage: unlink_allto $dstdir $src1 $src2 $src3 multiple args allowed

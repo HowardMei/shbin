@@ -1,0 +1,14 @@
+
+#%   DESCRIPTION:  Extract and echo the password of the given url
+#%   USAGE: urlpass "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
+#%         echo "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1" | urlpass
+#%   REQUIRES: uripass
+
+
+if [ $# -lt 1 ]; then
+    uripass "$(cat)"
+else
+    uripass "$@"
+fi
+
+exit 0

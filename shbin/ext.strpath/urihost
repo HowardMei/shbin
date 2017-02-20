@@ -1,0 +1,30 @@
+
+## require shbin/urifull, shbin/uriaccount
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#         NAME:  urihost
+#%   DESCRIPTION:  Extract and echo the hostnmae of the given url
+#%   USAGE: urihost "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
+#%   REQUIRES: urifull, uriaccount, sed, cut
+#----------------------------------------------------------------------------------------------------------------------
+_urihost() {
+   if [ $# -lt 1 ] ; then
+      echo "Usage: urihost sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1" >&2
+      echo "Result: down.test.com:8080" >&2
+      return 1
+   fi
+  local tmp1="$(urifull "$@")"
+  local tmp2="$(uriaccount "$tmp1")"
+  local tmp3="$(echo "$tmp1" | sed -e "s^$tmp2@^^g" 2>/dev/null | cut -d/ -f1)"
+   if [ -n "$tmp3" ];then
+      echo "$tmp3"
+      return 0
+   else
+      return 1
+   fi
+}
+
+
+_urihost "$@"
+
+unset -f _urihost
+exit 0

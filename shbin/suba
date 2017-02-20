@@ -2,7 +2,7 @@
 #%   DESCRIPTION:  Super bash shell [ sudo bash -c for bash called scriptfile/bash console ]
 #%   USAGE:     suba 'echo "Current shell is $SHELL"' OR suba "echo 'Current shell is $SHELL'"
 #%              OR suba bashcmd | bashfile
-#%   REQUIRES: shuser, sudo, su
+#%   REQUIRES: shbin/shuser, sudo, su
 ##----------------------------------------------------  Super BASH Shell ------------------------------------------------
 suba='bash -c'
 if [ "$(shuser)" != 'root' ]; then

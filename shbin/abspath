@@ -1,4 +1,5 @@
-
+set -o nounset     # Strict var declare
+set -o errexit     # Exit on error
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  abspath/the same as 'abspath' in dfsop.sh except use
 #          single '[' for sh instead of '[[' for bash in if conditions.
@@ -57,13 +58,13 @@ abspath() {
 
     local OLDPWD="$(pwd)"
     if [ -d "$relpath" ]; then
-       local ABS_PATH="$(cd "$relpath"; pwd)"
+       local ABS_PATH="$(cd "$relpath" 2>/dev/null && pwd || \ls -d "$relpath" 2>/dev/null)"
     elif [ -f "$relpath" ];then
           local PARENT_DIR="$(dirname "$relpath" 2>/dev/null)"
           cd "$PARENT_DIR" >/dev/null 2>&1
           local ABS_PATH="$(pwd)/$(basename "$relpath" 2>/dev/null)"
     fi
-    cd "$OLDPWD" >/dev/null
+    cd "$OLDPWD" >/dev/null 2>&1
     if [ -d "${ABS_PATH:-}" ] || [ -f "${ABS_PATH:-}" ] || [ -L "${ABS_PATH:-}" ];then
         echo "$ABS_PATH"
     else

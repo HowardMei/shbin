@@ -1,0 +1,133 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __addsshremote
+#%   DESCRIPTION:  add a ssh remote machine with a host name
+#%   USAGE:addsshremote -u username nickname user@remotehostip/name keypairpath
+#%   REQUIRES: uriuser, uridomain, uriport, ssh-add, abspath, dirname, userhome, urifilename, ssh-copy-id, ssh-agent
+#----------------------------------------------------------------------------------------------------------------------
+__sshremotepub() {
+   if [ $# -ne 2 ] ; then
+      echo "Add a ssh host w/ keypairs as a shortcut for a certain user"
+      echo "Usage:__sshremotepub user@remotehostip/name samplekey.pub"
+      return 1
+   fi
+    local ruser="$(uriuser $1)"
+    local rhost="$(uridomain $1)"
+    local rport="$(uriport $1)"
+    if ! iscommand ssh-add 2>/dev/null; then
+        pinstall openssh-client openssh-server
+    fi
+    if [ -f "$(abspath $2)" ]; then
+        local lname="$(abspath $2)"
+        local kname="$(dirname $lname)/$(urifilename $2)"
+        echo "Copying $lname to its $rhost/$ruser/.ssh/authorized_keys"
+        ssh-copy-id -i "$lname" "$ruser@$rhost" -p "$rport"
+        if [ -f "${kname}.pem" ]; then
+            ssh-add "${kname}.pem" &>/dev/null
+        elif [ -f "$kname" ]; then
+            ssh-add "$kname" &>/dev/null
+        else
+            ssh-agent "$SHELL"
+            ssh-add -L
+            echo "Cannot find the corresponding private key for $2"
+            echo "Please ssh-add theprivkey.pem manually"
+        fi
+        ##cat "${kname}.pub" | ssh "$rhost" -l "$ruser" '[ -d .ssh ] || mkdir -p .ssh; cat >> .ssh/authorized_keys; chmod 700 ~/.ssh; chmod 600 ~/.ssh/authorized_keys'
+        ##or use the default key file: ~/.ssh/id_rsa.pub without -i all pub keys in /.ssh will be copied!
+        ##ssh-copy-id -i "$ruser@$rhost" -p "$rport"
+    else
+        echo "$2"
+        echo "The given public key is not valid."
+        return 1
+    fi
+}
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __sshagentcfg
+#   DESCRIPTION:  Update the ssh agent config file
+#----------------------------------------------------------------------------------------------------------------------
+__sshagentcfg() {
+   if [ $# -lt 1 ] ; then
+      echo "Usage:__sshagentcfg cfgfilepath hostname cfglines_to_append"
+      return 1
+   fi
+local cfghead="Host *
+ControlMaster auto
+ControlPath $__ScriptTmp/ssh-%r@%h:%p
+ControlPersist 5m
+"
+
+ local rcfg="$(psbpath $1)"
+ shift
+ local rhost="$2"
+ shift
+ if [ -f "$rcfg" ]; then
+    if ! isstringof "ControlPath" "$rcfg"; then
+        echo "$(echo $cfghead | cat - $rcfg)" > "$rcfg"
+    fi
+    if ! isstringof "rhost" "$rcfg"; then
+        printf "%b\n" "$@" >> "$rcfg"
+    fi
+ else
+    echo "$cfghead" > "$rcfg"
+    printf "%b\n" "$@" >> "$rcfg"
+ fi
+
+}
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  addsshremote
+#   DESCRIPTION:  add a ssh remote machine with a host name
+#----------------------------------------------------------------------------------------------------------------------
+_addsshremote() {
+   if [ $# -lt 3 ] ; then
+      echo "Add a ssh host w/ keypairs as a shortcut for a certain user"
+      echo "Usage:addsshremote -u username nickname user@remotehostip/name keypairpath"
+      return 1
+   fi
+   case "$1" in
+      -u | --user)
+         shift
+         if [ -d "$(userhome $1)" ]; then
+            local sshome="$(userhome $1)/.ssh"
+            shift
+         else
+            local sshome="$(userhome)/.ssh"
+            shift
+         fi
+        ;;
+      -- | *)
+         local sshome="$(userhome)/.ssh"
+        ;;
+   esac
+
+     local nickname="$1"
+     shift
+     local ruser="$(uriuser $1)"
+     local rhost="$(uridomain $1)"
+     local rport="$(uriport $1)"
+     local cfgline="\n\nHost $nickname\n\tHostName $rhost\n\tUser $ruser\n\tPort $port\n"
+     local kname="$(dirname $(psbpath $2))/$(urifilename $2)"
+     if [ -f "${kname}.pub" ]; then
+        __sshremotepub "$ruser@$rhost:$rport" "${kname}.pub"
+     else
+        echo "Cannot find the public key ${kname}.pub"
+        return 1
+     fi
+     if [ -f "${kname}.pem" ]; then
+        cp "${kname}.pem" "$sshome/$(basename ${kname}.pem)"
+        cfgline="${cfgline}\tIdentityFile ${kname}.pem\n"
+     elif [ -f "$kname" ]; then
+        cp "$kname" "$sshome/$(basename $kname)"
+        cfgline="${cfgline}\tIdentityFile $kname\n"
+     fi
+     __sshagentcfg "$sshome/config" "$rhost" "$cfgline"
+}
+
+
+_addsshremote "$@"
+
+unset -f _addsshremote
+exit 0

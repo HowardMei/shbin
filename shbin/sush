@@ -2,7 +2,7 @@
 #%   DESCRIPTION:  Super sh shell [ sudo sh -c for sh called scriptfile/sh console ]
 #%   USAGE:     sush 'echo "Current shell is $SHELL"' OR sush "echo 'Current shell is $SHELL'"
 #%              OR  sush shcmd | shfile
-#%   REQUIRES: shuser, sudo, su
+#%   REQUIRES: shbin/shuser, sudo, su
 ##----------------------------------------------------  Super SH Shell ------------------------------------------------
 sush='sh -c'
 if [ "$(shuser)" != 'root' ]; then

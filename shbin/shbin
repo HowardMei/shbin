@@ -1,9 +1,9 @@
-__ShbinVersion="1.0"
-__ShbinRelease="2015.07.12 for docker"
+__ShbinVersion="2.0"
+__ShbinRelease="2017.02.20 Moved to subdirs"
 
 #%   DESCRIPTION: Essential binary tools to enhance sh/bash environment.
-#%   USAGE: Usage: shbin list | show | help abspath
-#%   REQUIRES: dirname, shsrc, [cannotrun], efilters
+#%   USAGE: shbin list | show | help | ext
+#%   REQUIRES: dirname, shbin/shsrc, sed
 
 shbinpath="$(dirname $(shsrc "$_" "$0" "$-" "shbin") 2>/dev/null)"
 
@@ -19,7 +19,6 @@ else
         histpath="$(pwd)"
         cd "$shbinpath" >/dev/null 2>&1
         \ls -ph --color $@ 2>/dev/null
-        [ -x "./cannotrun" ] && ./cannotrun
         cd "$histpath" >/dev/null 2>&1
         ;;
         -s | --cat | cat | show)
@@ -31,7 +30,7 @@ else
             shift
         fi
         if [ -n "$filename" ] && [ -r "$shbinpath/$filename" ]; then
-            cat "$shbinpath/$filename" "$@" 2>/dev/null
+            cat "$shbinpath/$filename" | less 2>/dev/null
         elif [ -n "$filename" ]; then
             echo "$filename is NOT a valid shbin file. No content will be shown." >&2
         fi
@@ -45,7 +44,7 @@ else
             shift
         fi
         if [ -n "$filename" ] && [ -r "$shbinpath/$filename" ]; then
-            hlp="$(cat "$shbinpath/$filename" | efilters -rl "^#%.*")"
+            hlp="$(cat "$shbinpath/$filename" | sed -e "/^#%.*/!d" 2>/dev/null)"
             if [ -z "$hlp" ]; then
                 cat "$shbinpath/$filename" 2>/dev/null
             else
@@ -54,6 +53,52 @@ else
         elif [ -n "$filename" ]; then
             echo "$filename is NOT a valid shbin file. No help will be presented." >&2
         fi
+        ;;
+        -e | ext | --ext | extend | extlist | --extlist | --extend)
+		shift
+		extlist="$@"
+		histpath="$(pwd)"
+		\cd "$shbinpath" 2>/dev/null
+		if [ -z "$extlist" ]; then
+			allextlist="$(\ls -1d ext.*)"
+			enaextlist=""
+			echo "Available extentions:"
+			echo ""
+			echo "$allextlist"
+			echo ""
+			for ext in ${allextlist}; do
+				if [ -f "${shbinpath}/${ext}/.enabled" ]; then
+					enaextlist=$(printf "$enaextlist\n$ext")
+				fi
+			done
+			echo "Enabled extentions:"
+			echo "$enaextlist"
+		else
+			for ext in "$extlist"; do
+				[ -d "${shbinpath}/ext.${ext}" ] && ext=ext.${ext}
+				if [ -d "${shbinpath}/${ext}" ]; then
+					if [ -f "${shbinpath}/${ext}/.enabled" ]; then
+						echo "Disabling shbin extension dir ${ext}"
+						rm -f "${shbinpath}/${ext}/.enabled"
+						unlink_allto -f "${shbinpath}" "${shbinpath}/${ext}" >/dev/null 2>&1
+						if [ ! -f "${shbinpath}/${ext}/.enabled" ]; then
+							echo "shbin extension dir ${ext} is disabled"
+						fi
+					else
+						echo "Enabling shbin extension dir ${ext}"
+						symln_allto -f "${shbinpath}" "${shbinpath}/${ext}" >/dev/null 2>&1
+						touch -f "${shbinpath}/${ext}/.enabled"
+						if [ -f "${shbinpath}/${ext}/.enabled" ]; then
+							echo "shbin extension dir ${ext} is enabled"
+						fi
+					fi
+				else
+					echo "$ext is NOT a valid extension dir"
+				fi
+			done			
+		fi
+		\cd $histpath 2>/dev/null
+		unset extlist histpath allextlist enaextlist ext
         ;;
         -v | --version | version)
             echo "shbin version ${__ShbinVersion} release ${__ShbinRelease}"

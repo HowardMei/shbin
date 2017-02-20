@@ -3,7 +3,7 @@
 #          NAME:  whichis
 #%   DESCRIPTION:  Return the real binary path of the given command
 #%   USAGE: whichis docker
-#%   REQUIRES: abspath, which
+#%   REQUIRES: shbin/abspath, which
 #----------------------------------------------------------------------------------------------------------------------
 _whichis() {
    local whis="$(abspath -f $(which "$1"))"

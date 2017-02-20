@@ -3,7 +3,7 @@
 #          NAME:  shsrc
 #%   DESCRIPTION:  Get the real path of the script file being executed, sourced or called.
 #%   USAGE: shsrc "\$_" "\$0" "\$-" "FilePath/FileName"
-#%   REQUIRES: which, find, head, abspath
+#%   REQUIRES: which, find, head, shbin/abspath
 #----------------------------------------------------------------------------------------------------------------------
 CHKA="$_"
 CHKB="$0"

@@ -1,0 +1,31 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#         NAME:  uriaccount
+#%   DESCRIPTION:  Extract and echo the account of the given url
+#%   USAGE: uriaccount "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
+#%   REQUIRES: urifull, urionly, esubst, grep, cut
+#----------------------------------------------------------------------------------------------------------------------
+_uriaccount() {
+   if [ $# -lt 1 ]; then
+      echo "Usage: uriaccount sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1" >&2
+      echo "Result: user:pass" >&2
+      return 1
+   fi
+  local tmp1="$(urifull "$@")"
+  local tmp2="$(urionly "$@")"
+  local tmp3="$(esubst "$tmp2" "" "$tmp1")"
+
+  ##"$(echo $tmp1 | grep @ | cut -d@ -f1)$(echo $tmp1 | grep @ | cut -d@ -f2- | cut -d@ -f1)"
+  if [ -n "$tmp3" ];then
+     echo "$(esubst @ "" "$tmp3")"
+     return 0
+  else
+     return 1
+  fi
+}
+
+
+_uriaccount "$@"
+
+unset -f _uriaccount
+exit 0

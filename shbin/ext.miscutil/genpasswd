@@ -1,9 +1,10 @@
 
+## require shbin/strlen
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  genpasswd
 #%   DESCRIPTION:  Generate a password phrase
 #%   USAGE: genpasswd [-a|-an|-d|-h|-lo|-sp|-up] [1024]
-#%   REQUIRES: tr, /dev/urandom, head, strlen
+#%   REQUIRES: tr, head, /dev/urandom, strlen
 #----------------------------------------------------------------------------------------------------------------------
 _genpasswd() {
    local plen=8

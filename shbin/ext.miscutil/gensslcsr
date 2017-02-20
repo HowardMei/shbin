@@ -1,0 +1,98 @@
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __gensslcsr
+#%   DESCRIPTION:  Generate a SSL request to sign your certificate
+#%   USAGE: gensslcsr csrname [2048]
+#%   REQUIRES: psbpath, dirname, basename, tr, [pacapt], openssl, cecho
+#----------------------------------------------------------------------------------------------------------------------
+__gensslcsr() {
+   if [ $# -lt 1 ] ; then
+      echo "Usage:__gensslcsr csrname [2048]"
+      return 1
+   fi
+   local dname="$(psbpath $1)"
+   local kname="$(dirname $dname)/$(basename $1)"
+   if [ -f "${kname}.csr" ]; then
+      cecho -r "${kname}.csr requesting file already exists, please change the name."
+      return 1
+   fi
+   if [ -n "$2" ]; then
+      local kleng="$(echo $2 | tr -cd '[[:digit:]]')"
+   else
+      local kleng=2048
+   fi
+   if ! iscommand openssl 2>/dev/null; then
+        pacapt -S openssl
+   fi
+   gensslpem "$kname" "$kleng"
+   cecho "Generating a SSL csr requesting file based on existing pem, please keep the pem file in a safe place ..."
+   if [ -f "${kname}.key" ]; then
+      openssl req -new -key "${kname}.pem" -out "${kname}.csr"
+   else
+      echo "Cannot find the generate key file: ${kname}.key"
+   fi
+}
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  gensslcsr
+#%   DESCRIPTION:  Generate a SSL request to sign your certificate
+#%   Usage: gensslcsr cname.csrdomain [2048]
+#----------------------------------------------------------------------------------------------------------------------
+_gensslcsr() {
+   if [ $# -lt 1 ] ; then
+      echo "Usage:gensslcsr csrname [2048]"
+      echo "or gensslcsr -c config.csr csrname[2048]"
+      return 1
+   fi
+    # config.csr sample format:
+    #
+    # [ req ]
+    # distinguished_name="req_distinguished_name"
+    # prompt="no"
+    #
+    # [ req_distinguished_name ]
+    # C="SG"
+    # ST="Singapore"
+    # L="Tanjong Pagar"
+    # O="Mubiic Technology Pte Ltd."
+    # CN="www.mvtocloud.com"
+   case "$1" in
+      -c | --config)
+         shift
+         if [ -f "$1" ]; then
+            local cfgfile="$1"
+            shift
+         else
+            echo "The config file is invalid."
+            return 1
+         fi
+         local dname="$(psbpath $1)"
+         local kname="$(dirname $dname)/$(basename $1)"
+         if [ -f "${kname}.csr" ]; then
+            cecho -r "${kname}.csr already exists, please change the name."
+            return 1
+         fi
+         if [ -n "$2" ]; then
+            local kleng="$(echo $2 | tr -cd '[[:digit:]]')"
+         else
+            local kleng=2048
+         fi
+         if ! iscommand openssl 2>/dev/null; then
+                pacapt -S openssl
+         fi
+         cecho "Generating a SSL csr requesting file based on existing pem, please keep the pem file in a safe place ..."
+         openssl req -config "$cfgfile" -new -newkey rsa:"$kleng" -nodes -keyout "${kname}.pem" -out "${kname}.csr"
+        ;;
+      -- | *)
+        __gensslcsr "$@"
+        ;;
+   esac
+}
+
+
+_gensslcsr "$@"
+
+unset -f _gensslcsr
+exit 0

@@ -1,0 +1,28 @@
+
+## require shbin/uriproto, shbin/esubst
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#         NAME:  urifull
+#%   DESCRIPTION:  Extract and echo the full path of the given url
+#%   USAGE: urifull "sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1"
+#%   REQUIRES: uriproto
+#----------------------------------------------------------------------------------------------------------------------
+_urifull() {
+   if [ $# -lt 1 ]; then
+      echo "Usage: urifull sftp://user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1" >&2
+      echo "Result: user:pass@down.test.com:8080/files%20repo+new/test.tar.gz#body-old#download?ver=1.0&reg=us-1" >&2
+      return 1
+   fi
+   local tmp1="$@"
+   local tmp2="$(uriproto "$tmp1")""://"
+   esubst "$tmp2" "" "$tmp1"
+}
+
+
+if [ $# -lt 1 ]; then
+    _urifull "$(cat)"
+else
+    _urifull "$@"
+fi
+
+unset -f _urifull
+exit 0

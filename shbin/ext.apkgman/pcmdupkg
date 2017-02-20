@@ -1,0 +1,57 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  pcmdupkgt
+#%   DESCRIPTION:  List the cmds of a package or get the package name of a cmd
+#%   USAGE: pcmdupkg [--listcmd | --showpack] cmdname | pkgname" >&2
+#%   REQUIRES: ext.3rdparty/pacapt, grep
+#----------------------------------------------------------------------------------------------------------------------
+if [ $# -lt 1 ]; then
+    echo "Usage: pcmdupkg [--listcmd | --showpack] cmdname | pkgname" >&2
+elif [ $# -eq 1 ]; then
+    case $1 in
+    -h | --help)
+        echo "pcmdupkgt  -  List the available cmds of a package or get the parent package name of a cmd" >&2
+        echo "Usage: pcmdupkg [--listcmd | --showpack] cmdname | pkgname" >&2
+        exit 0
+    ;;
+    -- | *)
+        opt="--showapp"
+        binorpkg="$1"
+    ;;
+    esac
+else
+    opt="$1"
+    binorpkg="$2"
+fi
+
+case "$opt" in
+   -b | -c | -lb | -lc | --listcmd | --listbin | listbinary | listcommand)
+        cmdlist="$(pacapt -Ql ${binorpkg} | grep -i '/bin/' 2>/dev/null)"
+        if [ -z "$cmdlist" ] && [ -z "$pkgname" ]; then
+            echo "Package $binorpkg is not installed yet or its binary commands are missing." >&2
+        elif [ -z "$cmdlist" ] && [ -n "$pkgname" ]; then
+            echo "$binorpkg"
+        else
+            echo "$cmdlist"
+        fi
+    ;;
+   -p | -a | -sa | -sp | --showapp | --showpack | showpack | showpackage)
+        pkgname="$(pacapt -Qo ${binorpkg} | grep -iE "/bin/${binorpkg}$" 2>/dev/null)"
+        if [ -z "$pkgname" ] && [ -z "$cmdlist" ]; then
+            echo "Command $binorpkg is missing or its parent package is not installed yet." >&2
+        elif [ -z "$pkgname" ] && [ -n "$cmdlist" ]; then
+            echo "$binorpkg"
+        else
+            echo "$pkgname"
+        fi
+    ;;
+   "" | -- | *)
+        echo "Unsupported option, usage: pcmdupkg [--listcmd | --showpack] cmdname | pkgname" >&2
+    ;;
+esac
+
+
+unset opt binorpkg cmdlist pkgname
+unset -f _pcmd2pkg
+unset -f _ppkg2cmd
+exit 0

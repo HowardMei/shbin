@@ -10,7 +10,7 @@
 CHKA="$-"
 
 case ${CHKA} in
-	hB | h*B*)
+	hB | *h*B*)
 		echo "Shell is bash"
 	;;
 	-- | *)
