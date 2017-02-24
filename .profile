@@ -10,7 +10,6 @@ if [ -z ${SH_PROFILE+x} ]; then
 	export SH_PROFILE='$HOME/.profile initialized.'
 else
 	unset SH_PROFILE
-	export SH_PROFILE='$HOME/.profile reloaded.'
 fi
 
 ## Prefer US English and use UTF-8
@@ -63,3 +62,5 @@ if [ -d "${HOME}/.profiles.d" ]; then
   done
   unset dpf
 fi
+
+export SH_PROFILE='$HOME/.profile reloaded.'

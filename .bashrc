@@ -11,7 +11,6 @@ case $- in
 		export BASH_RC='$HOME/.bashrc initialized.'
 	else
 		unset BASH_RC
-		export BASH_RC='$HOME/.bashrc reloaded.'
 	fi
 	;;
 	-- | *)
@@ -65,3 +64,4 @@ set +o errexit     # Don't mess up the interactive shell
 ## Load bash aliases everytime creating a new tab or running a program.
 [ -r "${HOME}/.bash_aliases" ] && . ${HOME}/.bash_aliases
 
+export BASH_RC='$HOME/.bashrc reloaded.'

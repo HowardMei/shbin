@@ -13,7 +13,6 @@ case $- in
 		export BASH_PROFILE='$HOME/.bash_profile initialized.'
 	else
 		unset BASH_PROFILE
-		export BASH_PROFILE='$HOME/.bash_profile reloaded.'
 	fi
 	;;
 	-- | *)
@@ -53,3 +52,4 @@ if [ -f "/etc/bash_completion" ] && ! shopt -oq posix; then
     . /etc/bash_completion
 fi
 
+export BASH_PROFILE='$HOME/.bash_profile reloaded.'

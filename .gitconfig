@@ -85,9 +85,11 @@
     prune = !"git gc --aggressive --prune=now"
     # Pull in remote changes for the current repository and all its submodules
     pull = pull --no-edit
+    pushd = push --dry-run
     pushf = push --force
-    pushuf = push -u --force
+    pushfu = push -u --force
     pusha = push --all
+    pushau = push --all --u
     pushall = push --all
     pusht = push --tags
     pushtags = push --tags
@@ -95,7 +97,7 @@
     # Interactive rebase with the given number of latest commits
     rebi = !"r() { git rebase -i HEAD~$1; }; r"
     ra = remote add
-    rog = remote add origin
+    reog = remote add origin
     reup = remote add upstream
     rero = !"git remote set-url --push $1 fetchonly"
     reurl = remote set-url
@@ -104,20 +106,20 @@
     rev = remote -v
 
     # View the current working tree status using the short format
-    s = status -s
     save = !"git add -A && git commit -m 'SAVEPOINT: temporary save point'"
     sb = status -s -b
     serve = !"git daemon --reuseaddr --verbose --base-path=. --export-all ./.git"
     size = !"git count-objects -Hv"
     snapshot = !"git stash save snapshot: $(date) && git stash apply stash@{0}"
-    svnpull = !"git-svn fetch && git-svn rebase -l"
-    svnpush = !"git-svn dcommit"
-    stat = status
-    st = status --short
+    ss = status --short
+    st = status
+    stat = status --verbose
     subinit = submodule update --init --recursive
     subpull = submodule update --recursive
     subpull = !"git submodule foreach git pull --tags origin master"
     subdir = !"sh -c 'filter-branch --prune-empty --subdirectory-filter $1 master' -"
+    svnpull = !"git-svn fetch && git-svn rebase -l"
+    svnpush = !"git-svn dcommit"
 
     # Show verbose output about tags, branches or remotes
     tags = tag -l
@@ -127,6 +129,8 @@
     trace = log -u
     type = cat-file -t
 
+	uemail = config --global user.email
+	uname = config --global user.name
 	undo = reset HEAD~1 --mixed
 	upon = !"git pull --rebase --prune $@ && git submodule update --init --recursive"
     unassume = update-index --no-assume-unchanged
@@ -220,5 +224,5 @@
    default = tracking
 
 [user]
-	name = 
-	email = 
+	name = Howard Mei
+	email = howardleomei@gmail.com
