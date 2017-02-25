@@ -1,0 +1,228 @@
+[alias]
+    aa = add -A
+    alias = !"git config -l | grep alias | cut -c 7-"
+    amend = commit --amend
+    amendall = commit -a --amend
+    append = !"git add $@ && git commit --amend -C HEAD"
+    appendall = commit -a --amend -C HEAD
+    au = !"git add -u && git add . && git status"
+    authors = shortlog -sn
+    assume = update-index --assume-unchanged
+    assumed = !"git ls-files -v | grep ^h | cut -c 3-"
+    assumeall = !"git st -s | awk {'print $2'} | xargs git assume"
+
+    ba = branch -a
+    barebranch = !"sh -c 'git symbolic-ref HEAD refs/heads/$1 && git rm --cached -r . && git clean -xfd' -"
+    bigpost = !"git config http.postBuffer 524288000"
+    bclr = !"_f() { git branch --merged ${1-master} | grep -v " ${1-master}$" | xargs -r git branch -d; }; _f"
+    bl = branch -r
+    bd = branch -D
+    bdone = !"_f() { git checkout ${1-master} && git upon && git bclr ${1-master}; }; _f"
+    bn = rev-parse --abbrev-ref HEAD
+    br = branch
+	
+
+    # Commit all changes
+    ca = !"git add -A && git commit -avm"
+    cb = checkout -b
+    changes = show --stat --oneline
+    ci = commit
+    cl = clone
+    clrf = !"git clean -f -d"
+    clsrf = !"git stash; git clean -f -d"
+    cm = commit -m
+    cma = commit -am
+    co = checkout
+    conflicts = diff --name-only --diff-filter=U
+    cp = cherry-pick
+    # Clone a repository including all submodules
+    cr = clone --recursive
+    # Credit an author on the latest commit
+    credit = !"_f() { [ $# -ge 2 ] && git commit --amend --author \"$1 <$2>\" -C HEAD; unset -f _f; }; _f"
+
+    # Show the diff between the latest commit and the current state
+    dif = diff --
+    dif0 = diff --cached --
+    dif1 = diff HEAD@{1}..HEAD@{0} --
+    dif2 = diff HEAD@{2}..HEAD@{0} --
+    difn = !"_d() { git diff HEAD@{$1}..HEAD@{0} -- $2;unset -f _d; }; _d"
+
+    # `git di $number` shows the diff between the state `$number` revisions ago and the current state
+    diffn = !"_d() { git diff --patch-with-stat HEAD~$1;unset -f _d; }; git diff-index --quiet HEAD --; _d"
+    dump = cat-file -p
+
+    # search logs for a bugzilla like number
+    findbug = "!sh -c 'git log --grep=^$1:' -"
+    flat = clone --depth 1
+
+    grep = grep -Ii
+
+    human = name-rev --name-only --refs=refs/heads/*
+
+    ignore=!"([ ! -e .gitignore ] && touch .gitignore) | echo $1 >>.gitignore"
+    keep = !"[ ! -e .gitkeep ] && touch .gitkeep && git add .gitkeep"
+
+    la = log --all --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(cyan)<%an>%Creset' --abbrev-commit --date=relative
+    last = log -1 HEAD
+    lc = log --stat --oneline --abbrev-commit --no-merges
+    lg = log --graph --oneline --abbrev-commit --date=relative
+    ll = log --graph --oneline --decorate --all --name-status
+    ln = log --no-merges --oneline
+    lu = log -u
+    # List the files or the given file
+    ls = ls-files
+    lsf = !"git ls-files | grep -i $1 2>/dev/null"
+
+    merge = merge --no-edit
+    mg = merge --no-edit
+    mgsq = merge --no-edit --squash
+
+    pickup = checkout --
+    pick = cherry-pick
+    pl = pull --no-edit
+    plre = pull --no-edit --rebase
+    pr = !"git pull; git submodule foreach git pull origin master"
+    prune = !"git gc --aggressive --prune=now"
+    # Pull in remote changes for the current repository and all its submodules
+    pull = pull --no-edit
+    pushd = push --dry-run
+    pushf = push --force
+    pushfu = push -u --force
+    pusha = push --all
+    pushau = push --all --u
+    pushall = push --all
+    pusht = push --tags
+    pushtags = push --tags
+
+    # Interactive rebase with the given number of latest commits
+    rebi = !"r() { git rebase -i HEAD~$1; }; r"
+    ra = remote add
+    reog = remote add origin
+    reup = remote add upstream
+    rero = !"git remote set-url --push $1 fetchonly"
+    reurl = remote set-url
+    reduce = !"git gc --aggressive --prune=now"
+    rerm = remote rm
+    rev = remote -v
+
+    # View the current working tree status using the short format
+    save = !"git add -A && git commit -m 'SAVEPOINT: temporary save point'"
+    sb = status -s -b
+    serve = !"git daemon --reuseaddr --verbose --base-path=. --export-all ./.git"
+    size = !"git count-objects -Hv"
+    snapshot = !"git stash save snapshot: $(date) && git stash apply stash@{0}"
+    ss = status --short
+    st = status
+    stat = status --verbose
+    subinit = submodule update --init --recursive
+    subpull = submodule update --recursive
+    subpull = !"git submodule foreach git pull --tags origin master"
+    subdir = !"sh -c 'filter-branch --prune-empty --subdirectory-filter $1 master' -"
+    svnpull = !"git-svn fetch && git-svn rebase -l"
+    svnpush = !"git-svn dcommit"
+
+    # Show verbose output about tags, branches or remotes
+    tags = tag -l
+    tgz = archive --format=tar.gz
+    this = !"git init && echo 'Initial Commit' >> README.md && git add -A . && git commit -am 'Initial Commit' && git rm -f README.md && git amend --allow-empty -m 'master:git repo init'"
+    tree = log --oneline --decorate --graph
+    trace = log -u
+    type = cat-file -t
+
+	uemail = config --global user.email
+	uname = config --global user.name
+	undo = reset HEAD~1 --mixed
+	upon = !"git pull --rebase --prune $@ && git submodule update --init --recursive"
+    unassume = update-index --no-assume-unchanged
+    unassumeall = !"git assumed | xargs git update-index --no-assume-unchanged"
+    unstage = reset HEAD --
+    unstash = stash pop --index
+
+    # from https://git.wiki.kernel.org/index.php/Aliases
+    whois = !"sh -c 'git log -i -1 --pretty=\"format:%an <%ae>\n\" --author=\"$1\"' -"
+    whatis = show -s --pretty='tformat:%h (%s, %ad)' --date=short
+    wipe = !"_f() { local rev=$(git rev-parse ${1-HEAD}); git add -A && git commit --allow-empty -qm 'WIP: WIPED CODE SAVEPOINT' && git reset --hard ${rev}; }; _f"
+    zip = archive --format=zip
+
+[apply]
+    # Detect whitespace errors when applying a patch
+    whitespace = fix
+
+[core]
+    editor = vim
+    # Use custom `.gitignore` and `.gitattributes`
+    excludesfile = ~/.gitignore
+    attributesfile = ~/.gitattributes
+    # Treat spaces before tabs, lines that are indented with 8 or more spaces, and all kinds of trailing whitespace as an error
+    # whitespace = space-before-tab,indent-with-non-tab,trailing-space
+    whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
+    mergeoptions = --no-edit
+    pulloptions = --no-edit
+
+[color]
+    # Use colors in Git commands that are capable of colored output when outputting to the terminal
+    ui = auto
+[color "branch"]
+    current = yellow reverse
+    local = yellow
+    remote = green bold
+[color "diff"]
+    meta = yellow bold
+    frag = magenta bold
+    old = red bold
+    new = green bold
+    whitespace = red reverse
+[color "status"]
+    added = green
+    changed = yellow
+    untracked = cyan
+[merge]
+    # Include summaries of merged commits in newly created merge commit messages
+    log = true
+
+# Use `origin` as the default remote on the `master` branch in all cases
+[branch "master"]
+    remote = origin
+    merge = refs/heads/master
+[diff]
+   tool = diffuse
+   suppressBlankEmpty = true
+   mnemonicprefix = true
+   #noprefix = true
+
+[difftool]
+    prompt = false
+
+# convert po files to a less noisy
+# # variant for display in git log -p etc
+# # note that textconv does not affect
+# # git-format-patch output
+[diff "po"]
+    textconv=po_diff
+    cachetextconv = true
+
+[diff "pot"]
+    textconv=pot_diff
+    # the line's it was picking for the "funcname"
+    # context were kind of terrible for this case, so
+    # just match a blank line so it's empty
+    xfuncname = "^$"
+    cachetextconv = true
+
+# from http://stackoverflow.com/questions/2006351/gettext-po-files-under-version-control/11291001#11291001
+# more verbose than my minimal version
+[diff "msgcat"]
+    textconv=msgcat --no-location --no-wrap --sort-output
+[mergetool "vimdiff3"]
+   cmd = vim -f -d -c \"wincmd J\" \"$MERGED\" \"$LOCAL\" \"$BASE\" \"$REMOTE\"
+
+[difftool "vim"]
+    cmd = vim \"$MERGED\"
+    prompt = false
+
+[push]
+   default = tracking
+
+[user]
+	name = Howard Mei
+	email = howardleomei@gmail.com
