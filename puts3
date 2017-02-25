@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+## A simple script for uploading files to preconfigured s3 bucket by howardleomei@gmail.com
+dsturl="s3://bucketname"
+srcname="shbin"
+vernum="1.0"
+srcfile="$srcname-v${vernum}.tar.gz"
+
+if [ $# -lt 1 ]; then
+    echo "Usage: puts3 s3://bucketname/newname srcname" >&2
+    echo "       puts3 s3://bucketname/salt-bootstrap.sh saltstrap.sh"
+    echo "       puts3 --tarball s3://bucketname/$srcname-v${vernum}.tar.gz"
+    echo "       puts3 --name srcname --vernum 1.2 --tarball s3://bucketname/newname.tar.gz"
+    exit 1
+elif iscommand s3cmd 2>/dev/null && [ -f "$HOME/.s3cfg" ]; then
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --name | --srcname)
+                shift
+                srcname="$1"
+                shift
+                ;;
+            --vernum | --srcver)
+                shift
+                vernum="$1"
+                shift
+                ;;
+            --tarball)
+                shift
+                srcfile="$srcname-v${vernum}.tar.gz"
+                if [ $# -lt 1 ]; then
+                    dsturl="$dsturl/$srcfile"
+                else
+                    case "$1" in
+                        s3://*)
+                            dstfile="$(basename $(echo "$1" | awk -F@ '{print $NF}' | grep / 2>/dev/null | cut -d/ -f2- | cut -d? -f1 | cut -d# -f1 | cut -d "&" -f1) 2>/dev/null)"
+                            if [ -z "$dstfile" ]; then
+                                dsturl="$1/$srcfile"
+                                shift
+                            else
+                                dsturl="$1"
+                                shift
+                            fi
+                        ;;
+                        *.tar.gz)
+                            dsturl="$dsturl/$1"
+                            shift
+                            ;;
+                        -- | *)
+                            if [ -n "$1" ]; then
+                               dstfile="$1"'.tar.gz'
+                               shift
+                               dsturl="$dsturl/$dstfile"
+                            fi
+                        ;;
+                    esac
+                fi
+                [ -d ".git" ] && git archive --format=tar.gz "$(git symbolic-ref --short HEAD)" > "$(pwd)/$srcfile" || echo "This is NOT a git repo." && ls -l
+                ;;
+            s3://*)
+                if [ $# -lt 2 ]; then
+                    echo "2 arguments are required but only gets 1."
+                    exit 1
+                else
+                    dstfile="$(basename $(echo "$1" | awk -F@ '{print $NF}' | grep / 2>/dev/null | cut -d/ -f2- | cut -d? -f1 | cut -d# -f1 | cut -d "&" -f1) 2>/dev/null)"
+                    if [ -z "$dstfile" ]; then
+                        [ -f "$(pwd)/$2" ] && srcfile="$2" || echo "Cannot find source file $2" >&2 && exit 1
+                        dsturl="$1/$srcfile"
+                    else
+                        dsturl="$1"
+                        srcfile="$2"
+                    fi
+                    shift 2
+                fi
+                ;;
+            -- | *)
+                if [ $# -eq 1 ]; then
+                    if [ -f "$(pwd)/$1" ]; then
+                        srcfile="$1"
+                    else
+                        echo "Cannot find $1, abort releasing ..." >&2
+                        exit 1
+                    fi
+                    dsturl="$dsturl/$srcfile"
+                    shift
+                elif [ $# -ge 2 ]; then
+                    dsturl="$dsturl/$1"
+                    if [ -f "$(pwd)/$2" ]; then
+                        srcfile="$2"
+                    else
+                        echo "Cannot find $2, abort releasing ..." >&2
+                        exit 1
+                    fi
+                    shift 2
+                fi
+                ;;
+        esac
+    done
+    echo "Uploading $srcfile to $dsturl ... ..."
+    if [ -f "$(pwd)/$srcfile" ]; then
+        s3cmd put "$(pwd)/$srcfile" "$dsturl"
+    else
+        echo "Cannot find $2, abort releasing ..." >&2
+        exit 1
+    fi
+else
+    echo "Please install s3cmd and run s3cmd --configure to apply s3 bucket credentials." >&2
+    exit 1
+fi
