@@ -42,14 +42,14 @@ alias mkdir='mkdir -p'
 # Mv all current files and folders one dir up and omit the parent dir
 alias what='type -a'
 alias unsetall='unset all;set +o nounset'
-alias cls='clear;set +o nounset'
-alias clr='reset;clear;set +o nounset'
+alias cls='clear_console || clear;set +o nounset'
+alias clr='reset;clear_console || clear;set +o nounset'
 # List all files colorized in long format
 alias ll="ls -lph --color"
 alias lt='ll -t'
 alias ls="command ls --color"
 alias lu='du -ach --time --max-depth=1'
-alias reloadx="echo 'Reloading .profile' && . $HOME/.profile"
+alias reloadx='echo "Reloading $HOME/.profile" && . $HOME/.profile'
 alias memclr='free -mh;sync;echo 3 > /proc/sys/vm/drop_caches;free -mh'
 alias path='echo -e ${PATH//:/\\n}'
 
