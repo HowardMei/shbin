@@ -73,9 +73,9 @@ else
 			done
 			echo "Enabled extentions:"
 			echo "$enaextlist"
-		else
-			for ext in ${extlist}; do
-				[ -d "${shbinpath}/ext.${ext}" ] && ext=ext.${ext}
+		elif [ ${extlist} == 'all' ]; then
+			allextlist="$(\ls -1d ext.*)"
+			for ext in ${allextlist}; do
 				if [ -d "${shbinpath}/${ext}" ]; then
 					if [ -f "${shbinpath}/${ext}/.enabled" ]; then
 						echo "Disabling shbin extension dir ${ext}"
@@ -96,6 +96,29 @@ else
 					echo "$ext is NOT a valid extension dir"
 				fi
 			done			
+		else
+			for ext in ${extlist}; do
+				[ -d "${shbinpath}/ext.${ext}" ] && ext=ext.${ext}
+				if [ -d "${shbinpath}/${ext}" ]; then
+					if [ -f "${shbinpath}/${ext}/.enabled" ]; then
+						echo "Disabling shbin extension dir ${ext}"
+						rm -f "${shbinpath}/${ext}/.enabled"
+						unlink_allto -f "${shbinpath}" "${shbinpath}/${ext}" >/dev/null 2>&1
+						if [ ! -f "${shbinpath}/${ext}/.enabled" ]; then
+							echo "shbin extension dir ${ext} is disabled"
+						fi
+					else
+						echo "Enabling shbin extension dir ${ext}"
+						symln_allto -f "${shbinpath}" "${shbinpath}/${ext}" >/dev/null 2>&1
+						touch -f "${shbinpath}/${ext}/.enabled"
+						if [ -f "${shbinpath}/${ext}/.enabled" ]; then
+							echo "shbin extension dir ${ext} is enabled"
+						fi
+					fi
+				else
+					echo "$ext is NOT a valid option/extension dir"
+				fi
+			done			
 		fi
 		\cd $histpath 2>/dev/null
 		unset extlist histpath allextlist enaextlist ext
@@ -104,7 +127,7 @@ else
             echo "shbin version ${__ShbinVersion} release ${__ShbinRelease}"
         ;;
         -- | *)
-            echo "$@ option is not supported. Usage: shbin list | show | help"
+            echo "$@ option is not supported. Usage: shbin list | show | help | ext"
         ;;
     esac
 fi
