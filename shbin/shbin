@@ -74,7 +74,7 @@ else
 			echo "Enabled extentions:"
 			echo "$enaextlist"
 		else
-			for ext in "$extlist"; do
+			for ext in ${extlist}; do
 				[ -d "${shbinpath}/ext.${ext}" ] && ext=ext.${ext}
 				if [ -d "${shbinpath}/${ext}" ]; then
 					if [ -f "${shbinpath}/${ext}/.enabled" ]; then
