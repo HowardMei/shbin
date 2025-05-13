@@ -1,5 +1,10 @@
+
+#%   DESCRIPTION:  S3cmd wrapper script for uploading files to preconfigured s3 bucket
+#%   USAGE:     runas howardmei 'echo "Run as $USER in $SHELL at $HOME";pwd;mkdir -p /root/temp'
+#%   REQUIRES:  shbin/userhome, grep, sudo
+
 #!/usr/bin/env bash
-## A simple script for uploading files to preconfigured s3 bucket by howardleomei@gmail.com
+
 dsturl="s3://bucketname"
 srcname="shbin"
 vernum="1.0"
@@ -7,7 +12,7 @@ srcfile="$srcname-v${vernum}.tar.gz"
 
 if [ $# -lt 1 ]; then
     echo "Usage: puts3 s3://bucketname/newname srcname" >&2
-    echo "       puts3 s3://bucketname/salt-bootstrap.sh saltstrap.sh"
+    echo "       puts3 s3://bucketname/filename localfilename"
     echo "       puts3 --tarball s3://bucketname/$srcname-v${vernum}.tar.gz"
     echo "       puts3 --name srcname --vernum 1.2 --tarball s3://bucketname/newname.tar.gz"
     exit 1

@@ -1,5 +1,5 @@
-__ShbinVersion="2.0"
-__ShbinRelease="2017.02.20 Moved to subdirs"
+__ShbinVersion="2.1"
+__ShbinRelease="2025.05.13 Add install.sh, move puts3"
 
 #%   DESCRIPTION: Essential binary tools to enhance sh/bash environment.
 #%   USAGE: shbin list | show | help | ext
