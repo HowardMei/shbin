@@ -26,10 +26,15 @@ alias lhf='__lsfhidden() { local p="$1";ls --almost-all -lhd $(realpath ${p:-$(p
 alias lhd='__lsdirhidden() { local p="$1";ls --almost-all -lhd $(realpath ${p:-$(pwd)})/.??*/ 2>/dev/null; unset -f __lsdirhidden; }; __lsdirhidden'
 alias ls="command ls --color --group-directories-first"
 alias lu='du -ach --time --max-depth=1'
+# Intuitive map function,i.e. to list all directories that contain a certain file:
+# find . -name .gitattributes | map dirname
+alias map="xargs -n1"
 alias memclr='free -mh;sync;echo 3 > /proc/sys/vm/drop_caches;free -mh'
+alias cpuclr="kill -9 $(ps -eo pid,%cpu - sort=-%cpu | awk 'NR==2 {print $1}')"
 alias hisp='__lshis() { local p="$*";history | estrip -u | grep -i "${p:-""}" | grep -v grep | grep -v hisp; unset -f __lshis; }; __lshis'
 alias wget='wget -c'
 alias path='echo -e ${PATH//:/\\n}'
+alias here='__subl() { local fo="$(pwd)"; local fn="${1}"; cd ${fn}; nohup explorer.exe . >/dev/null 2>&1; cd ${fo}; unset -f __subl; }; __subl'
 alias geois='whois $(pubip) 2>/dev/null | efilters -rl "^country: *" | estrips -r "^country: *" | head -1'
 ## get top process eating memory
 alias memtop='__memls() { local p="$1"; ps -e -o pid,uname,comm,cmd,pmem,pcpu --sort=-pmem,-pcpu | head -n ${p:=11}; unset -f __memls; }; __memls'

@@ -1,7 +1,7 @@
 [alias]
     aa = add -A
     alias = !"git config -l | grep alias | cut -c 7-"
-    amend = commit --amend
+    amend = commit --amend --reuse-message=HEAD
     amendall = commit -a --amend
     append = !"git add $@ && git commit --amend -C HEAD"
     appendall = commit -a --amend -C HEAD
@@ -20,7 +20,6 @@
     bdone = !"_f() { git checkout ${1-master} && git upon && git bclr ${1-master}; }; _f"
     bn = rev-parse --abbrev-ref HEAD
     br = branch
-	
 
     # Commit all changes
     ca = !"git add -A && git commit -avm"
@@ -42,19 +41,43 @@
 
     # Show the diff between the latest commit and the current state
     dif = diff --
+    #   What's the ancestor commit this branch shares with (the parent branch, or, more likely...) main?
+	#   diffbase = !"git config --get branch.$(command git symbolic-ref --short HEAD).base || git merge-base origin/$(git mainormaster) HEAD"
+	difbas = !"git merge-base origin/$(git mainormaster) HEAD"
     dif0 = diff --cached --
     dif1 = diff HEAD@{1}..HEAD@{0} --
     dif2 = diff HEAD@{2}..HEAD@{0} --
-    difn = !"_d() { git diff HEAD@{$1}..HEAD@{0} -- $2;unset -f _d; }; _d"
-
+    difm = !"_d() { git diff HEAD@{$1}..HEAD@{0} -- $2;unset -f _d; }; _d"
     # `git di $number` shows the diff between the state `$number` revisions ago and the current state
-    diffn = !"_d() { git diff --patch-with-stat HEAD~$1;unset -f _d; }; git diff-index --quiet HEAD --; _d"
+    difn = !"_d() { git diff --patch-with-stat HEAD~$1;unset -f _d; }; git diff-index --quiet HEAD --; _d"
+    # Essentially GitHub's compare view: show all 'ahead' changes (incl working tree) vs the merge-base
+	difbra = !"git diff  $(git diffbase)"
+	# Diff of branch that's not checked out. Doesn't include working tree (but obv doesnt need to)
+	diftha = !"git diff origin/$(git mainormaster)...\"$1\" #"
+	# Show commit log of unique commits of this branch (not on main)
+	difuni = !"git log --no-merges origin/$(git mainormaster).."
+
     dump = cat-file -p
 
-    # search logs for a bugzilla like number
+    # Search logs for a bugzilla like number
     findbug = "!sh -c 'git log --grep=^$1:' -"
-    flat = clone --depth 1
 
+    # Find branches containing commit
+	findbra = "!f() { git branch -a --contains $1; }; f"
+
+	# Find tags containing commit
+	findtag = "!f() { git describe --always --contains $1; }; f"
+
+	# Find commits by source code
+	findsrc = "!f() { git log --pretty=format:'%C(yellow)%h	%Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short -S$1; }; f"
+
+	# Find commits by commit message
+	findmsg= "!f() { git log --pretty=format:'%C(yellow)%h	%Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short --grep=$1; }; f"
+    
+    flat = clone --depth 1
+  
+    # Switch to a branch, creating it if necessary
+	go = "!f() { git checkout -b \"$1\" 2> /dev/null || git checkout \"$1\"; }; f"
     grep = grep -Ii
 
     human = name-rev --name-only --refs=refs/heads/*
@@ -62,7 +85,7 @@
     ignore=!"([ ! -e .gitignore ] && touch .gitignore) | echo $1 >>.gitignore"
     keep = !"[ ! -e .gitkeep ] && touch .gitkeep && git add .gitkeep"
 
-    la = log --all --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(cyan)<%an>%Creset' --abbrev-commit --date=relative
+    la = log --all --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(cyan)<%an>%Creset' --abbrev-commit --date=relative
     last = log -1 HEAD
     lc = log --stat --oneline --abbrev-commit --no-merges
     lg = log --graph --oneline --abbrev-commit --date=relative
@@ -93,10 +116,11 @@
     pushall = push --all
     pusht = push --tags
     pushtags = push --tags
-
+  
     # Interactive rebase with the given number of latest commits
     rebi = !"r() { git rebase -i HEAD~$1; }; r"
     ra = remote add
+	rems = remote -v
     reog = remote add origin
     reup = remote add upstream
     rero = !"git remote set-url --push $1 fetchonly"
@@ -111,6 +135,7 @@
     serve = !"git daemon --reuseaddr --verbose --base-path=. --export-all ./.git"
     size = !"git count-objects -Hv"
     snapshot = !"git stash save snapshot: $(date) && git stash apply stash@{0}"
+    squash = merge --squash
     ss = status --short
     st = status
     stat = status --verbose
@@ -124,6 +149,7 @@
     # Show verbose output about tags, branches or remotes
     tags = tag -l
     tgz = archive --format=tar.gz
+    top = !git log --format=format:%an | sort | uniq -c | sort -r | head -n 20
     this = !"git init && echo 'Initial Commit' >> README.md && git add -A . && git commit -am 'Initial Commit' && git rm -f README.md && git amend --allow-empty -m 'master:git repo init'"
     tree = log --oneline --decorate --graph
     trace = log -u

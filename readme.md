@@ -1,5 +1,12 @@
 # shbin: sh/sash scripted binary tools with minimal dependency to enhance the *nix sh/bash environment.
 
+## Preinstallation:
+   Must-have:
+    bash core-utils git install
+   Optional:
+    https://github.com/sharkdp/fd/ 
+    https://github.com/chmln/sd    
+
 ## Installation:
      Step1: Copy shbin into /opt/shbin OR ~/.shbin
 		 cp -rf shbin ~/.shbin 
@@ -40,6 +47,18 @@ You may enable or disable extensions by running:
 ## Credits:
     Some utility functions come from online sources but I lost the record of the origins
     due to many refactors before git tracking. Thanks for all the original authors.
+    References: 
+    https://github.com/koalaman/shellcheck
+    https://github.com/HariSekhon/DevOps-Bash-tools    
+    https://github.com/AverageJoesHosting/HostingToolkit-Scripts
+    https://github.com/awesome-lists/awesome-bash
+    https://github.com/dylanaraps/pure-sh-bible  
+    https://github.com/mathiasbynens/dotfiles
+    https://github.com/gauchocode/brolit-shell 
+    https://github.com/konstruktoid/hardening 
+    https://github.com/wbfoss/Ubuntu-Security-Hardening-Script  
+    https://github.com/Miraitowa700/Best-practice/blob/main/Service/SSH%20Security%20Practice.md
+
 
 ## Testing: TBD. It's recommended for development environment only and take your own risk.
    shbin is suitable for sh/bash environment. It requires only sed, awk, grep, cut, tr, sort,
