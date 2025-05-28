@@ -1,19 +1,15 @@
 # shbin: sh/sash scripted binary tools with minimal dependency to enhance the *nix sh/bash environment.
 
-## Preinstallation:
-   Must-have:
-    bash core-utils git install
-   Optional:
-    https://github.com/sharkdp/fd/ 
-    https://github.com/chmln/sd    
-
 ## Installation:
-     Step1: Copy shbin into /opt/shbin OR ~/.shbin
-		 cp -rf shbin ~/.shbin 
-         chmod a+x -R ~/.shbin
-     Step2: Copy all dotfiles in shdot into ~/ 
-		 cp -rf shdot/.* ~/
-     Step3: . $HOME/.bash_profile
+     Auto: bash -c "$(curl -sSL https://github.com/HowardMei/shbin/raw/refs/heads/master/install.sh)" 
+     Manually:
+        Step1: Copy shbin into /opt/shbin OR ~/.shbin
+                        cp -rf shbin ~/.shbin 
+                chmod a+x -R ~/.shbin
+        Step2: Copy all dotfiles in shdot into ~/ 
+                        cp -rf shdot/.* ~/
+        Step3: . $HOME/.bash_profile
+        Step4: Copy conf files in shsec to /etc/...
 
 ## Usage: shbin help shbin
      shbin version

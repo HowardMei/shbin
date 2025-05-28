@@ -33,7 +33,7 @@ function wget_install_shbin() {
     if [[ ! -d "$INSTALL_DIR" ]]; then
         log_message "shbin will be installed in $INSTALL_DIR."
     else
-        log_message "Cleaning old version shbin in $INSTALL_DIR."
+        log_message "Removing old version shbin in $INSTALL_DIR."
         rm -rf "$INSTALL_DIR"
     fi
 
@@ -55,7 +55,7 @@ function wget_install_shbin() {
     DOTFILES_DIR="${INSTALL_DIR}/shdot"
     if [[ -d "$DOTFILES_DIR" ]]; then
         log_message "Copying dotfiles to home directory..."
-        cp -rf "${DOTFILES_DIR}"/.* "$HOME"/
+        cp -rf "${DOTFILES_DIR}"/ "$HOME"/
     else
         log_error "Dotfiles directory not found in $DOTFILES_DIR. Skipping dotfiles setup."
     fi
@@ -92,6 +92,7 @@ function git_install_shbin() {
 
         log_message "Cloning shbin repository into $INSTALL_DIR..."
         git clone "$REPO_URL" "$INSTALL_DIR"
+        rm -rf "${HOME}/.git"
 
     # Step 2: Set execute permissions
     log_message "Setting execute permissions..."
@@ -101,7 +102,7 @@ function git_install_shbin() {
     DOTFILES_DIR="${INSTALL_DIR}/shdot"
     if [[ -d "$DOTFILES_DIR" ]]; then
         log_message "Copying dotfiles to home directory..."
-        cp -rf "${DOTFILES_DIR}"/.* "$HOME"/
+        cp -rf "${DOTFILES_DIR}"/ "$HOME"/
     else
         log_error "Dotfiles directory not found in $DOTFILES_DIR. Skipping dotfiles setup."
     fi
