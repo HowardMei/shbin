@@ -31,6 +31,7 @@ _dormv() {
                     if [ "${dryrun}"==false ]; then
                             echo "Actually deleting docker volume ${dir}"
                             rm -rf "${targetdir}/${dir}"
+                            docker volume prune -f
                     else
                             echo "Would have deleted docker volume ${dir}"
                     fi

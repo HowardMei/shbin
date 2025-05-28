@@ -1,0 +1,70 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  readcfg
+#%   DESCRIPTION:  Reads a configuration file and populates shell variables with the parsed data.
+#%   USAGE: readcfg <cfgfile_name.cfg> <config_array>
+#%   config_array section example: 
+#%   [git]
+#%   [openssh-server]
+#%      pacman = openssh
+#%      brew = openssh
+#%   REQUIRES: ext.apkgman/pcapt, read, sed, eval
+#----------------------------------------------------------------------------------------------------------------------
+_readcfg() {
+  if [ $# -ne 2 ] ; then
+     echo "Usage: readcfg configuration.cfg config_array"
+     return 0
+  fi
+
+  local cfgfile_name="$1"
+  local config_array="$2"
+
+  # Helper function to remove leading and trailing whitespace
+    # This function is POSIX-compliant
+    trim_spaces() {
+    echo "$1" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'
+    }
+
+    # Helper function to remove comments from lines
+    trim_comment() {
+    echo "$1" | sed 's/[[:space:]]*#.*//'
+    }
+
+  current_section=""
+  # Store all encountered sections in a variable
+  eval config_array_sections="${config_array}_sections"
+  
+  while IFS= read -r line; do
+    # Remove comments and whitespace
+    line=$(trim_comment "$line")
+    line=$(trim_spaces "$line")
+
+    # Skip empty lines
+    [ -z "$line" ] && continue
+
+    case "$line" in
+      \[*\])
+        current_section=$(echo "$line" | sed 's/^\[\(.*\)\]$/\1/')
+        eval "${config_array_sections}=\"\${${config_array_sections}} $current_section\""
+        ;;
+      *=*)
+
+        # Split the line into key and value
+        key=$(echo "$line" | cut -d= -f1)
+        value=$(echo "$line" | cut -d= -f2-)
+        key=$(trim_spaces "$key")
+        value=$(trim_spaces "$value")
+
+        escaped_section=$(echo "$current_section" | sed 's/[^a-zA-Z0-9_]/_/g')
+
+        # Store the key-value in a shell variable
+        eval "${config_array}_${escaped_section}_${key}=\"$value\""
+        ;;
+    esac
+  done < "$cfgfile_name"
+}
+
+_readcfg "$@"
+
+unset -f _readcfg
+exit 0

@@ -31,6 +31,12 @@ function wget_install_shbin() {
     TEMP_ARCHIVE="/tmp/shbin.tar.gz"
 
     if [[ ! -d "$INSTALL_DIR" ]]; then
+        log_message "shbin will be installed in $INSTALL_DIR."
+    else
+        log_message "Cleaning old version shbin in $INSTALL_DIR."
+        rm -rf "$INSTALL_DIR"
+    fi
+
         log_message "Downloading shbin repository archive..."
         wget -O "$TEMP_ARCHIVE $REPO_URL"
 
@@ -40,9 +46,6 @@ function wget_install_shbin() {
 
         log_message "Cleaning up temporary files..."
         rm -f "$TEMP_ARCHIVE"
-    else
-        log_message "shbin is already installed in $INSTALL_DIR."
-    fi
 
     # Step 2: Set execute permissions
     log_message "Setting execute permissions..."
@@ -81,11 +84,14 @@ function git_install_shbin() {
     REPO_URL="https://github.com/HowardMei/shbin.git"
     INSTALL_DIR="${HOME}/.shbin"
     if [[ ! -d "$INSTALL_DIR" ]]; then
+        log_message "shbin will be installed in $INSTALL_DIR."
+    else
+        log_message "Cleaning old version shbin in $INSTALL_DIR."
+        rm -rf "$INSTALL_DIR"
+    fi
+
         log_message "Cloning shbin repository into $INSTALL_DIR..."
         git clone "$REPO_URL" "$INSTALL_DIR"
-    else
-        log_message "shbin is already cloned in $INSTALL_DIR."
-    fi
 
     # Step 2: Set execute permissions
     log_message "Setting execute permissions..."

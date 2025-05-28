@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+# based on https://scalastic.io/en/ufw-fail2ban-nginx/
+
+# Replace this with your personal API key to the free service https://ipinfo.io
+API_KEY=""
+JAIL=""
+
+ip_list=$(sudo fail2ban-client status $JAIL | grep 'Banned IP list:' | sed 's/.*Banned IP list:\s*//')
+
+# Files for storing counts
+COUNTRY_FILE="country_count.txt"
+ORG_FILE="org_count.txt"
+CITY_FILE="city_count.txt"
+
+# Initialize counting files if they do not exist
+> "$COUNTRY_FILE"
+> "$ORG_FILE"
+> "$CITY_FILE"
+
+# Function to obtain geolocation information of IP addresses in batch
+get_ip_info_batch() {
+  local ips=("$@")
+  local ip_data=$(printf '"%s",' "${ips[@]}")
+  ip_data=${ip_data%,}  # Remove the trailing comma
+  curl -s -XPOST --data "[$ip_data]" "https://ipinfo.io/batch?token=$API_KEY"
+}
+
+# Check if the list is empty
+if [ -z "$ip_list" ]; then
+  echo "No IPs currently banned in jail nginx-429."
+else
+  # Convert IP list to an array
+  IFS=' ' read -r -a ip_array <<< "$ip_list"
+  total_ips=${#ip_array[@]}
+  batch_size=1000
+  for ((i=0; i<total_ips; i+=batch_size)); do
+    # Get a batch of up to 1000 IPs
+    ip_batch=("${ip_array[@]:i:batch_size}")
+    echo "Processing batch of ${#ip_batch[@]} IPs..."
+    ip_info=$(get_ip_info_batch "${ip_batch[@]}")
+    echo "Got it"
+
+    # Parse the JSON response ONCE per batch using jq
+    # Output format: country<TAB>org<TAB>city (one line per IP)
+    # Use // "N/A" to handle cases where a field might be missing/null
+    echo "$ip_info" | jq -r 'to_entries[] | [.value.country // "N/A", .value.org // "N/A", .value.city // "N/A"] | @tsv' | \
+    while IFS=$'\t' read -r country org city; do
+        echo "$country" >> "$COUNTRY_FILE"
+        echo "$org" >> "$ORG_FILE"
+        echo "$city" >> "$CITY_FILE"
+    done
+    # Add a small delay to avoid hitting API rate limits if necessary
+    sleep 1
+  done
+fi
+
+# Function to count occurrences
+count_occurrences() {
+  sort -bfg | uniq -c
+}
+
+# Function to sort occurrences
+sort_occurrences() {
+  sort -rn -k1,1
+}
+
+# Display statistics
+echo "Statistics by country code:"
+cat "$COUNTRY_FILE" | count_occurrences | sort_occurrences
+
+echo "Statistics by organization:"
+cat "$ORG_FILE" | count_occurrences | sort_occurrences
+
+echo "Statistics by city:"
+cat "$CITY_FILE" | count_occurrences | sort_occurrences
+

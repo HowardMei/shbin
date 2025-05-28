@@ -3,7 +3,7 @@
 #          NAME:  pcmdupkgt
 #%   DESCRIPTION:  List the cmds of a package or get the package name of a cmd
 #%   USAGE: pcmdupkg [--listcmd | --showpack] cmdname | pkgname" >&2
-#%   REQUIRES: ext.3rdparty/pacapt, grep
+#%   REQUIRES: ext.apkgman/pacapt, grep
 #----------------------------------------------------------------------------------------------------------------------
 if [ $# -lt 1 ]; then
     echo "Usage: pcmdupkg [--listcmd | --showpack] cmdname | pkgname" >&2

@@ -1,0 +1,35 @@
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  getcfgkv
+#%   DESCRIPTION:  Retrieves a value from the parsed configuration data.
+#%   USAGE: getcfgkv <config_array> <section> <key> <default_value>
+#%  config_array section example: 
+#%  [openssh-server]
+#%      pacman = openssh
+#%      brew = openssh
+#%   REQUIRES: ext.apkgman/pcapt, read, sed, eval
+#----------------------------------------------------------------------------------------------------------------------
+_getcfgkv() {
+  if [ $# -ne 4 ] ; then
+     echo "Usage: getcfgkv config_array section_name key_name default_value"
+     return 0
+  fi
+
+  local config_array="$1"
+  local section_name="$2"
+  # Escape section name to avoid issues with special characters
+  section_name=$(echo "$section_name" | sed 's/[^a-zA-Z0-9_]/_/g')
+  key_name="$3"
+  default_value="$4"
+  eval "value=\$${config_array}_${section_name}_${key_name}"
+  if [ -z "$value" ]; then
+    echo "$default_value"
+  else
+    echo "$value"
+  fi
+}
+
+_getcfgkv "$@"
+
+unset -f _getcfgkv
+exit 0

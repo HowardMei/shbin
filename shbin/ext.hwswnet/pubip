@@ -17,18 +17,26 @@ _check_pubip() {
     elif iscommand "busybox" 2>/dev/null && [ -n "$(busybox --list-modules | grep -i wget)" ];then
         local chk='busybox wget -qO-'
     fi
-    PUB_IPv4="$($chk http://ip.appspot.com/ 2>/dev/null)"
+    PUB_IPv4="$($chk https://ipinfo.io/ip 2>/dev/null)"
     ## sh cannot recognize '==' and '=' is error prone, use ' != ' with spaces instead
     if ! isipv4 "$PUB_IPv4" 2>/dev/null;then
         ##echo "Checking public ip over checkip.dyndns.org"
-        PUB_IPv4="$($chk http://checkip.dyndns.org 2>/dev/null | grep -o "[[:digit:].]\+" 2>/dev/null)"
+        PUB_IPv4="$($chk https://ipecho.io/plain 2>/dev/null)"
         ##PUB_IPv4=$(curl -s checkip.dyndns.org|sed -e 's/.*Current IP Address: //' -e 's/<.*$//' 2>/dev/null)
     fi
+    if ! isipv4 "$PUB_IPv4" 2>/dev/null;then
+        ## https://ipecho.net/plain  ifconfig.me/ip 
+        PUB_IPv4="$($chk https://icanhazip.com/ 2>/dev/null)"
+    fi
+
     if iscommand "dig" 2>/dev/null && ! isipv4 "$PUB_IPv4" 2>/dev/null;then
         ##echo "Checking public ip over myip.opendns.com"
-        PUB_IPv4="$(dig +time=3 +short myip.opendns.com @resolver1.opendns.com 2>/dev/null)"
+        ##PUB_IPv4="$(dig +time=3 +short myip.opendns.com @resolver1.opendns.com 2>/dev/null)"
         ##PUB_IPv4=$(dig +short whoami.akamai.net @ns1-1.akamaitech.net -t -4 a  2>/dev/null)
-        ##PUB_IP4=$(dig +short o-o.myaddr.l.google.com @ns1.google.com -t txt | sed -e 's/\"//g' 2>/dev/null)
+        ## dig o-o.myaddr.l.google.com txt @ns1.google.com +short
+        ## nslookup -type=txt o-o.myaddr.l.google.com ns1.google.com
+        ## dig whoami.cloudflare ch txt @1.1.1.1 +short
+        PUB_IP4=$(dig +short o-o.myaddr.l.google.com @ns1.google.com -t txt | sed -e 's/\"//g' 2>/dev/null)
     fi
     if ! isipv4 "$PUB_IPv4" 2>/dev/null;then
         PUB_IPv4=""

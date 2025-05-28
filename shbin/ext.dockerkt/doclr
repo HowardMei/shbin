@@ -13,11 +13,17 @@ _doclr() {
         done
         dormi "<none>:<none>"
         dormc "<none>:<none>"
-        sudo docker rmi -f $(sudo docker images -f "dangling=true" -q) 2>/dev/null
+        docker rmi -f $(docker images -f "dangling=true" -q) 2>/dev/null
         dormi "<none>:<none>"
+
     elif [ "$1" == "-a" ] || [ "$1" == "all" ] || [ "$1" == "--all" ]; then
         dormc --all
         dormi --all
+        docker ps -aq --filter 'status=exited' --filter 'name=/[a-z]+_[a-z]+$' | xargs docker rm -f
+        sudo docker rmi -f $(docker images -f "dangling=true" -q) 2>/dev/null
+        sudo docker image prune -f
+        sudo docker volume prune -f
+        sudo docker network prune -f
         _doclr
     elif [ -n "$(dolsi "$@")" ]; then
         dormi "$@"
