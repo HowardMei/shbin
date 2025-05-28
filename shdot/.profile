@@ -15,7 +15,7 @@ fi
 ## Prefer US English and use UTF-8
 export LANG="en_US.UTF-8"
 export LANGUAGE="en_US.UTF-8"
-export LC_ALL="en_US.UTF-8"
+##export LC_ALL="en_US.UTF-8"
 
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:$PATH
 [ -d "/opt/bin" ] && export PATH="/opt/bin:${PATH}"
@@ -51,6 +51,7 @@ alias ls="command ls --color"
 alias lu='du -ach --time --max-depth=1'
 alias reloadx='echo "Reloading $HOME/.profile" && . $HOME/.profile'
 alias memclr='free -mh;sync;echo 3 > /proc/sys/vm/drop_caches;free -mh'
+alias cpuclr="kill -9 $(ps -eo pid,%cpu - sort=-%cpu | awk 'NR==2 {print $1}')"
 alias path='echo -e ${PATH//:/\\n}'
 
 ###############################################################################################

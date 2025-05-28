@@ -128,8 +128,8 @@ function git_install_shbin() {
 # Main
 function main() {
     log_message "Checking for required commands..."
-    check_command chmod
-    check_command cp
+    check_command grep
+    check_command tar
     if ! command -v git &>/dev/null; then
         wget_install_shbin
     else
