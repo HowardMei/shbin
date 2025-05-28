@@ -25,7 +25,7 @@ function check_command() {
 function wget_install_shbin() {
     log_message "Starting installation of shbin..."
 
-    # Step 1: Download the repository archive
+    # Step 1: Download the repository archive to /tmp
     REPO_URL="https://github.com/HowardMei/shbin/archive/refs/heads/main.tar.gz"
     INSTALL_DIR="${HOME}/.shbin"
     TEMP_ARCHIVE="/tmp/shbin.tar.gz"
@@ -42,24 +42,33 @@ function wget_install_shbin() {
 
         log_message "Extracting shbin archive to $INSTALL_DIR..."
         mkdir -p "$INSTALL_DIR"
-        tar -xzf "$TEMP_ARCHIVE" --strip-components=1 -C "$INSTALL_DIR"
+        tar -xzf "$TEMP_ARCHIVE" --strip-components=1 -C /tmp/shbins
+        mv -f /tmp/shbins/shbin "$INSTALL_DIR"
 
-        log_message "Cleaning up temporary files..."
-        rm -f "$TEMP_ARCHIVE"
-
-    # Step 2: Set execute permissions
-    log_message "Setting execute permissions..."
-    chmod -R a+x "$INSTALL_DIR"
-
-    # Step 3: Copy dotfiles
-    DOTFILES_DIR="${INSTALL_DIR}/shdot"
+    # Step 2: Copy shdot and shsec to $HOME
+    DOTFILES_DIR="/tmp/shbins/shdot"
     if [[ -d "$DOTFILES_DIR" ]]; then
-        log_message "Copying dotfiles to home directory..."
+        log_message "Copying shdot files to home directory..."
         ##cp -rf "${DOTFILES_DIR}"/ "$HOME"/
         "${DOTFILES_DIR}"/cpdot.sh
     else
-        log_error "Dotfiles directory not found in $DOTFILES_DIR. Skipping dotfiles setup."
+        log_error "Dotfiles directory not found in $DOTFILES_DIR. Skipping shdot files setup."
     fi
+    SECFILES_DIR="/tmp/shbins/shsec"
+    if [[ -d "$SECFILES_DIR" ]]; then
+        log_message "Copying shsec files to home directory..."
+        ##cp -rf "${DOTFILES_DIR}"/ "$HOME"/
+        "${SECFILES_DIR}"/cpsec.sh
+    else
+        log_error "Secfiles directory not found in $SECFILES_DIR. Skipping shsec files setup."
+    fi
+    log_message "Cleaning up temporary files..."
+    rm -f "$TEMP_ARCHIVE"
+    rm -rf /tmp/shbins
+
+    # Step 3: Set execute permissions
+    log_message "Setting execute permissions..."
+    chmod -R a+x "$INSTALL_DIR"
 
     # Step 4: Add shbin to PATH
     log_message "Adding shbin to PATH in .bash_profile..."
@@ -91,23 +100,34 @@ function git_install_shbin() {
         rm -rf "$INSTALL_DIR"
     fi
 
-        log_message "Cloning shbin repository into $INSTALL_DIR..."
-        git clone "$REPO_URL" "$INSTALL_DIR"
+        log_message "Cloning shbin repository into /tmp/shbins..."
+        git clone "$REPO_URL" /tmp/shbins
         ##rm -rf "${HOME}/.git"
 
-    # Step 2: Set execute permissions
-    log_message "Setting execute permissions..."
-    chmod -R a+x "$INSTALL_DIR"
-
-    # Step 3: Copy dotfiles
-    DOTFILES_DIR="${INSTALL_DIR}/shdot"
+    # Step 2: Copy shdot and shsec to $HOME
+    DOTFILES_DIR="/tmp/shbins/shdot"
     if [[ -d "$DOTFILES_DIR" ]]; then
-        log_message "Copying dotfiles to home directory..."
+        log_message "Copying shdot files to home directory..."
         ##cp -rf "${DOTFILES_DIR}"/ "$HOME"/
         "${DOTFILES_DIR}"/cpdot.sh
     else
-        log_error "Dotfiles directory not found in $DOTFILES_DIR. Skipping dotfiles setup."
+        log_error "Dotfiles directory not found in $DOTFILES_DIR. Skipping shdot files setup."
     fi
+    SECFILES_DIR="/tmp/shbins/shsec"
+    if [[ -d "$SECFILES_DIR" ]]; then
+        log_message "Copying shsec files to home directory..."
+        ##cp -rf "${DOTFILES_DIR}"/ "$HOME"/
+        "${SECFILES_DIR}"/cpsec.sh
+    else
+        log_error "Secfiles directory not found in $SECFILES_DIR. Skipping shsec files setup."
+    fi
+    log_message "Cleaning up temporary files..."
+    rm -f "$TEMP_ARCHIVE"
+    rm -rf /tmp/shbins
+
+    # Step 3: Set execute permissions
+    log_message "Setting execute permissions..."
+    chmod -R a+x "$INSTALL_DIR"
 
     # Step 4: Add shbin to PATH
     log_message "Adding shbin to PATH in .bash_profile..."
