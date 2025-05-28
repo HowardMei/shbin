@@ -43,7 +43,7 @@ function wget_install_shbin() {
         log_message "Extracting shbin archive to $INSTALL_DIR..."
         mkdir -p "$INSTALL_DIR"
         tar -xzf "$TEMP_ARCHIVE" --strip-components=1 -C /tmp/shbins
-        mv -f /tmp/shbins/shbin "$INSTALL_DIR"
+        mv -rf /tmp/shbins/shbin "$INSTALL_DIR"
 
     # Step 2: Copy shdot and shsec to $HOME
     DOTFILES_DIR="/tmp/shbins/shdot"
@@ -102,7 +102,7 @@ function git_install_shbin() {
 
         log_message "Cloning shbin repository into /tmp/shbins..."
         git clone "$REPO_URL" /tmp/shbins
-        mv -f /tmp/shbins/shbin "$INSTALL_DIR"
+        mv -rf /tmp/shbins/shbin "$INSTALL_DIR"
 
     # Step 2: Copy shdot and shsec to $HOME
     DOTFILES_DIR="/tmp/shbins/shdot"
