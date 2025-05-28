@@ -102,7 +102,7 @@ function git_install_shbin() {
 
         log_message "Cloning shbin repository into /tmp/shbins..."
         git clone "$REPO_URL" /tmp/shbins
-        ##rm -rf "${HOME}/.git"
+        mv -f /tmp/shbins/shbin "$INSTALL_DIR"
 
     # Step 2: Copy shdot and shsec to $HOME
     DOTFILES_DIR="/tmp/shbins/shdot"
