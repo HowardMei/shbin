@@ -37,15 +37,24 @@ function wget_install_shbin() {
         rm -rf "$INSTALL_DIR"
     fi
 
-        log_message "Downloading shbin repository archive..."
-        wget -O "$TEMP_ARCHIVE $REPO_URL"
+    log_message "Downloading shbin repository archive..."
+    wget -O "$TEMP_ARCHIVE $REPO_URL"
 
-        log_message "Extracting shbin archive to $INSTALL_DIR..."
-        mkdir -p "$INSTALL_DIR"
-        tar -xzf "$TEMP_ARCHIVE" --strip-components=1 -C /tmp/shbins
-        mv -rf /tmp/shbins/shbin "$INSTALL_DIR"
+    log_message "Extracting shbin archive to $INSTALL_DIR..."
+    mkdir -p "$INSTALL_DIR"
+    tar -xzf "$TEMP_ARCHIVE" --strip-components=1 -C /tmp/shbins
 
-    # Step 2: Copy shdot and shsec to $HOME
+    # Step 2: Copy shbin shdot and shsec to $HOME
+    BINFILES_DIR="/tmp/shbins/shbin"
+    if [[ -d "$BINFILES_DIR" ]]; then
+        log_message "Copying shbin files to home directory..."
+        ##cp -rf "${DOTFILES_DIR}"/ "$HOME"/
+        "${BINFILES_DIR}"/cpbin.sh "$INSTALL_DIR"
+    else
+        log_error "Binfiles directory not found in $BINFILES_DIR. Exiting."
+        exit 0
+    fi
+
     DOTFILES_DIR="/tmp/shbins/shdot"
     if [[ -d "$DOTFILES_DIR" ]]; then
         log_message "Copying shdot files to home directory..."
@@ -66,11 +75,9 @@ function wget_install_shbin() {
     rm -f "$TEMP_ARCHIVE"
     rm -rf /tmp/shbins
 
-    # Step 3: Set execute permissions
+    # Step 3: Set execute permissions and Add shbin to PATH
     log_message "Setting execute permissions..."
     chmod -R a+x "$INSTALL_DIR"
-
-    # Step 4: Add shbin to PATH
     log_message "Adding shbin to PATH in .bash_profile..."
     if ! grep -q "shbin" "$HOME"/.bash_profile; then
         echo "export PATH=\"$INSTALL_DIR:\$PATH\"" >>"$HOME"/.bash_profile
@@ -78,8 +85,6 @@ function wget_install_shbin() {
     else
         log_message "shbin already in PATH."
     fi
-
-    # Step 5: Source .bash_profile
     log_message "Sourcing .bash_profile..."
     source "$HOME"/.bash_profile
 
@@ -102,9 +107,18 @@ function git_install_shbin() {
 
         log_message "Cloning shbin repository into /tmp/shbins..."
         git clone "$REPO_URL" /tmp/shbins
-        mv -rf /tmp/shbins/shbin "$INSTALL_DIR"
 
-    # Step 2: Copy shdot and shsec to $HOME
+    # Step 2: Copy shbin shdot and shsec to $HOME
+    BINFILES_DIR="/tmp/shbins/shbin"
+    if [[ -d "$BINFILES_DIR" ]]; then
+        log_message "Copying shbin files to home directory..."
+        ##cp -rf "${DOTFILES_DIR}"/ "$HOME"/
+        "${BINFILES_DIR}"/cpbin.sh
+    else
+        log_error "Binfiles directory not found in $BINFILES_DIR. Exiting."
+        exit 1
+    fi
+
     DOTFILES_DIR="/tmp/shbins/shdot"
     if [[ -d "$DOTFILES_DIR" ]]; then
         log_message "Copying shdot files to home directory..."
@@ -125,11 +139,9 @@ function git_install_shbin() {
     rm -f "$TEMP_ARCHIVE"
     rm -rf /tmp/shbins
 
-    # Step 3: Set execute permissions
+    # Step 3: Set execute permissions and Add shbin to PATH
     log_message "Setting execute permissions..."
     chmod -R a+x "$INSTALL_DIR"
-
-    # Step 4: Add shbin to PATH
     log_message "Adding shbin to PATH in .bash_profile..."
     if ! grep -q "shbin" "$HOME"/.bash_profile; then
         echo "export PATH=\"$INSTALL_DIR:\$PATH\"" >>"$HOME"/.bash_profile
@@ -137,8 +149,6 @@ function git_install_shbin() {
     else
         log_message "shbin already in PATH."
     fi
-
-    # Step 5: Source .bash_profile
     log_message "Sourcing .bash_profile..."
     source "$HOME"/.bash_profile
 
