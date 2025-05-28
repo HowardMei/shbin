@@ -1,6 +1,6 @@
 set +o nounset     # Don't mess up the auto completion
 set +o errexit     # Don't mess up the interactive shell
-[ -z "${BASH_RC}" ] && return 
+## [ -z "${BASH_RC}" ] && return 
 
 # Define full featured bash aliaes and functions
 unalias -a
