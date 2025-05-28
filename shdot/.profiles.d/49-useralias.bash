@@ -30,7 +30,7 @@ alias lu='du -ach --time --max-depth=1'
 # find . -name .gitattributes | map dirname
 alias map="xargs -n1"
 alias memclr='free -mh;sync;echo 3 > /proc/sys/vm/drop_caches;free -mh'
-alias cpuclr="kill -9 $(ps -eo pid,%cpu - sort=-%cpu | awk 'NR==2 {print $1}')"
+alias cpuclr="kill -9 $(ps -e -o pid,%cpu --sort=-%cpu | awk 'NR==2 {print $1}')"
 alias hisp='__lshis() { local p="$*";history | estrip -u | grep -i "${p:-""}" | grep -v grep | grep -v hisp; unset -f __lshis; }; __lshis'
 alias wget='wget -c'
 alias path='echo -e ${PATH//:/\\n}'
