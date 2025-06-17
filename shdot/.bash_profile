@@ -67,5 +67,3 @@ if [ -f "/etc/bash_completion" ] && ! shopt -oq posix; then
     . /etc/bash_completion
 fi
 
-alias reloadx='echo "Reloading $HOME/.bash_profile" && . $HOME/.bash_profile'
-echo "$HOME/.bash_profile reloaded successfully!"

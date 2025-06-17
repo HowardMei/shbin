@@ -49,7 +49,6 @@ alias ll="ls -lph --color"
 alias lt='ll -t'
 alias ls="command ls --color"
 alias lu='du -ach --time --max-depth=1'
-alias reloadx='echo "Reloading $HOME/.profile" && . $HOME/.profile'
 alias path='echo -e ${PATH//:/\\n}'
 
 ###############################################################################################
