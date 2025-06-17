@@ -33,15 +33,7 @@ esac
 [ -r "${HOME}/.bash_aliases" ] && . ${HOME}/.bash_aliases
 
 ## Beautify the bash prompt
-[ -r "$HOME/.bash_prompt" ] && . "$HOME/.bash_prompt"
-
-## For more user specific bash profiles, source them accordingly.
-if [ -d "${HOME}/.profiles.d" ]; then
-  for bpf in ${HOME}/.profiles.d/*.bash; do
-    [ -r ${bpf} ] && . ${bpf}
-  done
-  unset bpf
-fi
+[ -r "$HOME/.bash_prompt" ] && . "$HOME"/.bash_prompt
 
 
 ###############################################################################################
