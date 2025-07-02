@@ -44,6 +44,7 @@ You may enable or disable extensions by running:
     Some utility functions come from online sources but I lost the record of the origins
     due to many refactors before git tracking. Thanks for all the original authors.
     References: 
+	https://askubuntu.com/questions/463462/sequence-of-scripts-sourced-upon-login
     https://github.com/koalaman/shellcheck
     https://github.com/HariSekhon/DevOps-Bash-tools    
     https://github.com/AverageJoesHosting/HostingToolkit-Scripts

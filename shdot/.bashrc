@@ -18,9 +18,6 @@ case $- in
 	;;
 esac
 
-## Load the one-time configuration profile
-[ -z ${BASH_PROFILE+x} ] && [ -r "${HOME}/.bash_profile" ] && . ${HOME}/.bash_profile
-
 ## This PS1 checking separates non-interactive and interactive configurations apart.
 ## Most running scripts and programs are under non-interactive non-login shells.
 ## Keep configuration above this line simple and essential to avoid various errors.
@@ -28,13 +25,6 @@ esac
 
 ## Add tab completion for SSH hostnames based on ~/.ssh/config, ignoring wildcards
 [ -r "$HOME/.ssh/config" ] && complete -o "default" -o "nospace" -W "$(grep "^Host" ~/.ssh/config | grep -v "[?*]" | cut -d " " -f2 | tr ' ' '\n')" scp sftp ssh
-
-## Load bash aliases everytime creating a new tab or running a program.
-[ -r "${HOME}/.bash_aliases" ] && . ${HOME}/.bash_aliases
-
-## Beautify the bash prompt
-[ -r "$HOME/.bash_prompt" ] && . "$HOME"/.bash_prompt
-
 
 ###############################################################################################
 set +o nounset     # Don't mess up the auto completion
